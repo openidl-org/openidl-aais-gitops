@@ -454,7 +454,7 @@ client_app_name              = "openidl-client"
 client_callback_urls         = ["https://dev-openidl.aaisdirect.com/callback", "https://dev-openidl.aaisdirect.com/redirect"]
 client_default_redirect_url  = "https://dev-openidl.aaisdirect.com/redirect"
 client_logout_urls           = ["https://dev-openidl.aaisdirect.com/signout"]
-cognito_domain               = "aaisdirect"
+cognito_domain               = "aaissandbox"
 #--------------------------------------------------------------------------------------------------------------------
 
 #application specific traffic to be allowed in app cluster worker nodes
