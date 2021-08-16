@@ -1,0 +1,380 @@
+# This workflow is used to deploy aais_node in aws using terraform with github actions pipeline
+# On pull request to aais_sandbox/test/prod this will run terraform init, fmt, validate and plan.
+# On push event to aais_sandbox/test/prod this will run terraform apply
+# Documentation for `hashicorp/setup-terraform` is located here: https://github.com/hashicorp/setup-terraform
+# Documentation for  `aws-actions/configure-aws-credentials` is located here: https://github.com/aws-actions/configure-aws-credentials
+
+name: "aais-node-openidl-pipeline-v1.0"
+on:
+    push:
+        paths:
+            - "aws/**"
+            - "!helm/**"
+            - "!aws/data_feed_in/*/*.template"
+            - "!aws/tf_backend_setup/**"
+            - "!aws/README.md"
+            - "!README.md"
+
+        branches:
+            - aais_sandbox
+            - aais_test
+            - aais_prod
+
+    pull_request:
+        paths:
+            - "aws/**"
+            - "!helm/**"
+            - "!aws/data_feed_in/*/*.template"
+            - "!aws/tf_backend_setup/**"
+            - "!aws/README.md"
+            - "!README.md"
+
+        branches:
+            - aais_sandbox
+            - aais_test
+            - aais_prod
+
+defaults:
+    run:
+        shell: bash
+        working-directory: aws
+
+jobs:
+    aais_sandbox:
+        environment: aais_sandbox
+
+        if: github.base_ref == 'aais_sandbox' || github.ref == 'refs/heads/aais_sandbox'
+        name: "aais-node-openidl-sandbox"
+        runs-on: ubuntu-latest
+        env:
+            TF_VAR_aws_account_number: ${{ secrets.aws_account_number }}
+            TF_VAR_aws_role_arn: ${{ secrets.aws_role_arn }}
+            TF_VAR_aws_user_arn: ${{ secrets.aws_user_arn }}
+            TF_VAR_aws_region: ${{ secrets.aws_region }}
+            TF_VAR_app_bastion_ssh_key: ${{ secrets.app_bastion_ssh_key }}
+            TF_VAR_blk_bastion_ssh_key: ${{ secrets.blk_bastion_ssh_key }}
+            TF_VAR_app_eks_worker_nodes_ssh_key: ${{ secrets.app_eks_worker_nodes_ssh_key }}
+            TF_VAR_blk_eks_worker_nodes_ssh_key: ${{ secrets.blk_eks_worker_nodes_ssh_key }}
+            TF_VAR_ses_email_identity: ${{ secrets.ses_email_identity }}
+            TF_VAR_userpool_email_source_arn: ${{ secrets.userpool_email_source_arn }}
+            TF_VAR_app_cluster_map_users: ${{ secrets.app_cluster_map_users }}
+            TF_VAR_blk_cluster_map_users: ${{ secrets.blk_cluster_map_users }}
+            TF_VAR_app_cluster_map_roles: ${{ secrets.app_cluster_map_roles }}
+            TF_VAR_blk_cluster_map_roles: ${{ secrets.blk_cluster_map_roles }}
+            TF_VAR_aws_access_key: ${{ secrets.aws_access_key }}
+            TF_VAR_aws_secret_key: ${{ secrets.aws_secret_key }}
+            TF_VAR_aws_external_id: ${{ secrets.aws_external_id }}
+
+        steps:
+            # Option:1 Configuring aws cli utilizing secrets from GIT SECRETS
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@230d25f14e841bc8e06b5f4ff89ccd6989fc1d71
+              with:
+                  aws-access-key-id: ${{ secrets.aws_access_key }}
+                  aws-secret-access-key: ${{ secrets.aws_secret_key }}
+                  aws-region: ${{ secrets.aws_region }}
+                  role-to-assume: ${{ secrets.aws_role_arn }}
+                  role-external-id: ${{ secrets.aws_external_id }}
+                  role-duration-seconds: 3600 # session valid for 30 minutes
+                  role-session-name: terraform-session
+
+            # Checkout the repository to the GitHub Actions runner
+            - name: Checkout Code
+              uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+
+            - name: Setup utilities
+              id: utilities
+              run: |
+                  sudo apt-get update
+                  sudo apt install curl
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  sudo unzip awscliv2.zip >> /dev/null
+                  sudo ./aws/install || sudo ./aws/install --update
+                  curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+                  sudo chmod +x ./aws-iam-authenticator
+                  mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
+                  echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+                  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+                  sudo mv /tmp/eksctl /usr/local/bin
+                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+            # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@a504130155a42639c3c62d0fafc9ff047dcfdb8b
+              with:
+                  terraform_version: 1.0.0
+                  terraform_wrapper: true
+
+            # Checks that all Terraform configuration files adhere to a canonical format
+            - name: Terraform Format
+              id: format
+              run: terraform fmt -recursive
+              #continue-on-error: true
+
+            ## Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+            - name: Terraform Init
+              id: init
+              run: terraform init -backend-config=tf_backends/s3_backend
+
+            # Sets up terraform workspace
+            - name: Terraform Workspace if push event
+              id: workspace-push
+              if: github.event_name == 'push'
+              run: terraform workspace select ${GITHUB_REF##*/} || terraform workspace new ${GITHUB_REF##*/}
+
+            - name: Terraform Workspace if pull event
+              id: workspace-pull
+              if: github.event_name == 'pull_request'
+              run: terraform workspace select ${{github.base_ref}} || terraform workspace new ${{github.base_ref}}
+
+            # Checks that all Terraform configuration files adhere for syntax
+            - name: Terraform Syntax
+              id: validate
+              run: terraform validate -no-color -json
+              #continue-on-error: true
+
+            # Generates an execution plan for Terraform
+            - name: Terraform Plan
+              id: plan
+              if: github.event_name == 'pull_request'
+              # env:
+              run: terraform plan -var-file=data_feed_in/aais_sandbox/dev/aais_sandbox.tfvars -out=sandbox_plan.out && terraform show -json sandbox_plan.out > sandbox_plan.out.json
+              continue-on-error: true
+
+            - name: Terraform Plan Status
+              if: steps.plan.outcome == 'failure'
+              run: exit 1
+
+            # On push to main, build or change infrastructure according to Terraform configuration files
+            - name: Terraform Apply
+              id: apply
+              #if: ((github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || github.ref == 'refs/heads/dev') && (github.event_name == 'push'))
+              if: github.ref == 'refs/heads/aais_sandbox' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var-file=data_feed_in/aais_sandbox/dev/aais_sandbox.tfvars
+
+    aais_node_test:
+        environment: aais_test
+
+        if: github.base_ref == 'aais_test' || github.ref == 'refs/heads/aais_test'
+        name: "aais-node-openidl-test"
+        runs-on: ubuntu-latest
+        env:
+            TF_VAR_aws_account_number: ${{ secrets.aws_account_number }}
+            TF_VAR_aws_role_arn: ${{ secrets.aws_role_arn }}
+            TF_VAR_aws_user_arn: ${{ secrets.aws_user_arn }}
+            TF_VAR_aws_region: ${{ secrets.aws_region }}
+            TF_VAR_app_bastion_ssh_key: ${{ secrets.app_bastion_ssh_key }}
+            TF_VAR_blk_bastion_ssh_key: ${{ secrets.blk_bastion_ssh_key }}
+            TF_VAR_app_eks_worker_nodes_ssh_key: ${{ secrets.app_eks_worker_nodes_ssh_key }}
+            TF_VAR_blk_eks_worker_nodes_ssh_key: ${{ secrets.blk_eks_worker_nodes_ssh_key }}
+            TF_VAR_ses_email_identity: ${{ secrets.ses_email_identity }}
+            TF_VAR_userpool_email_source_arn: ${{ secrets.userpool_email_source_arn }}
+            TF_VAR_app_cluster_map_users: ${{ secrets.app_cluster_map_users }}
+            TF_VAR_blk_cluster_map_users: ${{ secrets.blk_cluster_map_users }}
+            TF_VAR_app_cluster_map_roles: ${{ secrets.app_cluster_map_roles }}
+            TF_VAR_blk_cluster_map_roles: ${{ secrets.blk_cluster_map_roles }}
+            TF_VAR_aws_access_key: ${{ secrets.aws_access_key }}
+            TF_VAR_aws_secret_key: ${{ secrets.aws_secret_key }}
+            TF_VAR_aws_external_id: ${{ secrets.aws_external_id }}
+
+        steps:
+            # Option:1 Configuring aws cli utilizing secrets from GIT SECRETS
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@230d25f14e841bc8e06b5f4ff89ccd6989fc1d71
+              with:
+                  aws-access-key-id: ${{ secrets.aws_access_key }}
+                  aws-secret-access-key: ${{ secrets.aws_secret_key }}
+                  aws-region: ${{ secrets.aws_region }}
+                  role-to-assume: ${{ secrets.aws_role_arn }}
+                  role-external-id: ${{ secrets.aws_external_id }}
+                  role-duration-seconds: 3600 # session valid for 30 minutes
+                  role-session-name: terraform-session
+
+            # Checkout the repository to the GitHub Actions runner
+            - name: Checkout Code
+              uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+
+            - name: Setup utilities
+              id: utilities
+              run: |
+                  sudo apt-get update
+                  sudo apt install curl
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  sudo unzip awscliv2.zip >> /dev/null
+                  sudo ./aws/install || sudo ./aws/install --update
+                  curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+                  sudo chmod +x ./aws-iam-authenticator
+                  mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
+                  echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+                  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+                  sudo mv /tmp/eksctl /usr/local/bin
+                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+            # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@a504130155a42639c3c62d0fafc9ff047dcfdb8b
+              with:
+                  terraform_version: 1.0.0
+                  terraform_wrapper: true
+
+            # Checks that all Terraform configuration files adhere to a canonical format
+            - name: Terraform Format
+              id: format
+              run: terraform fmt -recursive
+              #continue-on-error: true
+
+            ## Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+            - name: Terraform Init
+              id: init
+              run: terraform init -backend-config=tf_backends/s3_backend
+
+            # Sets up terraform workspace
+            - name: Terraform Workspace if push event
+              id: workspace-push
+              if: github.event_name == 'push'
+              run: terraform workspace select ${GITHUB_REF##*/} || terraform workspace new ${GITHUB_REF##*/}
+
+            - name: Terraform Workspace if pull event
+              id: workspace-pull
+              if: github.event_name == 'pull_request'
+              run: terraform workspace select ${{github.base_ref}} || terraform workspace new ${{github.base_ref}}
+
+            # Checks that all Terraform configuration files adhere for syntax
+            - name: Terraform Syntax
+              id: validate
+              run: terraform validate -no-color -json
+              #continue-on-error: true
+
+            # Generates an execution plan for Terraform
+            - name: Terraform Plan
+              id: plan
+              if: github.event_name == 'pull_request'
+              # env:
+              run: terraform plan -var-file=data_feed_in/aais_node/test/aais_sandbox.tfvars -out=test_plan.out && terraform show -json test_plan.out > test_plan.out.json
+              continue-on-error: true
+
+            - name: Terraform Plan Status
+              if: steps.plan.outcome == 'failure'
+              run: exit 1
+
+            # On push to main, build or change infrastructure according to Terraform configuration files
+            - name: Terraform Apply
+              id: apply
+              #if: ((github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || github.ref == 'refs/heads/dev') && (github.event_name == 'push'))
+              if: github.ref == 'refs/heads/aais_test' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var-file=data_feed_in/aais_node/test/aais_sandbox.tfvars
+
+    aais_node_prod:
+        environment: aais_prod
+
+        if: github.base_ref == 'aais_prod' || github.ref == 'refs/heads/aais_prod'
+        name: "aais-node-openidl-prod"
+        runs-on: ubuntu-latest
+        env:
+            TF_VAR_aws_account_number: ${{ secrets.aws_account_number }}
+            TF_VAR_aws_role_arn: ${{ secrets.aws_role_arn }}
+            TF_VAR_aws_user_arn: ${{ secrets.aws_user_arn }}
+            TF_VAR_aws_region: ${{ secrets.aws_region }}
+            TF_VAR_app_bastion_ssh_key: ${{ secrets.app_bastion_ssh_key }}
+            TF_VAR_blk_bastion_ssh_key: ${{ secrets.blk_bastion_ssh_key }}
+            TF_VAR_app_eks_worker_nodes_ssh_key: ${{ secrets.app_eks_worker_nodes_ssh_key }}
+            TF_VAR_blk_eks_worker_nodes_ssh_key: ${{ secrets.blk_eks_worker_nodes_ssh_key }}
+            TF_VAR_ses_email_identity: ${{ secrets.ses_email_identity }}
+            TF_VAR_userpool_email_source_arn: ${{ secrets.userpool_email_source_arn }}
+            TF_VAR_app_cluster_map_users: ${{ secrets.app_cluster_map_users }}
+            TF_VAR_blk_cluster_map_users: ${{ secrets.blk_cluster_map_users }}
+            TF_VAR_app_cluster_map_roles: ${{ secrets.app_cluster_map_roles }}
+            TF_VAR_blk_cluster_map_roles: ${{ secrets.blk_cluster_map_roles }}
+            TF_VAR_aws_access_key: ${{ secrets.aws_access_key }}
+            TF_VAR_aws_secret_key: ${{ secrets.aws_secret_key }}
+            TF_VAR_aws_external_id: ${{ secrets.aws_external_id }}
+
+        steps:
+            # Option:1 Configuring aws cli utilizing secrets from GIT SECRETS
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@230d25f14e841bc8e06b5f4ff89ccd6989fc1d71
+              with:
+                  aws-access-key-id: ${{ secrets.aws_access_key }}
+                  aws-secret-access-key: ${{ secrets.aws_secret_key }}
+                  aws-region: ${{ secrets.aws_region }}
+                  role-to-assume: ${{ secrets.aws_role_arn }}
+                  role-external-id: ${{ secrets.aws_external_id }}
+                  role-duration-seconds: 3600 # session valid for 30 minutes
+                  role-session-name: terraform-session
+
+            # Checkout the repository to the GitHub Actions runner
+            - name: Checkout Code
+              uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+
+            - name: Setup utilities
+              id: utilities
+              run: |
+                  sudo apt-get update
+                  sudo apt install curl
+                  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                  sudo unzip awscliv2.zip >> /dev/null
+                  sudo ./aws/install || sudo ./aws/install --update
+                  curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+                  sudo chmod +x ./aws-iam-authenticator
+                  mkdir -p $HOME/bin && cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$PATH:$HOME/bin
+                  echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+                  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+                  sudo mv /tmp/eksctl /usr/local/bin
+                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+            # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@a504130155a42639c3c62d0fafc9ff047dcfdb8b
+              with:
+                  terraform_version: 1.0.0
+                  terraform_wrapper: true
+
+            # Checks that all Terraform configuration files adhere to a canonical format
+            - name: Terraform Format
+              id: format
+              run: terraform fmt -recursive
+              #continue-on-error: true
+
+            ## Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+            - name: Terraform Init
+              id: init
+              run: terraform init -backend-config=tf_backends/s3_backend
+
+            # Sets up terraform workspace
+            - name: Terraform Workspace if push event
+              id: workspace-push
+              if: github.event_name == 'push'
+              run: terraform workspace select ${GITHUB_REF##*/} || terraform workspace new ${GITHUB_REF##*/}
+
+            - name: Terraform Workspace if pull event
+              id: workspace-pull
+              if: github.event_name == 'pull_request'
+              run: terraform workspace select ${{github.base_ref}} || terraform workspace new ${{github.base_ref}}
+
+            # Checks that all Terraform configuration files adhere for syntax
+            - name: Terraform Syntax
+              id: validate
+              run: terraform validate -no-color -json
+              #continue-on-error: true
+
+            # Generates an execution plan for Terraform
+            - name: Terraform Plan
+              id: plan
+              if: github.event_name == 'pull_request'
+              # env:
+              run: terraform plan -var-file=data_feed_in/aais_node/prod/aais_sandbox.tfvars -out=prod_plan.out && terraform show -json prod_plan.out > prod_plan.out.json
+              continue-on-error: true
+
+            - name: Terraform Plan Status
+              if: steps.plan.outcome == 'failure'
+              run: exit 1
+
+            # On push to main, build or change infrastructure according to Terraform configuration files
+            - name: Terraform Apply
+              id: apply
+              #if: ((github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || github.ref == 'refs/heads/dev') && (github.event_name == 'push'))
+              if: github.ref == 'refs/heads/aais_prod' && github.event_name == 'push'
+              run: terraform apply -auto-approve -var-file=data_feed_in/aais_node/prod/aais_sandbox.tfvars
