@@ -16,9 +16,9 @@ resource "aws_cognito_user_pool" "user_pool" {
   admin_create_user_config {
     allow_admin_create_user_only = var.userpool_allow_admin_create_user_only
     invite_message_template {
-      email_message = "Dear {username}, your verification code is {####}."
-      email_subject = "Your temporary password"
-      sms_message   = "Your username is {username} and temporary password is {####}."
+      email_message = "Your username is {username}, and password is {####}."
+      email_subject = "Your password"
+      sms_message   = "Your username is {username} and password is {####}."
     }
   }
   #alias_attributes = var.userpool_alais_attributes
@@ -29,13 +29,13 @@ resource "aws_cognito_user_pool" "user_pool" {
     device_only_remembered_on_user_prompt = var.userpool_device_only_remembered_on_user_prompt
   }
   email_configuration {
-    reply_to_email_address = var.ses_email_identity
-    source_arn             = var.userpool_email_source_arn
-    email_sending_account  = "DEVELOPER"
-    from_email_address     = var.ses_email_identity
+    reply_to_email_address = var.email_sending_account == "DEVELOPER" ? var.ses_email_identity : null
+    source_arn             = var.email_sending_account == "DEVELOPER" ? var.userpool_email_source_arn : null
+    email_sending_account  = var.email_sending_account
+    from_email_address     = var.email_sending_account == "DEVELOPER" ? var.ses_email_identity : null
   }
-  email_verification_subject = var.userpool_email_verficiation_subject != "" ? var.userpool_email_verficiation_subject : "Here, your verification code baby"
-  email_verification_message = var.userpool_email_verficiation_message != "" ? var.userpool_email_verficiation_message : "Dear {username}, your verification code is {####}."
+  email_verification_subject = var.userpool_email_verficiation_subject != "" ? var.userpool_email_verficiation_subject : "Your password"
+  email_verification_message = var.userpool_email_verficiation_message != "" ? var.userpool_email_verficiation_message : "Your username is {username}, and password is {####}."
   mfa_configuration          = var.userpool_mfa_configuration
   software_token_mfa_configuration {
     enabled = var.userpool_software_token_mfa_enabled
@@ -48,7 +48,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     require_uppercase                = var.password_policy_require_uppercase
     temporary_password_validity_days = var.password_policy_temporary_password_validity_days
   }
-  sms_authentication_message = "Your username is {username} and temporary password is {####}."
+  sms_authentication_message = "Your username is {username} and password is {####}."
   sms_verification_message   = "This is the verification message {####}."
 
   user_pool_add_ons {
@@ -58,7 +58,7 @@ resource "aws_cognito_user_pool" "user_pool" {
     case_sensitive = var.userpool_enable_username_case_sensitivity
   }
   verification_message_template {
-    default_email_option = "CONFIRM_WITH_LINK"
+    default_email_option = "CONFIRM_WITH_CODE"
   }
   dynamic "schema" {
     for_each = local.custom_attributes

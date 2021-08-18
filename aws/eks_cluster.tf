@@ -65,6 +65,7 @@ module "app_eks_cluster" {
     {
       name                          = "${local.std_name}-app-worker-group-1"
       instance_type                 = var.eks_worker_instance_type
+      ami_id                        = data.aws_ami.eks_app_worker_nodes_ami.id
       platform                      = "linux"
       additional_userdata           = local.worker_nodes_userdata
       asg_min_size                  = var.wg_asg_min_size
@@ -74,7 +75,6 @@ module "app_eks_cluster" {
       additional_security_group_ids = module.app_eks_workers_app_traffic_sg.security_group_id
       public_ip                     = var.eks_wg_public_ip
       root_encrypted                = var.eks_wg_root_vol_encrypted
-      root_encrypted                = true
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
       key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_key_name
@@ -89,6 +89,7 @@ module "app_eks_cluster" {
     {
       name                          = "${local.std_name}-app-worker-group-2"
       instance_type                 = var.eks_worker_instance_type
+      ami_id                        = data.aws_ami.eks_app_worker_nodes_ami.id
       platform                      = "linux"
       additional_userdata           = local.worker_nodes_userdata
       asg_min_size                  = var.wg_asg_min_size
@@ -202,6 +203,7 @@ module "blk_eks_cluster" {
     {
       name                          = "${local.std_name}-blk-worker-group-1"
       instance_type                 = var.eks_worker_instance_type
+      ami_id                        = data.aws_ami.eks_blk_worker_nodes_ami.id
       platform                      = "linux"
       additional_userdata           = local.worker_nodes_userdata
       asg_min_size                  = var.wg_asg_min_size
@@ -211,7 +213,6 @@ module "blk_eks_cluster" {
       additional_security_group_ids = module.blk_eks_workers_app_traffic_sg.security_group_id
       public_ip                     = var.eks_wg_public_ip
       root_encrypted                = var.eks_wg_root_vol_encrypted
-      root_encrypted                = true
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
       key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
@@ -226,6 +227,7 @@ module "blk_eks_cluster" {
     {
       name                          = "${local.std_name}-blk-worker-group-2"
       instance_type                 = var.eks_worker_instance_type
+      ami_id                        = data.aws_ami.eks_blk_worker_nodes_ami.id
       platform                      = "linux"
       additional_userdata           = local.worker_nodes_userdata
       asg_min_size                  = var.wg_asg_min_size

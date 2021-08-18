@@ -14,7 +14,7 @@ locals {
   #cognito custom attributes
   custom_attributes = [
     "role",
-    "statusCode",
+    "stateCode",
     "stateName",
   "organizationId"]
   #application cluster (eks) config-map (aws auth) - iam roles to map
@@ -26,12 +26,28 @@ locals {
         "system:masters",
         "system:nodes",
       "system:bootstrappers"]
+  },
+  {
+      rolearn  = aws_iam_role.eks_admin_role.arn
+      username = "admin"
+      groups = [
+        "system:masters",
+        "system:nodes",
+      "system:bootstrappers"]
   }]
   #blockchain cluster (eks) config-map (aws auth) - iam roles to map
   blk_cluster_map_roles = [
     {
       rolearn  = aws_iam_role.eks_nodegroup_role["blk-node-group"].arn
       username = "system:node:{{EC2PrivateDNSName}}"
+      groups = [
+        "system:masters",
+        "system:nodes",
+      "system:bootstrappers"]
+  },
+    {
+      rolearn  = aws_iam_role.eks_admin_role.arn
+      username = "admin"
       groups = [
         "system:masters",
         "system:nodes",

@@ -402,7 +402,7 @@ default_sg_rules = {
 
 #Bastion host specifications
 #application cluster bastion host specifications
-app_bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "172.16.0.0/16"},]
+app_bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "172.16.0.0/16"}]
 app_bastion_sg_egress =   [{rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
                        {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
                        {rule="ssh-tcp", cidr_blocks = "172.16.0.0/16"}]
@@ -419,16 +419,16 @@ blk_bastion_sg_egress =   [{rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
 #Route53 (PUBLIC) DNS domain related specifications (domain registrar: aws/others, registered: yes/no)
 domain_info = {
   domain_registrar = "others", # alternate option: aws
-  domain_name: "aaisdirect.com", #primary domain registered
+  domain_name = "aaisdirect.com", #primary domain registered
   registered = "yes" #registered already: yes, otherwise: no
-  app_sub_domain_name: "dev-openidl" , #subdomain mapped to app eks nlb
-  blk_sub_domain_names: ["orderer0","orderer1", "orderer2", "aais-peer", "aais-ca"] #list of subdomain names mapped to blk eks nlb
-  comments: "aais node public name resolutions"
+  app_sub_domain_name = "dev-openidl" , #subdomain mapped to app eks nlb
+  blk_sub_domain_names = ["orderer0","orderer1","aais-peer", "aais-ca"] #list of subdomain names mapped to blk eks nlb
+  comments = "aais node public name resolutions"
 }
 #Route53 (PRIVATE) DNS resolution related specifications
 #internal name resolution required for blockchain vpc NLB
 internal_domain = "internal.aaisdirect.com" #internal domain name for internal name resolution within vpcs
-internal_subdomain = ["orderer0", "orderer1", "orderer2", "aais-peer", "aais-ca"] #list of subdomains for internal resolution within vpcs
+internal_subdomain = ["orderer0", "orderer1", "aais-peer", "aais-ca"] #list of subdomains for internal resolution within vpcs
 
 #-------------------------------------------------------------------------------------------------------------------
 
@@ -455,6 +455,8 @@ client_callback_urls         = ["https://dev-openidl.aaisdirect.com/callback", "
 client_default_redirect_url  = "https://dev-openidl.aaisdirect.com/redirect"
 client_logout_urls           = ["https://dev-openidl.aaisdirect.com/signout"]
 cognito_domain               = "aaisdirect"
+email_sending_account        = "COGNITO_DEFAULT" #alternate input is "DEVELOPER". This uses SES service.
+# when DEVELOPER is set ensure ses_email_identity and userpool_email_source_arn are setup as secrets in github
 #--------------------------------------------------------------------------------------------------------------------
 
 #application specific traffic to be allowed in app cluster worker nodes
@@ -464,7 +466,7 @@ app_eks_workers_app_sg_ingress = [
     to_port = 443
     protocol = "tcp"
     description = "inbound https traffic"
-    cidr_blocks = "172.16.0.0/16"
+    cidr_blocks = "10.10.0.0/16"
   },
    {
     from_port = 443
@@ -478,8 +480,8 @@ app_eks_workers_app_sg_egress = [{rule = "all-all"}]
 #application specific traffic to be allowed in blk cluster worker nodes
 blk_eks_workers_app_sg_ingress = [
   {
-    from_port = 443
-    to_port = 443
+    from_port = 80
+    to_port = 80
     protocol = "tcp"
     description = "inbound https traffic"
     cidr_blocks = "172.17.0.0/16"

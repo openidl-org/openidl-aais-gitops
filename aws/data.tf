@@ -15,6 +15,23 @@ data "aws_ami" "amazon_linux" {
     ]
   }
 }
+#AMI used with eks worker nodes, this identifies the filtered ami from the region
+data "aws_ami" "eks_app_worker_nodes_ami" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name = "name"
+    values = ["amazon-eks-node-${var.app_cluster_version}-v*"]
+  }
+}
+data "aws_ami" "eks_blk_worker_nodes_ami" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name = "name"
+    values = ["amazon-eks-node-${var.blk_cluster_version}-v*"]
+  }
+}
 #extracting zone info if the domain is already registered in aws
 data "aws_route53_zone" "data_zones" {
   count = (lookup(var.domain_info, "registered") == "yes" && lookup(var.domain_info, "domain_registrar") == "aws") ? 1 : 0

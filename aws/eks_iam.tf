@@ -81,6 +81,64 @@ resource "aws_iam_role_policy_attachment" "eks_nodegroup_AmazonEKSEBSCSIDriverPo
   policy_arn = aws_iam_policy.eks_worker_node_ebs_policy.arn
   role       = aws_iam_role.eks_nodegroup_role["${each.value}"].id
 }
+#iam policy for eks admin role
+resource "aws_iam_policy" "eks_admin_policy" {
+  name   = "AmazonEKSAdminPolicy"
+  policy = file("resources/policies/eks-admin-policy.json")
+  tags = merge(local.tags,
+    { "Name" = "${local.std_name}-AmazonEKSAdminPolicy",
+  "Cluster_type" = "both" })
+}
+#iam role - to perform eks administrative tasks
+resource "aws_iam_role" "eks_admin_role" {
+  name = "${local.std_name}-eks-admin"
+  assume_role_policy = jsonencode({
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${var.aws_account_number}:root"
+      },
+      "Action": "sts:AssumeRole",
+      "Condition": {}
+    }]
+  })
+  managed_policy_arns = [aws_iam_policy.eks_admin_policy.arn]
+  tags = merge(local.tags, {Name = "${local.std_name}-eks-admin", Cluster_type = "both"})
+  description = "The iam role that is used to manage EKS cluster administrative tasks"
+  max_session_duration = 3600
+}
+#iam group that allows users to assume eks-admin-role
+resource "aws_iam_group" "eks_admin_group" {
+  name = "${local.std_name}-eks-admin"
+}
+#iam group eks-admin group and its related policy attachment
+resource "aws_iam_group_policy_attachment" "eks_admin_group_policy_attachment" {
+  group = aws_iam_group.eks_admin_group.name
+  policy_arn = aws_iam_policy.eks_admin_group_assume_policy.arn
+}
+#iam policy for eks admin role
+resource "aws_iam_policy" "eks_admin_group_assume_policy" {
+  name = "${local.std_name}-eks-admin-group-assume"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "VisualEditor1",
+        "Effect": "Allow",
+        "Action": "sts:AssumeRole",
+        "Resource": aws_iam_role.eks_admin_role.arn
+      }]
+  })
+  tags = merge(local.tags, {
+    Name = "${local.std_name}-eks-admin-group-assume",
+    Cluster_type = "both"
+  })
+}
+
+
+
 
 
 
