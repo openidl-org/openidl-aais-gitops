@@ -455,6 +455,8 @@ client_callback_urls         = ["https://dev-openidl.aaisdirect.com/callback", "
 client_default_redirect_url  = "https://dev-openidl.aaisdirect.com/redirect"
 client_logout_urls           = ["https://dev-openidl.aaisdirect.com/signout"]
 cognito_domain               = "aaissandbox"
+email_sending_account        = "COGNITO_DEFAULT" #alternate input is "DEVELOPER". This uses SES service.
+
 #--------------------------------------------------------------------------------------------------------------------
 
 #application specific traffic to be allowed in app cluster worker nodes
