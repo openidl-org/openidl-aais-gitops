@@ -13,7 +13,40 @@ app_private_subnets    = ["172.20.3.0/24", "172.20.4.0/24"]
 #VPC Network ACL traffic rules to be configured in the VPC
 #you may need to update these rules as when new networks are added
 app_public_nacl_rules = {
-  inbound = [{
+  inbound = [
+    {
+    rule_number = 120
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "207.243.231.178/32"
+    },
+    {
+    rule_number = 121
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "50.234.147.114/32"
+    },
+    {
+    rule_number = 122
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "54.86.41.249/32"
+    },
+    {
+    rule_number = 123
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "3.237.88.84/32"
+    },
+    {
     rule_number = 100
     rule_action = "allow"
     from_port   = 22
@@ -53,7 +86,40 @@ app_public_nacl_rules = {
     protocol    = "tcp"
     cidr_block  = "0.0.0.0/0" #related to eks
     }],
-  outbound = [{
+  outbound = [
+    {
+    rule_number = 120
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "207.243.231.178/32"
+    },
+    {
+    rule_number = 121
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "50.234.147.114/32"
+    },
+    {
+    rule_number = 122
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "54.86.41.249/32"
+    },
+    {
+    rule_number = 123
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "3.237.88.84/32"
+    },
+    {
     rule_number = 100
     rule_action = "allow"
     from_port   = 22
@@ -95,7 +161,40 @@ app_public_nacl_rules = {
     }]
 }
 app_private_nacl_rules = {
-  inbound = [{
+  inbound = [
+    {
+    rule_number = 120
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "207.243.231.178/32"
+    },
+    {
+    rule_number = 121
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "50.234.147.114/32"
+    },
+    {
+    rule_number = 122
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "54.86.41.249/32"
+    },
+    {
+    rule_number = 123
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "3.237.88.84/32"
+    },
+    {
     rule_number = 100
     rule_action = "allow"
     from_port   = 22
@@ -143,7 +242,40 @@ app_private_nacl_rules = {
     protocol    = "tcp"
     cidr_block  = "172.21.0.0/16" #related to eks
     }],
-  outbound = [{
+  outbound = [
+    {
+    rule_number = 120
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "207.243.231.178/32"
+    },
+    {
+    rule_number = 121
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "50.234.147.114/32"
+    },
+    {
+    rule_number = 122
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "54.86.41.249/32"
+    },
+    {
+    rule_number = 123
+    rule_action = "allow"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_block  = "3.237.88.84/32"
+    },
+    {
     rule_number = 100
     rule_action = "allow"
     from_port   = 22
@@ -402,17 +534,17 @@ default_sg_rules = {
 
 #Bastion host specifications
 #application cluster bastion host specifications
-app_bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "172.20.0.0/16"},]
+app_bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "172.20.0.0/16"},{rule="ssh-tcp", cidr_blocks = "207.243.231.178/32"},{rule="ssh-tcp", cidr_blocks = "50.234.147.114/32"},{rule="ssh-tcp", cidr_blocks = "54.86.41.249/32"},{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
 app_bastion_sg_egress =   [{rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
                        {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
-                       {rule="ssh-tcp", cidr_blocks = "172.20.0.0/16"}]
+                       {rule="ssh-tcp", cidr_blocks = "172.20.0.0/16"},{rule="ssh-tcp", cidr_blocks = "207.243.231.178/32"},{rule="ssh-tcp", cidr_blocks = "50.234.147.114/32"},{rule="ssh-tcp", cidr_blocks = "54.86.41.249/32"},{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
 
 #blockchain cluster bastion host specifications
 #bastion host security specifications
-blk_bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "172.21.0.0/16"},]
+blk_bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "172.21.0.0/16"},{rule="ssh-tcp", cidr_blocks = "207.243.231.178/32"},{rule="ssh-tcp", cidr_blocks = "50.234.147.114/32"},{rule="ssh-tcp", cidr_blocks = "54.86.41.249/32"},{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
 blk_bastion_sg_egress =   [{rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
                        {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
-                       {rule="ssh-tcp", cidr_blocks = "172.21.0.0/16"}]
+                       {rule="ssh-tcp", cidr_blocks = "172.21.0.0/16"},{rule="ssh-tcp", cidr_blocks = "207.243.231.178/32"},{rule="ssh-tcp", cidr_blocks = "50.234.147.114/32"},{rule="ssh-tcp", cidr_blocks = "54.86.41.249/32"},{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
 
 #--------------------------------------------------------------------------------------------------------------------
 
