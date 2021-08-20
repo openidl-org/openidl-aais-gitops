@@ -7,4 +7,5 @@ aws/terraform.tfstate
 aws/terraform.tfstate.*
 aws/terraform.tfstate.d/.*
 aws/.terraform.tfstate.lock.info
+data_feed_in/aais_sandbox/dev/aais_sandbox.tfvars
 
