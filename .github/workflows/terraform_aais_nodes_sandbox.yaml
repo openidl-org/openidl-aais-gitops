@@ -150,7 +150,7 @@ jobs:
             - name: Terraform Apply
               id: apply
               #if: ((github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test' || github.ref == 'refs/heads/dev') && (github.event_name == 'push'))
-              if: github.ref == 'refs/heads/aais_sandbox' && github.event_name == 'pull'
+              if: github.ref == 'refs/heads/aais_sandbox' && github.event_name == 'push'
               # run: terraform apply -auto-approve -var-file=data_feed_in/aais_sandbox/dev/aais_sandbox.tfvars
               run: terraform destroy -auto-approve -var-file=data_feed_in/aais_sandbox/dev/aais_sandbox.tfvars -refresh=false
 
