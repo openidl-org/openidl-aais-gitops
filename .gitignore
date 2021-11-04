@@ -23,3 +23,6 @@ ansible-automation/baf.log
 ansible-automation/pre-register-users.sh
 .DS_Store
 docs/~$C-GitHub-Actions.doc
+docs/~$enIDL - Administration Guide.doc
+docs/~$enIDL - Deployment Guide.doc
+docs/~$enIDL - Testing Guide.doc
