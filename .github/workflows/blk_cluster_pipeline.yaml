@@ -58,7 +58,7 @@ jobs:
       repo_user: ${{ secrets.git_repo_user }}
       repo_user_token: ${{ secrets.git_repo_user_token }}
       repo_user_email: ${{ secrets.git_repo_user_email }}
-      registry: ghcr.io/${{ github.repository }}
+      registry: ghcr.io/${{ secrets.baf_image_repo }}
 
     steps:
       - name: Checkout code
@@ -215,7 +215,7 @@ jobs:
       - name: Deploy new_org
         if: github.event.inputs.action == 'new_org'
         run: |
-          export ORDERER_TLS_CERT=$(aws secretsmanager get-secret-value --secret-id ${{ github.event.inputs.environment }}-orderer-tls)
+          export ORDERER_TLS_CERT=$(aws secretsmanager get-secret-value --secret-id ${{ github.event.inputs.environment }}-orderer-tls --version-stage AWSCURRENT | jq -r .SecretString)
           ansible-playbook fabric-network.yml -i ./inventory/ansible_provisioners \
             -e "action=${{ github.event.inputs.action }}" \
             -e "@./${{ github.event.inputs.org_name }}-config-${{ github.event.inputs.environment }}.yml" \
