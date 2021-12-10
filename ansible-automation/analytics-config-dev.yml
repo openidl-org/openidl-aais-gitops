@@ -33,8 +33,10 @@ network:
       repo_branch: cognito-fabric-node14-helm
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
-        name: "analytics_trv_pdc"
-        policy: "OR('analyticsMSP.member', 'trvMSP.member')"
+        - name: "analytics_trv_pdc"
+          policy: "OR('analyticsMSP.member', 'trvMSP.member')"
+        - name: "anal_trv_pdc"
+          policy: "OR('analyticsMSP.member', 'trvMSP.member')"
   - name: analytics-aais
     chaincode:
       name: openidl-cc-aais-carriers
@@ -42,8 +44,10 @@ network:
       repo_branch: cognito-fabric-node14-helm
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
-        name: "analytics_aais_pdc"
-        policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
+        - name: "analytics_aais_pdc"
+          policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
+        - name: "anal_aais_pdc"
+          policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
   - name: defaultchannel
     chaincode:
       name: openidl-cc-default
