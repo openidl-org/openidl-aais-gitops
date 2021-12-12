@@ -8,9 +8,8 @@
     src: templates/collection-config.tpl
     dest: './build/collection-config-{{ item.channel_name }}.json'
   loop: "{{ collectionconfigs }}"
-  loop_control:
-    loop_var: collectionconfig
-  when: collectionconfig.channel_name == item.channel_name
+  vars:
+    channel_name: "{{ item.channel_name }}"
 
 - name: convert to base64
   shell: |
