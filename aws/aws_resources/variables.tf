@@ -632,6 +632,17 @@ variable "vault_password_reset" {
 variable "terraform_state_s3_bucket_name" {
   type = string
   description = "The name of the s3 bucket will manage terraform state files"
+  default = ""
+}
+variable "tfc_workspace_name_aws_resources" {
+  type = string
+  description = "The terraform cloud workspace of AWS resources provisioned"
+  default = ""
+}
+variable "tfc_org_name" {
+  type = string
+  description = "The terraform cloud organisation name"
+  default = ""
 }
 variable "app_worker_nodes_ami_id" {
   type = string
@@ -642,4 +653,23 @@ variable "blk_worker_nodes_ami_id" {
   type = string
   description = "The AMI id of the blk cluster worker nodes"
   default = ""
+}
+variable "aws_access_key" {
+  type = string
+  default = ""
+  description = "IAM user access key"
+}
+variable "aws_secret_key" {
+  type = string
+  default = ""
+  description = "IAM user secret key"
+}
+variable "aws_external_id" {
+  type = string
+  default = "terraform"
+  description = "External Id setup while setting up IAM user and and its relevant roles"
+}
+variable "s3_bucket_name_hds_analytics" {
+  type = string
+  description = "The name of s3 bucket for reporting relevant only to carrier and analytics node"
 }
