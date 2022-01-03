@@ -27,23 +27,27 @@ network:
         - name: "carrier"
           domain: "carrier.aaisdirect.com"
     channels:
-        - name: analytics-carrier
+        - name: anal-carr
           chaincode:
               name: openidl-cc-aais-carriers
               repo_url: github.com/openidl-org/openidl-main.git
               repo_branch: develop
               repo_path: openidl-chaincode/chaincode/openidl
               collectionconfig:
-                  name: "analytics_carrier_pdc"
+                - name: "analytics_carrier_pdc"
                   policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
-        - name: analytics-aais
+                - name: "anal_carr_pdc"
+                  policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
+        - name: anal-aais
           chaincode:
               name: openidl-cc-aais-carriers
               repo_url: github.com/openidl-org/openidl-main.git
               repo_branch: develop
               repo_path: openidl-chaincode/chaincode/openidl
               collectionconfig:
-                  name: "analytics_aais_pdc"
+                - name: "analytics_aais_pdc"
+                  policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
+                - name: "anal_aais_pdc"
                   policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
         - name: defaultchannel
           chaincode:
