@@ -173,7 +173,9 @@ s3_bucket_name_cloudtrail = "<s3_bucket_name>" #s3 bucket name to manage cloudtr
 #Name of the S3 bucket managing terraform state files
 terraform_state_s3_bucket_name = "<s3_bucket_terraform_state>"
 
-
+#Name of the S3 bucket used to store the data extracted from HDS for analytics
+#Applicable for carrier and analytics node only. For AAIS node leave it empty
+s3_bucket_name_hds_analytics = "<s3_bucket_name_hds_data_analytics>"
 
 
 
