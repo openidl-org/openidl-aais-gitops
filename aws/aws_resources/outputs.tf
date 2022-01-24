@@ -16,6 +16,9 @@ output "git_actions_iam_user_arn" {
 output "baf_automation_user_arn" {
   value = aws_iam_user.baf_user.arn
 }
+output "hds_iam_user_arn"{
+  value = var.org_name == "aais" ? null : aws_iam_user.hds_user[0].arn
+}
 output "eks_admin_role_arn" {
   value = aws_iam_role.eks_admin_role.arn
 }
@@ -64,6 +67,9 @@ output "blk_eks_nodegroup_role_arn" {
 #cloudtrail related
 output "cloudtrail_s3_bucket_name" {
   value = aws_s3_bucket.s3_bucket.bucket
+}
+output "hds_data_s3_bucket_name" {
+  value = var.org_name == "aais" ? null : aws_s3_bucket.s3_bucket_hds[0].bucket
 }
 #-----------------------------------------------------------------------------------------------------------------
 #Route53 entries

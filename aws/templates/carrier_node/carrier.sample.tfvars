@@ -99,3 +99,7 @@ s3_bucket_name_cloudtrail = "cloudtrail-logs"
 #--------------------------------------------------------------------------------------------------------------------
 #Name of the S3 bucket managing terraform state files
 terraform_state_s3_bucket_name = "trv-dev-tfstate-mgmt"
+
+#Name of the S3 bucket used to store the data extracted from HDS for analytics
+#Applicable for carrier and analytics node only
+s3_bucket_name_hds_analytics = "<s3_bucket_name_hds_data_analytics>"

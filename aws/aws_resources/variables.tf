@@ -624,14 +624,10 @@ variable "org_name" {
   description = "The name of the organization"
   default = ""
 }
-variable "vault_password_reset" {
-  type = string
-  description = "A random string to be set/changed when password vault password in AWS secrets manager required to reset"
-  default = ""
-}
 variable "terraform_state_s3_bucket_name" {
   type = string
   description = "The name of the s3 bucket will manage terraform state files"
+  default = ""
 }
 variable "app_worker_nodes_ami_id" {
   type = string
@@ -642,4 +638,8 @@ variable "blk_worker_nodes_ami_id" {
   type = string
   description = "The AMI id of the blk cluster worker nodes"
   default = ""
+}
+variable "s3_bucket_name_hds_analytics" {
+  type = string
+  description = "The name of s3 bucket for reporting relevant only to carrier and analytics node"
 }
