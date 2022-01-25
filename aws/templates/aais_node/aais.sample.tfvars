@@ -100,4 +100,7 @@ terraform_state_s3_bucket_name = "aais-dev-tfstate-mgmt"
 
 #Name of the S3 bucket used to store the data extracted from HDS for analytics
 #Applicable for carrier and analytics node only. For AAIS node leave it empty
-s3_bucket_name_hds_analytics = "<s3_bucket_name_hds_data_analytics>"
+s3_bucket_name_hds_analytics = ""
+
+#S3 public bucket to manage application related images (logos)
+s3_bucket_name_logos = "openidl-logos"

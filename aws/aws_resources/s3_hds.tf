@@ -43,7 +43,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
             "Sid": "AllowGetAndPutObjects",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "${aws_iam_user.hds_user[0].arn}"
+                "AWS": "${aws_iam_user.openidl_apps_user.arn}"
             },
             "Action": [
                 "s3:GetObject",
@@ -131,7 +131,7 @@ resource "aws_kms_key" "s3_kms_key_hds" {
         "Sid" : "EnableAccess",
         "Effect" : "Allow",
         "Principal" : {
-          "AWS" : "${aws_iam_user.hds_user[0].arn}"
+          "AWS" : "${aws_iam_user.openidl_apps_user.arn}"
         },
         "Action" : [
 			"kms:Encrypt",
@@ -167,63 +167,3 @@ resource "aws_kms_alias" "kms_alias_hds" {
   name          = "alias/${local.std_name}-${var.s3_bucket_name_hds_analytics}"
   target_key_id = aws_kms_key.s3_kms_key_hds[0].id
 }
-#IAM user and relevant credentials used for S3 bucket access which is used for HDS data extract for analytics node
-resource "aws_iam_user" "hds_user" {
-  count = var.org_name == "aais" ? 0 : 1
-  name = "${local.std_name}-hds-user"
-  force_destroy = true
-  tags = merge(local.tags, { Name = "${local.std_name}-hds-user", Cluster_type = "both" })
-}
-resource "aws_iam_access_key" "hds_user_access_key" {
-  count = var.org_name == "aais" ? 0 : 1
-  user = aws_iam_user.hds_user[0].name
-  status = "Active"
-  lifecycle {
-    ignore_changes = [status]
-  }
-}
-resource "aws_iam_user_policy" "hds_user_policy" {
-  count = var.org_name == "aais" ? 0 : 1
-  name = "${local.std_name}-hds-user-policy"
-  user = aws_iam_user.hds_user[0].name
-  policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "ListBucket",
-            "Effect": "Allow",
-            "Action": "s3:ListAllMyBuckets",
-            "Resource": "*"
-        },
-        {
-            "Sid": "GetPutAllow",
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:AbortMultipartUpload",
-                "s3:RestoreObject",
-                "s3:DeleteObject",
-                "s3:ListMultipartUploadParts"
-            ],
-            "Resource": [
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}",
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}/*",
-            ]
-        },
-        {
-            "Sid": "AllowKMS",
-            "Effect": "Allow",
-            "Action": [
-                "kms:Decrypt",
-                "kms:Encrypt",
-                "kms:DescribeKey"
-            ],
-            "Resource": [
-                "${aws_kms_key.s3_kms_key_hds[0].arn}"
-            ]
-        }
-    ]
-  })
-}
-
