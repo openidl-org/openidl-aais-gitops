@@ -177,3 +177,6 @@ terraform_state_s3_bucket_name = "<s3_bucket_terraform_state>"
 #Name of the S3 bucket used to store the data extracted from HDS for analytics
 #Applicable for carrier and analytics node only
 s3_bucket_name_hds_analytics = "<s3_bucket_name_hds_data_analytics>"
+
+#S3 public bucket to manage application related images (logos)
+s3_bucket_name_logos = "<unique_bucket_name>"

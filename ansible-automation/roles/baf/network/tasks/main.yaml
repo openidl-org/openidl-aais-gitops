@@ -46,6 +46,19 @@
         ID: "{{ access_id | b64encode }}"
         KEY: "{{ access_key | b64encode }}"
 
+- name: Create secret for github token
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: openidl-github-pat
+        namespace: openidl-baf
+      data:
+        PAT: "{{ gitops_repo_user_token | b64encode }}"
+
 - name: Create configmap for network configuration file
   shell: |
     kubectl -n openidl-baf create configmap network-setup --from-file=network-setup.yml=./network-setup.yml
@@ -77,6 +90,11 @@
               secretKeyRef:
                 name: openidl-baf-aws
                 key: KEY
+          - name: PAT
+            valueFrom:
+              secretKeyRef:
+                name: openidl-github-pat
+                key: PAT
           - name: AWS_REGION
             value: "{{ region }}"
           - name: ACTION
@@ -94,26 +112,26 @@
           - name: EXTRA_VARS
             value: "{{ extra_vars | default() }}"
           command: ["sh", "-c"]
-          args: 
+          args:
           - |-
             #!/bin/bash -e
-            set -x
-            git clone https://{{ gitops_repo_user }}:{{ gitops_repo_user_token }}@{{ gitops_repo_url }} -b {{ gitops_repo_branch }}
+            export LOCAL_PATH=/home/gitrepo
+            git clone https://{{ gitops_repo_user }}:${PAT}@{{ gitops_repo_url }} -b {{ gitops_repo_branch }} $LOCAL_PATH
             mkdir /home/blockchain-automation-framework/build
             touch /home/blockchain-automation-framework/build/orderer1.crt
             aws eks --region {{ region }} update-kubeconfig --name {{ cluster_name }}
-            cd /home/openidl-aais-gitops/
+            cd $LOCAL_PATH
             ansible-playbook blockchain-automation-framework/platforms/shared/configuration/environment-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true"
             if [ ${ACTION} != "deploy_network" ] || [ ${ACTION} != "reset" ] || [ ${ACTION} != "new_org" ]; then
               POD_NAME=$(kubectl -n ${ORG_NAME}-net get pods --selector=name=ca-tools --output=jsonpath={.items..metadata.name})
-              mkdir -p /home/openidl-aais-gitops/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/channel-artifacts
-              kubectl -n ${ORG_NAME}-net cp $POD_NAME:/crypto-config /home/openidl-aais-gitops/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config
-              cp /home/openidl-aais-gitops/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config/peerOrganizations/${ORG_NAME}-net/peers/peer0.${ORG_NAME}-net/msp/cacerts/ca-${ORG_NAME}-net-${ORG_NAME}.${ENV}.${DOMAIN}-8443.pem /home/blockchain-automation-framework/build/${ORG_NAME}-ca.crt
+              mkdir -p $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/channel-artifacts
+              kubectl -n ${ORG_NAME}-net cp $POD_NAME:/crypto-config $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config
+              cp $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config/peerOrganizations/${ORG_NAME}-net/peers/peer0.${ORG_NAME}-net/msp/cacerts/ca-${ORG_NAME}-net-${ORG_NAME}.${ENV}.${DOMAIN}-8443.pem /home/blockchain-automation-framework/build/${ORG_NAME}-ca.crt
               if [ -z $ORDERERORG ]; then
                 POD_NAME=$(kubectl -n ordererorg-net get pods --selector=name=ca-tools --output=jsonpath={.items..metadata.name})
                 kubectl -n ordererorg-net cp $POD_NAME:/crypto-config /home/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config
-                cp /home/openidl-aais-gitops/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config/ordererOrganizations/ordererorg-net/orderers/orderer1.ordererorg-net/tls/ca.crt /home/blockchain-automation-framework/build/orderer1.crt
-              fi              
+                cp $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/crypto-config/ordererOrganizations/ordererorg-net/orderers/orderer1.ordererorg-net/tls/ca.crt /home/blockchain-automation-framework/build/orderer1.crt
+              fi
             fi
             if [ $ACTION = "deploy_network" ]; then
               ansible-playbook blockchain-automation-framework/platforms/shared/configuration/kubernetes-env-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true"
@@ -132,7 +150,7 @@
               cat /home/credentials/org.creds > /home/blockchain-automation-framework/build/orderer5.crt
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/launch-new-organization.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=true" $EXTRA_VARS
             elif [ $ACTION = "add_new_org" ]; then
-              cat /home/credentials/org.creds > /home/openidl-aais-gitops/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/channel-artifacts/${CHANNEL_NAME}.json
+              cat /home/credentials/org.creds > $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/channel-artifacts/${CHANNEL_NAME}.json
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/syschannel-add-org.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=true" $EXTRA_VARS
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/creator-fetch-add-org.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=true" $EXTRA_VARS
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/creator-sign-update-add-org.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=true" $EXTRA_VARS
