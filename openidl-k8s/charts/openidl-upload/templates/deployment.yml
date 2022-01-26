@@ -1,0 +1,38 @@
+{{- if .Values.global.upload.install }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openidl-upload
+  labels:
+    {{- include "openidl-upload.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: openidl-upload
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: openidl-upload
+    spec:
+      # {{- with .Values.imagePullSecrets }}
+      # imagePullSecrets:
+      #   {{- toYaml . | nindent 8 }}
+      # {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        # for regular deployment
+        # image: aais:1
+        # for local development against minikube registry
+        image: {{ .Values.global.upload.image.repository | default .Values.image.repository }}:{{ .Values.global.upload.image.tag | default .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.upload.image.pullPolicy | default .Values.image.pullPolicy }}      
+        ports:
+        - containerPort: {{ .Values.global.upload.port }}
+      restartPolicy: Always
+{{- end }}

@@ -1,0 +1,6 @@
+{
+    {% set mongoURL = 'mongodb://' ~ mongo.user ~ ':' ~ mongo.token ~ '@' ~ organizationName ~ '-mongodb-0.' ~ organizationName ~ '-mongodb-headless.database.svc.cluster.local:27017,' ~ organizationName ~ '-mongodb-1.' ~ organizationName ~ '-mongodb-headless.database.svc.cluster.local:27017,' ~ organizationName ~ '-mongodb-2.' ~ organizationName ~ '-mongodb-headless.database.svc.cluster.local:27017/openidl-offchain-db?authSource=openidl-offchain-db' -%}
+    "mongodb": "openidl-offchain-db",
+    "persistentStore": "mongo",
+    "simpleURI": "{{ mongoURL }}"
+}

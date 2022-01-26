@@ -1,0 +1,16 @@
+{
+    "identifiers": [
+        {
+            "carrierName": "aais",
+            "uniqueIdentifier": "7777"
+        },
+        {
+            "carrierName": "carrier2",
+            "uniqueIdentifier": "4809"
+        },
+        {
+            "carrierName": "carrier1",
+            "uniqueIdentifier": "11111"
+        }
+    ]
+}

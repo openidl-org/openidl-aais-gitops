@@ -1,0 +1,4 @@
+{
+    "walletType": "couchdb",
+    "url": "http://${COUCHDB_USERNAME}:${COUCHDB_PASSWORD}@couchdb-couchdb.database.svc.cluster.local:5984"
+}

@@ -26,3 +26,13 @@ docs/~$C-GitHub-Actions.doc
 docs/~$enIDL - Administration Guide.doc
 docs/~$enIDL - Deployment Guide.doc
 docs/~$enIDL - Testing Guide.doc
+openidl-config/config/*
+!openidl-config/config/placeholder.txt
+openidl-config/ubuntu.yml
+openidl-config/aais-dev-config-secrets.json
+openidl-config/analytics-dev-config-secrets.json
+openidl-config/carrier-dev-config-secrets.json.hig
+openidl-config/openidl-configurations/config/carrier-config.json
+openidl-config/vault/*
+ansible-automation/orderer.pem
+ansible-automation/orderer.base64.pem

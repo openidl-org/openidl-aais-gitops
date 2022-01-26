@@ -1,0 +1,17 @@
+{{- if .Values.global.transactionaldataeventlistener.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.transactionaldataeventlistener.servicename }}
+  labels:
+    {{- include "openidl-transactional-data-event-listener.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.transactionaldataeventlistener.port }}
+      targetPort: {{ .Values.global.transactionaldataeventlistener.targetport }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "openidl-transactional-data-event-listener.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -1,0 +1,18 @@
+{{- if .Values.global.upload.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.upload.servicename }}
+  labels:
+    {{- include "openidl-upload.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.upload.port }}
+      targetPort: {{ .Values.global.upload.targetport }}
+      nodePort: {{ .Values.global.upload.nodeport }}
+      protocol: TCP
+      name: http
+  selector:
+    app: openidl-upload
+{{- end }}

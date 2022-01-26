@@ -1,0 +1,57 @@
+{
+    "name": "test-network-${ANALYTICS_ORGNAME}",
+    "version": "1.0.0",
+    "isLocal": true,
+    "client": {
+        "organization": "${ANALYTICS_ORGNAME}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "${ANALYTICS_ORGNAME}": {
+            "mspid": "${ANALYTICS_ORGNAME}MSP",
+            "peers": [
+                "peer0.${ANALYTICS_ORGNAME_SHORT}-net.${ANALYTICS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            ],
+            "certificateAuthorities": [
+                "ca.${ANALYTICS_ORGNAME_SHORT}-net.${ANALYTICS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.${ANALYTICS_ORGNAME}-net.${ANALYTICS_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "grpcs://peer0.${ANALYTICS_ORGNAME_SHORT}-net.${ANALYTICS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+            "tlsCACerts": {
+                "pem": "${TLS_CERT}"
+            },
+            "grpcOptions": {
+                "grpc.http2.keepalive_time": 36000,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.http2.keepalive_timeout": 18000,
+                "grpc.keepalive_timeout_ms": 180000,
+                "grpc-wait-for-ready-timeout": 30000,
+                "ssl-target-name-override": "peer0.${ANALYTICS_ORGNAME_SHORT}-net.${ANALYTICS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com",
+                "hostnameOverride": "peer0.${ANALYTICS_ORGNAME_SHORT}-net.${ANALYTICS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.${ANALYTICS_ORGNAME}-net.${ANALYTICS_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "https://ca.${ANALYTICS_ORGNAME_SHORT}-net.${ANALYTICS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+            "caName": "ca.${ANALYTICS_ORGNAME_SHORT}-net",
+            "tlsCACerts": {
+                "pem": [
+                    "${TLS_CERT}"
+                ]
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

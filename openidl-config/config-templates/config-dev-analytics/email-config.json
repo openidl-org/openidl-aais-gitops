@@ -1,0 +1,104 @@
+{
+    "Config": [
+        {
+            "service": "APIDOWN",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Blockchain API is Down"
+        },
+        {
+            "service": "DBDOWN",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Mongo Service is Down"
+        },
+        {
+            "service": "DBEXECERROR",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Data Load for <<BATCHID>> - Mongo Database Error"
+        },
+        {
+            "service": "BCERROR",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Blockchain Hash failed"
+        },
+        {
+            "service": "DATALOADFAILURE",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Data Load for <<BATCHID>> Failure "
+        },
+        {
+            "service": "INPUTFILEFORMAT",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Data Load - Input file format is incorrect"
+        },
+        {
+            "service": "DBLOGFAILURE",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "annb@aaisonline.com",
+                "andym@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Data Load Log Failure - <<BATCHID>>"
+        },
+        {
+            "service": "DATALOADSUCCESS",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "andym@aaisonline.com",
+                "annb@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Data Loaded Successfully"
+        },
+        {
+            "service": "GENERATETOKENFAILURE",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "andym@aaisonline.com",
+                "annb@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Generate Token Failure"
+        },
+        {
+            "service": "GENERATETOKENSUCCESS",
+            "fromemailaddress": "andym@aaisonline.com",
+            "toemailaddress": [
+                "andym@aaisonline.com",
+                "annb@aaisonline.com",
+                "kens@aaisonline.com"
+            ],
+            "emailsubject": "Generate Token Success"
+        }
+    ]
+}

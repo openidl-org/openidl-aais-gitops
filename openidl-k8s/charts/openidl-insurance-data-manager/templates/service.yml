@@ -1,0 +1,17 @@
+{{- if .Values.global.insurancedatamanager.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.insurancedatamanager.servicename }}
+  labels:
+    {{- include "openidl-insurance-data-manager.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.insurancedatamanager.port }}
+      targetPort: {{ .Values.global.insurancedatamanager.targetport }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "openidl-insurance-data-manager.selectorLabels" . | nindent 4 }}
+{{- end }}

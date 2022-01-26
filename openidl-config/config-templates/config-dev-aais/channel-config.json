@@ -1,0 +1,29 @@
+{
+    "channels": [
+        {
+            "channelName": "defaultchannel",
+            "chaincodeName": "openidl-cc-default"
+        },
+        {
+            "channelName": "${ANALYTICS_ORGNAME_SHORT}-${AAIS_ORGNAME_SHORT}",
+            "chaincodeName": "openidl-cc-aais-carriers"
+        }
+    ],
+    "users": [
+        {
+            "org": "${AAIS_ORGNAME}",
+            "user": "openidl-${AAIS_ORGNAME}-data-call-app-ibp-2.0",
+            "mspId": "${AAIS_ORGNAME}MSP"
+        }
+    ],
+    "crossChannelQueryParam": [
+        {
+            "channelName": "${ANALYTICS_ORGNAME_SHORT}-${AAIS_ORGNAME_SHORT}",
+            "chaincodeName": "openidl-cc-aais-carriers"
+        },
+        {
+            "channelName": "${ANALYTICS_ORGNAME_SHORT}-${CARRIER_ORGNAME_SHORT}",
+            "chaincodeName": "openidl-cc-aais-carriers"
+        }
+    ]
+}

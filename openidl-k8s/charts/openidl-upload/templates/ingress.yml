@@ -1,0 +1,42 @@
+{{- if .Values.global.upload.install }}
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "openidl-upload.fullname" . -}}
+{{- $svcPort := .Values.global.upload.port -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: upload-ingress
+  labels:
+    {{- include "openidl-upload.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: upload-aais.test.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.global.upload.servicename }}
+                port: 
+                  number: 80
+  {{- end }}
+{{- end }}

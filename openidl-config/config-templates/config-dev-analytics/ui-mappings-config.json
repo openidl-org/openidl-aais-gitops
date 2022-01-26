@@ -1,0 +1,18 @@
+{
+	"idp-credentials": {
+		"file": "local-cognito-config.json",
+		"env": "IDP_CONFIG"
+	},
+	"port": {
+		"value": "8080",
+		"env": "PORT"
+	},
+	"data-call-app-url": {
+		"value": "http://data-call-app-service.${ENV}.${ANALYTICS_ORGNAME}.internal.${DOMAIN}.com/openidl/api",
+		"env": "DATA_CALL_APP_URL"
+	},
+	"log-level": {
+		"value": "debug",
+		"env": "LOG_LEVEL"
+	}
+}

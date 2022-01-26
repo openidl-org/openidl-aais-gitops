@@ -1,0 +1,57 @@
+{
+    "name": "test-network-${CARRIER_ORGNAME}",
+    "version": "1.0.0",
+    "isLocal": true,
+    "client": {
+        "organization": "${CARRIER_ORGNAME}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "${CARRIER_ORGNAME}": {
+            "mspid": "${CARRIER_ORGNAME}MSP",
+            "peers": [
+                "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            ],
+            "certificateAuthorities": [
+                "ca.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "grpcs://peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+            "tlsCACerts": {
+                "pem": "${TLS_CERT}"
+            },
+            "grpcOptions": {
+                "grpc.http2.keepalive_time": 36000,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.http2.keepalive_timeout": 18000,
+                "grpc.keepalive_timeout_ms": 180000,
+                "grpc-wait-for-ready-timeout": 30000,
+                "ssl-target-name-override": "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com",
+                "hostnameOverride": "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "https://ca.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+            "caName": "ca.${CARRIER_ORGNAME}-net",
+            "tlsCACerts": {
+                "pem": [
+                    "${TLS_CERT}"
+                ]
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

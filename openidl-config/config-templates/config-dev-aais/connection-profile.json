@@ -1,0 +1,57 @@
+{
+    "name": "test-network-${AAIS_ORGNAME}",
+    "version": "1.0.0",
+    "isLocal": true,
+    "client": {
+        "organization": "${AAIS_ORGNAME}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        }
+    },
+    "organizations": {
+        "${AAIS_ORGNAME}": {
+            "mspid": "${AAIS_ORGNAME}MSP",
+            "peers": [
+                "peer0.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            ],
+            "certificateAuthorities": [
+                "ca.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            ]
+        }
+    },
+    "peers": {
+        "peer0.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "grpcs://peer0.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+            "tlsCACerts": {
+                "pem": "${TLS_CERT}"
+            },
+            "grpcOptions": {
+                "grpc.http2.keepalive_time": 36000,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.http2.keepalive_timeout": 18000,
+                "grpc.keepalive_timeout_ms": 180000,
+                "grpc-wait-for-ready-timeout": 30000,
+                "ssl-target-name-override": "peer0.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com",
+                "hostnameOverride": "peer0.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${AAIS_ORGNAME_SHORT}.${DOMAIN}.com": {
+            "url": "https://ca.${AAIS_ORGNAME_SHORT}-net.${AAIS_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+            "caName": "ca.${AAIS_ORGNAME}-net",
+            "tlsCACerts": {
+                "pem": [
+                    "${TLS_CERT}"
+                ]
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

@@ -1,0 +1,50 @@
+{{- if .Values.global.carrierui.install }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openidl-carrier-ui
+  labels:
+    {{- include "openidl-insurance-data-manager.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "openidl-insurance-data-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "openidl-insurance-data-manager.selectorLabels" . | nindent 8 }}
+    spec:
+      # {{- with .Values.imagePullSecrets }}
+      # imagePullSecrets:
+      #   {{- toYaml . | nindent 8 }}
+      # {{- end }}
+      volumes:
+      - name: apkey
+        secret:
+          secretName: {{ .Values.global.appsecret }}
+          items:
+          {{- range .Values.secrets }}
+          - key: {{ .name }}
+            path: {{ .file }}
+          {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        # for regular deployment
+        # image: aais:1
+        # for local development against minikube registry
+        image: {{ .Values.global.carrierui.image.repository | default .Values.image.repository }}:{{ .Values.global.carrierui.image.tag | default .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.carrierui.image.pullPolicy | default .Values.image.pullPolicy }}      
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        volumeMounts:
+        - name: apkey
+          mountPath: "/app/server/config"
+          readOnly: true
+{{- end }}

@@ -1,0 +1,17 @@
+{{- if .Values.global.carrierui.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.carrierui.servicename }}
+  labels:
+    {{- include "openidl-carrier-ui.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.carrierui.port }}
+      targetPort: {{ .Values.global.carrierui.targetport }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "openidl-carrier-ui.selectorLabels" . | nindent 4 }}
+{{- end }}

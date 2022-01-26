@@ -1,0 +1,60 @@
+{{- if .Values.global.insurancedatamanager.install }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openidl-insurance-data-manager.fullname" . }}
+  labels:
+    {{- include "openidl-insurance-data-manager.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "openidl-insurance-data-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "openidl-insurance-data-manager.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.global.minikubehostip }}
+      hostAliases:
+      - ip: {{ .Values.global.minikubehostip }}
+        hostnames:
+        - "peer0.aais.example.com"
+        - "peer0.analytics.example.com"
+        - "peer0.carrier.example.com"
+        - "orderer.example.com"
+        - "host.minikube.internal"
+      {{- end }}
+      # {{- with .Values.imagePullSecrets }}
+      # imagePullSecrets:
+      #   {{- toYaml . | nindent 8 }}
+      # {{- end }}
+      volumes:
+      - name: apkey
+        secret:
+          secretName: {{ .Values.global.appsecret }}
+          items:
+          {{- range .Values.secrets }}
+          - key: {{ .name }}
+            path: {{ .file }}
+          {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        # for regular deployment
+        # image: aais:1
+        # for local development against minikube registry
+        image: {{ .Values.global.insurancedatamanager.image.repository | default .Values.image.repository }}:{{ .Values.global.insurancedatamanager.image.tag | default .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.insurancedatamanager.image.pullPolicy | default .Values.image.pullPolicy }}      
+        ports:
+        - containerPort: {{ .Values.global.insurancedatamanager.port }}
+        volumeMounts:
+        - name: apkey
+          mountPath: "/server/config"
+          readOnly: true
+{{- end }}

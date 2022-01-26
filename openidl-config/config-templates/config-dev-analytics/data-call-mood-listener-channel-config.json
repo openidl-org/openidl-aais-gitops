@@ -1,0 +1,31 @@
+{
+    "listenerChannels": [
+        {
+            "channelName": "${ANALYTICS_ORGNAME_SHORT}-${AAIS_ORGNAME_SHORT}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                },
+                {
+                    "ToggleLikeEvent": "ToggleLikeEvent"
+                }
+            ]
+        },
+        {
+            "channelName": "${ANALYTICS_ORGNAME_SHORT}-${CARRIER_ORGNAME_SHORT}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                },
+                {
+                    "ToggleLikeEvent": "ToggleLikeEvent"
+                }
+            ]
+        }
+    ],
+    "identity": {
+        "user": "openidl-${ANALYTICS_ORGNAME}-data-call-mood-listener-ibp-2.0",
+        "wallet": "&wallet"
+    },
+    "applicationName": "openidl-data-call-mood-listener"
+}

@@ -1,0 +1,17 @@
+{{- if .Values.global.utilities.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.utilities.servicename }}
+  labels:
+    {{- include "openidl-utilities.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.utilities.port }}
+      targetPort: {{ .Values.global.utilities.targetport }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "openidl-utilities.selectorLabels" . | nindent 4 }}
+{{- end }}
