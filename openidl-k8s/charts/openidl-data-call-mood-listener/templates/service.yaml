@@ -1,0 +1,17 @@
+{{- if .Values.global.datacallmoodlistener.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.datacallmoodlistener.servicename }}
+  labels:
+    {{- include "openidl-data-call-mood-listener.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.datacallmoodlistener.port }}
+      targetPort: {{ .Values.global.datacallmoodlistener.targetport }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "openidl-data-call-mood-listener.selectorLabels" . | nindent 4 }}
+{{- end }}

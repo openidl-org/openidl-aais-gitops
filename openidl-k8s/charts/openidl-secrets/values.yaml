@@ -1,0 +1,193 @@
+# Default values for openidl-secrets.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+    repository: nginx
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+    {}
+    # fsGroup: 2000
+
+securityContext:
+    {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+service:
+    type: ClusterIP
+    port: 80
+
+ingress:
+    enabled: false
+    annotations:
+        {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+    hosts:
+        - host: chart-example.local
+          paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+resources:
+    {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+secrets:
+    - name: insurance-data-manager-mappings-config
+      file: config/insurance-data-manager-mappings-config.json
+      namespace: default
+    - name: insurance-data-manager-metadata-config
+      file: config/insurance-data-manager-metadata-config.json
+      namespace: default
+    - name: insurance-data-manager-default-config
+      file: config/insurance-data-manager-default-config.json
+      namespace: default
+    - name: insurance-data-manager-channel-config
+      file: config/insurance-data-manager-channel-config.json
+      namespace: default
+    - name: data-call-app-default-config
+      file: config/data-call-app-default-config.json
+      namespace: default
+    - name: data-call-app-mappings-config
+      file: config/data-call-app-mappings-config.json
+      namespace: default
+    - name: data-call-processor-default-config
+      file: config/data-call-processor-default-config.json
+      namespace: default
+    - name: data-call-processor-metadata-config
+      file: config/data-call-processor-metadata-config.json
+      namespace: default
+    - name: data-call-processor-mappings-config
+      file: config/data-call-processor-mappings-config.json
+      namespace: default
+    - name: ui-mappings-config
+      file: config/ui-mappings-config.json
+      namespace: default
+    - name: cognito-config
+      file: config/local-cognito-config.json
+      namespace: default
+    - name: kvs-config
+      file: config/local-kvs-config.json
+      namespace: default
+    - name: vault-config
+      file: config/local-vault-config.json
+      namespace: default
+    - name: connectionprofile-config
+      file: config/connection-profile.json
+      namespace: default
+    - name: channelconfigaais
+      file: config/channel-config.json
+      namespace: default
+    - name: db-config
+      file: config/local-db-config.json
+      namespace: default
+    - name: email-config
+      file: config/email-config.json
+      namespace: default
+    - name: listenerchannelaais-config
+      file: config/listener-channel-config.json
+      namespace: default
+    - name: s3bucket-config
+      file: config/s3-bucket-config.json
+      namespace: default
+    - name: targetchannelaais-config
+      file: config/target-channel-config.json
+      namespace: default
+    - name: uniqueidentifiersaais-config
+      file: config/unique-identifiers-config.json
+      namespace: default
+    - name: data-call-mood-listener-default-config
+      file: config/data-call-mood-listener-default-config.json
+      namespace: default
+    - name: data-call-mood-listener-metadata-config
+      file: config/data-call-mood-listener-metadata-config.json
+      namespace: default
+    - name: data-call-mood-listener-mappings-config
+      file: config/data-call-mood-listener-mappings-config.json
+      namespace: default
+    - name: data-call-mood-listener-channel-config
+      file: config/data-call-mood-listener-channel-config.json
+      namespace: default
+    - name: data-call-mood-listener-target-channel-config
+      file: config/data-call-mood-listener-target-channel-config.json
+      namespace: default
+    - name: transactional-data-event-listener-default-config
+      file: config/transactional-data-event-listener-default-config.json
+      namespace: default
+    - name: transactional-data-event-listener-metadata-config
+      file: config/transactional-data-event-listener-metadata-config.json
+      namespace: default
+    - name: transactional-data-event-listener-mappings-config
+      file: config/transactional-data-event-listener-mappings-config.json
+      namespace: default
+    - name: transactional-data-event-listener-channel-config
+      file: config/transactional-data-event-listener-channel-config.json
+      namespace: default
+    - name: transactional-data-event-listener-target-channel-config
+      file: config/transactional-data-event-listener-target-channel-config.json
+      namespace: default
+    - name: cognito-admin-config
+      file: config/local-cognito-admin-config.json
+      namespace: default
+    - name: utilities-fabric-config
+      file: config/utilities-fabric-config.json
+      namespace: default
+    - name: utilities-admin-config
+      file: config/utilities-admin-config.json
+      namespace: default
+    - name: utilities-mappings-config
+      file: config/utilities-mappings-config.json
+      namespace: default
+    - name: utilities-default-config
+      file: config/default-config.json
+      namespace: default

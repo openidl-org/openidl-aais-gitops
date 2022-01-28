@@ -1,0 +1,17 @@
+{{- if .Values.global.datacallprocessor.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.global.datacallprocessor.servicename }}
+  labels:
+    {{- include "openidl-data-call-processor.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.global.datacallprocessor.port }}
+      targetPort: {{ .Values.global.datacallprocessor.targetport }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "openidl-data-call-processor.selectorLabels" . | nindent 4 }}
+{{- end }}

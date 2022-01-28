@@ -1,0 +1,7 @@
+{
+    "walletType": "hashicorp_vault",
+    "accessKeyId": "${AWS_SECRET_MANAGER_ACCESS_KEY_ID}",
+    "secretAccessKey": "${AWS_SECRET_MANAGER_SECRET_ACCESS_KEY}",
+    "region": "${AWS_SECRET_MANAGER_REGION}",
+    "secretName": "${VAULT_SECRET_NAME}"
+}

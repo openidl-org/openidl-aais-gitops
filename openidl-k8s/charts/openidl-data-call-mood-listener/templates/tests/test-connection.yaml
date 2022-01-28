@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "openidl-data-call-mood-listener.fullname" . }}-test-connection"
+  labels:
+    {{- include "openidl-data-call-mood-listener.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "openidl-data-call-mood-listener.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

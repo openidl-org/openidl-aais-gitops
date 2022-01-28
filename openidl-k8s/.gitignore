@@ -1,0 +1,9 @@
+charts/openidl-secrets/config-local-aais/**
+charts/openidl-secrets/config-local-carrier/**
+charts/openidl-secrets/config-local-analytics/**
+charts/openidl-secrets/config-dev-aais/**
+charts/openidl-secrets/config-dev-carrier/**
+charts/openidl-secrets/config-dev-analytics/**
+charts/openidl-secrets/config-itpc-aais/**
+charts/openidl-secrets/config-itpc-carrier/**
+charts/openidl-secrets/config-itpc-analytics/**

@@ -1,0 +1,5 @@
+{
+    "logLevel": "debug",
+    "connectionProfile": "connection-profile.json",
+    "adminConfigFile": "admin-config.json"
+}

@@ -1,0 +1,67 @@
+#GitHub Actions to deploy openidl application using HELM upgrade 
+#It requires the EKS cluster public access turned ON 
+
+#Prerequisites: IAM User (access key, secret key), IAM Role (with its external_id setup), EKS region, EKS cluster name. 
+# Note: All these prereqs are provisioned part of AWS resources provisioning part of gitactions+terraform deployment. 
+# It is required to inspect the AWS resources and gather the information to setup and enable this gitactions. 
+# Setup the following secrets in github as environment secrets under environment named "prod-analytics"
+#1. gitactions_user_access_key
+#2. gitactions_user_secret_key
+#3. gitactions_eksadm_role
+#4. gitactions_external_id
+#5. aws_region
+#6. app_cluster_name
+
+#Authors: Rajesh Sanjeevi & Sandeep Pulluru 
+#Version: v1.0 
+
+name: Deploy openIDL prod-analytics
+on:
+  push:
+    branches:
+      - 'develop'
+    paths:
+      - 'openidl-k8s/global-values-prod-analytics.yaml'
+
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy-openidl-app:
+    environment: prod-analytics
+
+    name: Deploy openIDL application on prod-analytics
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Configure AWS CLI with credentials
+      uses: aws-actions/configure-aws-credentials@230d25f14e841bc8e06b5f4ff89ccd6989fc1d71
+      with:
+        aws-access-key-id: ${{ secrets.gitactions_user_access_key }}
+        aws-secret-access-key: ${{ secrets.gitactions_user_secret_key }}
+        aws-region: ${{ secrets.aws_region }}
+        role-to-assume: ${{ secrets.gitactions_eksadm_role }}
+        role-external-id: ${{ secrets.gitactions_external_id }}
+        role-duration-seconds: 3600 # session valid for 30 minutes
+        role-session-name: git-actions
+        role-skip-session-tagging: true
+
+    - name: Checkout Code
+      uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f
+
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.6.3
+
+    - name: Setup kube-config
+      run: |
+        aws eks update-kubeconfig --region ${{ secrets.aws_region }} --name ${{ secrets.app_cluster_name }}
+    - name: Deploy openIDL app using helm
+      run: |
+        helm upgrade --recreate-pods --install prod-analytics ./openidl-k8s -f ./openidl-k8s/global-values-prod-analytics.yaml \
+          -n openidl --set global.datacallapp.ingressenabled=true --set global.utilities.ingressenabled=true \
+          --set global.ui.ingressenabled=true --set global.secrets.install=false

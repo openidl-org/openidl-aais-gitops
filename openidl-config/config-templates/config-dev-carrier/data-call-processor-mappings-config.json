@@ -1,0 +1,10 @@
+{
+    "off-chain-db-credentials": {
+        "env": "OFF_CHAIN_DB_CONFIG",
+        "file": "local-db-config.json"
+    },
+    "kvs-credentialss": {
+        "env": "KVS_CONFIG",
+        "file": "local-vault-config.json"
+    }
+}
