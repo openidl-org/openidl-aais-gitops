@@ -1,0 +1,177 @@
+---
+- name: Generate pre-register-users script
+  template:
+    src: templates/pre-register-user.sh.j2
+    dest: ./pre-register-users.sh
+    mode: 0755
+
+- name: Delete user script pod
+  community.kubernetes.k8s:
+    name: pre-register-user-script
+    namespace: vault
+    api_version: v1
+    kind: Pod
+    state: absent
+    wait: yes
+
+- name: Delete Script Configmap
+  community.kubernetes.k8s:
+    name: pre-register-users-script
+    namespace: vault
+    api_version: v1
+    kind: ConfigMap
+    state: absent
+
+- name: Create a k8s namespace
+  community.kubernetes.k8s:
+    name: vault
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create configmap for network configuration file
+  shell: |
+    kubectl -n vault create configmap pre-register-users-script --from-file=pre-register-users.sh=./pre-register-users.sh
+
+- name: Create secret for credentials
+  community.kubernetes.k8s:
+    state: present
+    definition: 
+      apiVersion: v1
+      kind: Secret
+      type: Opaque             
+      metadata:
+        name: vault-user-creds
+        namespace: vault   
+      data:
+        VAULT_ROOT_TOKEN: "{{ vault_token | b64encode }}"
+        CA_USER_TOKEN: "{{ ca_user_token | b64encode }}"
+        VAULT_KVS_USER: "{{ vault_kvs_user | b64encode }}"
+        VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
+
+- name: Launch Pod for pre-register-users
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: pre-register-user-script
+        namespace: vault
+      spec:
+        containers:
+        - name: script
+          image: hyperledger/fabric-ca:1.5.1
+          env:
+          - name: VAULT_ROOT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_ROOT_TOKEN
+          - name: CA_USER_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: CA_USER_TOKEN
+          - name: VAULT_KVS_USER
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_KVS_USER
+          - name: VAULT_KVS_USER_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_KVS_USER_TOKEN
+          - name: ORG_NAME
+            value: "{{ network.org_name }}"
+          - name: VAULT_URL
+            value: "http://vault.{{ env }}.{{ internal_domain }}"
+          - name: ENV
+            value: "{{ env }}"
+          - name: DOMAIN
+            value: "{{ domain }}"
+          - name: NODE_TYPE
+            value: "{{ node_type }}"
+          command: ["sh", "-c"]
+          args: 
+          - |-
+            #!/bin/bash -e
+            cd /home/
+            apk add bash curl jq
+            ./config/pre-register-users.sh -N ${ORG_NAME}-admin \
+              -p ${CA_USER_TOKEN} \
+              -u ca.${ORG_NAME}-net.${ORG_NAME}.${ENV}.${DOMAIN}:8443 \
+              -n ca.${ORG_NAME}-net \
+              -o ${ORG_NAME} \
+              -m ${ORG_NAME}MSP \
+              -U "openidl-${ORG_NAME}-insurance-data-manager-ibp-2.0 openidl-${ORG_NAME}-data-call-processor-ibp-2.0 openidl-${ORG_NAME}-data-call-app-ibp-2.0 openidl-${ORG_NAME}-data-call-mood-listener-ibp-2.0 openidl-${ORG_NAME}-transactional-data-event-listener-ibp-2.0" \
+              -V ${VAULT_URL} \
+              -l ${VAULT_KVS_USER} \
+              -t ${VAULT_KVS_USER_TOKEN} \
+              -b kvs \
+              -q kvs-${ORG_NAME} \
+              -T ${VAULT_ROOT_TOKEN} \
+              -w vault
+          volumeMounts:
+          - name: vault-user-script
+            mountPath: "/home/config/"
+            readOnly: true
+        volumes:
+        - name: vault-user-script
+          configMap:
+            name: pre-register-users-script
+            defaultMode: 0777
+        restartPolicy: Never
+        backoffLimit: 0
+
+- name: Pod logs
+  shell: |
+    sleep 30
+    kubectl -n vault logs -f pre-register-user-script
+  register: pod_logs
+
+#- name: Pod logs
+#  debug:
+#    msg: '{{ pod_logs.stdout_lines }}'
+
+#- name: delete ca user token to aws secrets manager
+#  shell: |
+#    export AWS_PROFILE=cicd-role
+#    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token --region {{ aws_region }} --force-delete-without-recovery
+#  ignore_errors: yes
+
+- name: upload ca user token to aws secrets manager
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-ca-app-user-token --description "Ca App User token" --secret-string {{ ca_user_token }} --region {{ aws_region }}
+
+- name: Delete user script pod
+  community.kubernetes.k8s:
+    name: pre-register-user-script
+    namespace: vault
+    api_version: v1
+    kind: Pod
+    state: absent
+    wait: yes
+
+- name: Delete Script Configmap
+  community.kubernetes.k8s:
+    name: pre-register-users-script
+    namespace: vault
+    api_version: v1
+    kind: ConfigMap
+    state: absent
+
+- name: Delete User Creds Secret
+  community.kubernetes.k8s:
+    name: vault-user-creds
+    namespace: vault
+    api_version: v1
+    kind: Secret
+    state: absent
+
+- name: Delete pre-register-users-script
+  file:
+    state: absent
+    path: ./pre-register-users.sh

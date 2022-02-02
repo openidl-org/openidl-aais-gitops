@@ -16,16 +16,16 @@
         "${CARRIER_ORGNAME}": {
             "mspid": "${CARRIER_ORGNAME}MSP",
             "peers": [
-                "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+                "peer0.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
             ],
             "certificateAuthorities": [
-                "ca.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+                "ca.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
             ]
         }
     },
     "peers": {
-        "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
-            "url": "grpcs://peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+        "peer0.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "grpcs://peer0.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
             "tlsCACerts": {
                 "pem": "${TLS_CERT}"
             },
@@ -35,14 +35,14 @@
                 "grpc.http2.keepalive_timeout": 18000,
                 "grpc.keepalive_timeout_ms": 180000,
                 "grpc-wait-for-ready-timeout": 30000,
-                "ssl-target-name-override": "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com",
-                "hostnameOverride": "peer0.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
+                "ssl-target-name-override": "peer0.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com",
+                "hostnameOverride": "peer0.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com"
             }
         }
     },
     "certificateAuthorities": {
-        "ca.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
-            "url": "https://ca.${CARRIER_ORGNAME_SHORT}-net.${CARRIER_ORGNAME_SHORT}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
+        "ca.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com": {
+            "url": "https://ca.${CARRIER_ORGNAME}-net.${CARRIER_ORGNAME}.${ENV}.${SUBDOMAIN}.${DOMAIN}.com:8443",
             "caName": "ca.${CARRIER_ORGNAME}-net",
             "tlsCACerts": {
                 "pem": [

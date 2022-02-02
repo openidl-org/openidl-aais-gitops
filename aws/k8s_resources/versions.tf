@@ -1,6 +1,6 @@
 ##Define required terraform and provider version
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.0.5"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -9,7 +9,6 @@ terraform {
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">= 2.0.2"
-
     }
     template = {
       source  = "hashicorp/template"

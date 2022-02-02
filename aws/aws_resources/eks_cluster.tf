@@ -288,7 +288,7 @@ module "blk_eks_cluster" {
   tags = merge(
     local.tags,
     {
-      "Name"         = "${local.app_cluster_name}"
+      "Name"         = "${local.blk_cluster_name}"
       "Cluster_type" = "blockchain"
   }, )
   depends_on = [module.aais_blk_vpc,
