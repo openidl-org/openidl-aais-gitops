@@ -1,0 +1,11 @@
+{
+  "name": "openidl-tools",
+  "version": "1.0.0",
+  "description": "This project is inteded to be used as a collection of tools for various functions.",
+  "main": "value-replacer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
