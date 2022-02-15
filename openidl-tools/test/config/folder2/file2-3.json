@@ -1,0 +1,31 @@
+{
+    "listenerChannels": [
+        {
+            "channelName": "analytics-aais",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                },
+                {
+                    "ToggleLikeEvent": "ToggleLikeEvent"
+                }
+            ]
+        },
+        {
+            "channelName": "${ANALYTICS_ORGNAME_SHORT}-carrier",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                },
+                {
+                    "ToggleLikeEvent": "ToggleLikeEvent"
+                }
+            ]
+        }
+    ],
+    "identity": {
+        "user": "openidl-data-call-mood-listener-ibp-2.0",
+        "wallet": "&wallet"
+    },
+    "applicationName": "openidl-data-call-mood-listener"
+}

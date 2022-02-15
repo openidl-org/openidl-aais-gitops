@@ -14,5 +14,9 @@
 	"log-level": {
 		"value": "debug",
 		"env": "LOG_LEVEL"
+	},
+	"icon-bucket-url": {
+		"value": "https://<S3_BUCKET_NAME_LOGOS>.s3.<AWS_REGION>.amazonaws.com",
+		"env": "ICON_BUCKET_URL"
 	}
 }
