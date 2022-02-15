@@ -1,0 +1,2 @@
+temp/config/*
+!temp/config/placeholder.txt
