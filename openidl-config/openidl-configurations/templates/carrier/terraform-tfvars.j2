@@ -25,13 +25,13 @@ userpool_email_source_arn ="" #arn of the email address configured in aws SES se
 
 #List of iam users and their relevant groups mapping in EKS for its access
 #When no additional IAM users are required to enable EKS access, set the below as empty in git secrets
-app_cluster_map_users = ["<userarn>","<userarn>"] #Optional, if not required set to empty in git secrets
-app_cluster_map_roles = ["<rolearn>","<rolearn>"] #Optional, if not required set to emtpy in git secrets
+app_cluster_map_users = [] #Optional, if not required set to empty in git secrets
+app_cluster_map_roles = [] #Optional, if not required set to emtpy in git secrets
 
 #List of iam roles and their relevant group mapping in EKS for its access
 #When no additional IAM roles are required to enable EKS access, set the below as empty in git secrets
-blk_cluster_map_users = ["<userarn>","<userarn>"] #Optional, if not required set to empty in git secrets
-blk_cluster_map_roles = ["<rolearn>","<rolearn>"] #Optional, if not required set to empty in git secrets
+blk_cluster_map_users = [] #Optional, if not required set to empty in git secrets
+blk_cluster_map_roles = [] #Optional, if not required set to empty in git secrets
 
 #Name of S3 bucket to hold terraform input file
 aws_input_bucket = ""
@@ -44,22 +44,22 @@ aws_input_bucket = ""
 #when nodetype is aais's dummy carrier set org_name="carrier" and for other carriers refer to next line.
 #when nodetype is other carrier set org_name="<carrier_org_name>" , example: org_name = "travelers" etc.,
 
-org_name = "trv" #Its an example
-aws_env = "<env>" #set to dev|test|prod
+org_name = "{{organizationName}}" #Its an example
+aws_env = "{{environment}}" #set to dev|test|prod
 
 #--------------------------------------------------------------------------------------------------------------------
 #Application cluster VPC specifications
-app_vpc_cidr           = "<app_vpc_cidr>"
-app_availability_zones = ["", ""]
-app_public_subnets     = ["", ""]
-app_private_subnets    = ["", ""]
+app_vpc_cidr           = "{{aws.network.appVPCCIDR}}"
+app_availability_zones = [{% for zone in aws.network.appAvailabilityZones %}"{{zone}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}]
+app_public_subnets     = [{% for subnet in aws.network.appPublicSubnets %}"{{subnet}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}]
+app_private_subnets    = [{% for subnet in aws.network.appPrivateSubnets %}"{{subnet}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}]
 
 #--------------------------------------------------------------------------------------------------------------------
 #Blockchain cluster VPC specifications
-blk_vpc_cidr           = "<blk_vpc_cidr>"
-blk_availability_zones = ["", ""]
-blk_public_subnets     = ["", ""]
-blk_private_subnets    = ["", ""]
+blk_vpc_cidr           = "{{aws.network.blkVPCCIDR}}"
+blk_availability_zones = [{% for zone in aws.network.blkAvailabilityZones %}"{{zone}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}]
+blk_public_subnets     = [{% for subnet in aws.network.blkPublicSubnets %}"{{subnet}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}]
+blk_private_subnets    = [{% for subnet in aws.network.blkPrivateSubnets %}"{{subnet}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}]
 
 #--------------------------------------------------------------------------------------------------------------------
 #Bastion host specifications
@@ -72,50 +72,50 @@ bastion_host_nlb_external = "true"
 
 #application cluster bastion host specifications
 app_bastion_sg_ingress =  [
-    {rule="ssh-tcp", cidr_blocks = "<app_vpc_cidr>"},
-    {rule="ssh-tcp", cidr_blocks = "<cidr_allowed_to_ssh_inbound>"}
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.appVPCCIDR}}"},
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.cidrAllowedToSSHOutbound}}"}
     ]
 app_bastion_sg_egress =   [
     {rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
     {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
-    {rule="ssh-tcp", cidr_blocks = "<app_vpc_cidr>"},
-    {rule="ssh-tcp", cidr_blocks = "<cidr_allowed_to_ssh_outbound>"}
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.appVPCCIDR}}"},
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.cidrAllowedToSSHOutbound}}"}
     ]
 
 #blockchain cluster bastion host specifications
 #bastion host security specifications
 blk_bastion_sg_ingress =  [
-    {rule="ssh-tcp", cidr_blocks = "<blk_vpc_cidr>"},
-    {rule="ssh-tcp, cidr_blocks = "<cidr_allowed_to_ssh_inbound>"}
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.blkVPCCIDR}}"},
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.cidrAllowedToSSHOutbound}}"}
     ]
 blk_bastion_sg_egress =   [
     {rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
     {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
-    {rule="ssh-tcp", cidr_blocks = "<blk_vpc_cidr>"},
-    {rule="ssh-tcp", cidr_blocks = "<cidr_allowed_to_ssh_outbound>"}
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.blkVPCCIDR}}"},
+    {rule="ssh-tcp", cidr_blocks = "{{aws.network.cidrAllowedToSSHOutbound}}"}
     ]
 
 #--------------------------------------------------------------------------------------------------------------------
 #Route53 (PUBLIC) DNS domain related specifications
 domain_info = {
-  r53_public_hosted_zone_required = "<yes>" #Options: yes | no
-  domain_name = "<domain_name>", #primary domain registered
-  sub_domain_name = "<subdomain_name>" #sub domain
-  comments = "<comments>"
+  r53_public_hosted_zone_required = "{{ aws.network.route53PublicHostedZoneRequired }}", #Options: yes | no
+  domain_name = "{{ dns.domain }}", #primary domain registered
+  sub_domain_name = "{{ dns.subdomain }}", #sub domain
+  comments = "{{organizationName}} domain information"
 }
 
 #-------------------------------------------------------------------------------------------------------------------
 #Transit gateway  specifications
-tgw_amazon_side_asn = "<amazon_side_asn>" #default is 64532
+tgw_amazon_side_asn = "{{ aws.network.amazonSideASN }}" #default is 64532
 
 #--------------------------------------------------------------------------------------------------------------------
 #Cognito specifications
-userpool_name                = "<cognito_pool_name>" #unique user_pool name
-client_app_name              = "<cognito_app_client_name>" #a name of the application that uses user pool
-client_callback_urls         = ["", ""] #ensure to add redirect url part of callback urls, as this is required
-client_default_redirect_url  = "" #redirect url
-client_logout_urls           = [""] #logout url
-cognito_domain               = "<cognito_domain_name>" #unique domain name
+userpool_name                = "{{ aws.cognito.poolName }}" #unique user_pool name
+client_app_name              = "{{ aws.cognito.applicationName }}" #a name of the application that uses user pool
+client_callback_urls         = [{% for url in aws.cognito.clientCallbackURLs %}"https://{{environment}}-{{dns.subdomain}}.{{dns.domain}}/{{url}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}] #ensure to add redirect url part of callback urls, as this is required
+client_default_redirect_url  = "https://{{environment}}-{{dns.subdomain}}.{{dns.domain}}/{{aws.cognito.clientDefaultRedirectURL}}" #redirect url
+client_logout_urls           = [{% for url in aws.cognito.clientLogoutURLs %}"https://{{environment}}-{{dns.subdomain}}.{{dns.domain}}/{{url}}"{% if loop.last %}{% else %},{% endif %}{% endfor %}] #logout url
+cognito_domain               = "{{organizationName}}-{{environment}}-openidl-domain" #unique domain name
 
 # COGNITO_DEFAULT - Uses cognito default. When set to cognito default SES related inputs goes empty in git secrets
 # DEVELOPER - Ensure inputs ses_email_identity and userpool_email_source_arn are setup in git secrets
@@ -129,14 +129,14 @@ app_eks_workers_app_sg_ingress = [
     to_port = 443
     protocol = "tcp"
     description = "inbound https traffic"
-    cidr_blocks = "<cidr>"
+    cidr_blocks = "{{aws.network.appVPCCIDR}}"
   },
    {
     from_port = 443
     to_port = 443
     protocol = "tcp"
     description = "inbound https traffic"
-    cidr_blocks = "<cidr>"
+    cidr_blocks = "{{aws.network.blkVPCCIDR}}"
    }]
 app_eks_workers_app_sg_egress = [{rule = "all-all"}]
 
@@ -147,42 +147,41 @@ blk_eks_workers_app_sg_ingress = [
     to_port = 443
     protocol = "tcp"
     description = "inbound https traffic"
-    cidr_blocks = "<cidr>"
+    cidr_blocks = "{{aws.network.appVPCCIDR}}"
   },
    {
     from_port = 443
     to_port = 443
     protocol = "tcp"
     description = "inbound https traffic"
-    cidr_blocks = "<cidr>"
+    cidr_blocks = "{{aws.network.blkVPCCIDR}}"
    }]
 blk_eks_workers_app_sg_egress = [{rule = "all-all"}]
 blk_eks_workers_app_sg_egress = [{rule = "all-all"}]
 
 #--------------------------------------------------------------------------------------------------------------------
 # application cluster EKS specifications
-app_cluster_name              = "<app_cluster_name>"
-app_cluster_version           = "<version>"
-app_worker_nodes_ami_id = "<ami_id_region_specific>"
+app_cluster_name              = "{{ aws.eks.appClusterName }}"
+app_cluster_version           = "{{ aws.eks.appClusterVersion }}"
+app_worker_nodes_ami_id = "{{ aws.eks.appWorkerNodesAMI }}"
 
 #--------------------------------------------------------------------------------------------------------------------
 # blockchain cluster EKS specifications
-blk_cluster_name              = "<blk_cluster_name>"
-blk_cluster_version           = "<version>"
-blk_worker_nodes_ami_id = "<ami_id_region_specific>"
+blk_cluster_name              = "{{ aws.eks.blkClusterName }}"
+blk_cluster_version           = "{{ aws.eks.blkClusterVersion }}"
+blk_worker_nodes_ami_id = "{{ aws.eks.appWorkerNodesAMI }}"
 
 #--------------------------------------------------------------------------------------------------------------------
 #cloudtrail related
-cw_logs_retention_period = "<days>" #example 90 days
-s3_bucket_name_cloudtrail = "<s3_bucket_name>" #s3 bucket name to manage cloudtrail logs
+cw_logs_retention_period = "{{ aws.cloudtrail.logRetentionPeriod }}" #example 90 days
+s3_bucket_name_cloudtrail = "openidl-{{ organizationName }}-{{ environment }}-cloudtrail" #s3 bucket name to manage cloudtrail logs
 
 #--------------------------------------------------------------------------------------------------------------------
 #Name of the S3 bucket managing terraform state files
-terraform_state_s3_bucket_name = "<s3_bucket_terraform_state>"
+terraform_state_s3_bucket_name = "{{ terraformBackendBucketName }}"
 
 #Name of the S3 bucket used to store the data extracted from HDS for analytics
 #Applicable for carrier and analytics node only
-s3_bucket_name_hds_analytics = "<s3_bucket_name_hds_data_analytics>"
-
+s3_bucket_name_hds_analytics = "openidl-{{ organizationName }}-{{ environment }}-hds-analytics"
 #S3 public bucket to manage application related images (logos)
-s3_bucket_name_logos = "<unique_bucket_name>"
+s3_bucket_name_logos = "openidl-logos-public"

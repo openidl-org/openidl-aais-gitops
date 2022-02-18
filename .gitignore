@@ -34,5 +34,7 @@ openidl-config/analytics-dev-config-secrets.json
 openidl-config/carrier-dev-config-secrets.json.hig
 openidl-config/openidl-configurations/config/carrier-config.json
 openidl-config/vault/*
+openidl-config/k8s/*
 ansible-automation/orderer.pem
 ansible-automation/orderer.base64.pem
+config.zip
