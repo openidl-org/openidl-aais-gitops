@@ -145,6 +145,7 @@
   shell: |
     export AWS_PROFILE=cicd-role
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-ca-app-user-token --description "Ca App User token" --secret-string {{ ca_user_token }} --region {{ aws_region }}
+  when: ca_user_token_status == "null"
 
 - name: Delete user script pod
   community.kubernetes.k8s:
