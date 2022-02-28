@@ -135,6 +135,7 @@
 - name: upload ca user token to aws secrets manager
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-ca-app-user-token --description "Ca App User token" --secret-string {{ ca_user_token }}
+  when: ca_user_token_status == "null" 
 
 - name: Delete user script pod
   community.kubernetes.k8s:
