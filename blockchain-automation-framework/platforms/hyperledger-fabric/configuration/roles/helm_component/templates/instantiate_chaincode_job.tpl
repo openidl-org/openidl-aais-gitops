@@ -11,6 +11,8 @@ spec:
     git: {{ git_url }}
     ref: {{ git_branch }}
     path: {{ charts_dir }}/instantiate_chaincode
+    secretRef:
+      name: git-auth-{{ network.env.type }}
   values:
     metadata:
       namespace: {{ namespace }}

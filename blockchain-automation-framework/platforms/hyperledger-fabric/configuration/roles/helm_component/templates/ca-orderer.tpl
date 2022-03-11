@@ -10,7 +10,9 @@ spec:
   chart:
     git: {{ git_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/ca    
+    path: {{ charts_dir }}/ca
+    secretRef:
+      name: git-auth-{{ network.env.type }}  
   values:
 {% if network.env.annotations is defined %}
     deployment:
