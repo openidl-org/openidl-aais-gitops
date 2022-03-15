@@ -1,0 +1,117 @@
+---
+- name: Install package dependencies - ubuntu
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - unzip
+    - python3
+    - python3-pip
+    - curl
+    - awscli
+    - python3-requests-oauthlib
+    - python-yaml
+    - jq
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install package dependencies - redhat
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - unzip
+    - python3
+    - python3-pip
+    - curl
+    - python3-requests-oauthlib
+    - jq
+  when: ansible_distribution == "RedHat"
+
+- name: Install ansible and its dependent modules
+  become: true
+  pip:
+    name: "{{ item.pkg_name }}"
+    extra_args: "{{ item.args }}"
+    executable: "{{ item.exec }}"
+  loop:
+    - { pkg_name: "ansible==2.9.11", exec: "pip3", args: "--user" }
+    - { pkg_name: "openshift", exec: "pip3", args: "" }
+    - { pkg_name: "docker", exec: "pip3", args: "" }
+
+- name: Install awscli and pyyaml - redhat
+  become: true
+  pip:
+    name: "{{ item.pkg_name }}"
+    executable: "{{ item.exec }}"
+    extra_args: "{{ item.args }}"
+  loop:
+    - { pkg_name: "awscli", exec: "pip3", args: "" }
+    - { pkg_name: "pyyaml", exec: "pip3", args: "--user" }
+  when: ansible_distribution == "RedHat"
+
+- name: Configure awscli credentials for IAM user
+  shell: aws configure set {{ item.key }} {{ item.value }} --profile cicd-user
+  no_log: true
+  with_dict:
+    aws_access_key_id: "{{ aws_access_key }}"
+    aws_secret_access_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    format: "table"
+    external_id: "{{ aws_external_id }}"
+  changed_when: false
+
+- name: Configure awscli credentials for IAM role
+  shell: aws configure set {{ item.key }} {{ item.value }} --profile cicd-role
+  no_log: true
+  with_dict:
+    external_id: "{{ aws_external_id }}"
+    source_profile: "cicd-user"
+    role_arn: "{{ aws_iam_role }}"
+    region: "{{ aws_region }}"
+  changed_when: false
+
+- name: Test AWS CLI is functioning
+  shell: export AWS_PROFILE=cicd-role; aws sts get-caller-identity
+  register: aws_caller_identity
+
+- name: Checking kubectl exists
+  stat:
+    path: /usr/local/bin/kubectl
+  register: kubectl_status
+
+- name: Setup kubectl utility
+  become: true
+  shell: |
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    chmod +x kubectl
+    mv ./kubectl /usr/local/bin
+  when: kubectl_status.stat.exists == False
+
+- name: Checking helm exists
+  stat:
+    path: /usr/local/bin/helm
+  register: helm_status
+
+- name: Download the helm bundle
+  get_url: url=https://get.helm.sh/helm-v3.4.1-linux-amd64.tar.gz dest=/tmp/helm-bundle.zip
+  register: helm_bundle_download
+  when: helm_status.stat.exists == False
+
+- name: Unarchive the helm installer
+  unarchive: src=/tmp/helm-bundle.zip dest=/tmp copy=no creates=/tmp/linux-amd64/helm
+  register: helm_installer_unarchive
+  when: helm_bundle_download.changed
+
+- name: Intall helm
+  become: true
+  shell: |
+    sudo mv /tmp/linux-amd64/helm /usr/local/bin/helm
+    sudo chmod +x /usr/local/bin/helm
+  when: helm_installer_unarchive.changed
+
+
+
+

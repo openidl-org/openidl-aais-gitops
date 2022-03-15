@@ -1,0 +1,13 @@
+---
+- name: "Setting up vault cluster"
+  include_tasks: "{{ item }}.yaml"
+  with_items:
+    - "deploy"
+  when: deploy_action == "vault-deploy"
+
+- name: "Cleanup vault cluster"
+  include_tasks: "{{ item }}.yaml"
+  with_items:
+    - "cleanup"
+  when: deploy_action == "vault-cleanup"
+

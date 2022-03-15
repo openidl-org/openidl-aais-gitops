@@ -1,57 +1,52 @@
-access_id: ""
-access_key: ""
-region: ""
-cluster_name: ""
-account: ""
-gitops_repo_url: "github.com/openidl-aais/openidl-aais-gitops"
-gitops_repo_branch: "develop"
-gitops_repo_user: ""
-gitops_repo_user_token: ""
-gitops_repo_user_email: ""
-ordererorg_domain: "aais.aaisdirect.com"
-domain: "aais.aaisdirect.com"
-internal_domain: "aais.internal.aaisdirect.com"
-env: "dev"
+ordererorg_domain: "thetech.digital"
+domain: "thetech.digital"
+internal_domain: "internal.thetech.digital"
+gitops_repo_url: "github.com/rajeshsanjeevi/openidl-iaac"
+gitops_repo_branch: "develop-v2"
 add_org: ""
-registry: ""
 chaincode_version: ""
 node_type: "aais"
-
 network:
-    org_name: "aais"
-    ordererorg: "true"
-    ordererorg_name: "ordererorg"
-    organizations:
-        - name: "analytics"
-          domain: "analytics.aaisdirect.com"
-        - name: "carrier"
-          domain: "carrier.aaisdirect.com"
-    channels:
-        - name: anal-carr
-          chaincode:
-              name: openidl-cc-aais-carriers
-              repo_url: github.com/openidl-org/openidl-main.git
-              repo_branch: develop
-              repo_path: openidl-chaincode/chaincode/openidl
-              collectionconfig:
-                - name: "analytics_carrier_pdc"
-                  policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
-                - name: "anal_carr_pdc"
-                  policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
-        - name: anal-aais
-          chaincode:
-              name: openidl-cc-aais-carriers
-              repo_url: github.com/openidl-org/openidl-main.git
-              repo_branch: develop
-              repo_path: openidl-chaincode/chaincode/openidl
-              collectionconfig:
-                - name: "analytics_aais_pdc"
-                  policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
-                - name: "anal_aais_pdc"
-                  policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
-        - name: defaultchannel
-          chaincode:
-              name: openidl-cc-default
-              repo_url: github.com/openidl-org/openidl-main.git
-              repo_branch: develop
-              repo_path: openidl-chaincode/chaincode/openidl
+  org_name: "aais"
+  ordererorg: "true"
+  ordererorg_name: "ordererorg"
+  organizations:
+    - name: "analytics"
+      domain: "analytics.thetech.digital"
+    - name: "carrier"
+      domain: "carrier.thetech.digital"
+  channels:
+  - name: defaultchannel
+    chaincode:
+      name: openidl-cc-default
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_branch: hig-carrier
+      repo_path: openidl-chaincode/chaincode/openidl
+  - name: anal-aais
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_branch: hig-carrier
+      repo_path: openidl-chaincode/chaincode/openidl
+      collectionconfig:
+        - name: "anal_aais_pdc"
+          policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
+  - name: anal-carr
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_branch: hig-carrier
+      repo_path: openidl-chaincode/chaincode/openidl
+      collectionconfig:
+        - name: "anal_carr_pdc"
+          policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
+    
+  - name: anal-caru
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_branch: hig-carrier
+      repo_path: openidl-chaincode/chaincode/openidl
+      collectionconfig:
+        - name: "anal_caru_pdc"
+          policy: "OR('analyticsMSP.member', 'caruMSP.member')"

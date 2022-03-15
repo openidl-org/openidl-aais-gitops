@@ -13,7 +13,7 @@ network:
   #Environment section for Kubernetes setup
   env:
     type: "{{ env }}"              # tag for the environment. Important to run multiple flux on single cluster
-    proxy: 'haproxy'                  # values can be 'haproxy' or 'ambassador'
+    proxy: 'nginx'                  # values can be 'haproxy' or 'ambassador' #attempting 'nginx'
     ambassadorPorts:                # Any additional Ambassador ports can be given here, this is valid only if proxy='ambassador'
       portRange:              # For a range of ports 
         from: 8443 

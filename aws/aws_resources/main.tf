@@ -1,5 +1,4 @@
-#uses s3 as backend to manage terraform state files
-terraform {
-  backend "s3" {}
-}
-
+#Active below code snippet when used S3 as backend
+#terraform {
+#  backend "s3" {}
+#}

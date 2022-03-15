@@ -1,5 +1,6 @@
-#setting up congnito user pool
+#Setting up congnito user pool
 resource "aws_cognito_user_pool" "user_pool" {
+  count = var.create_cognito_userpool ? 1 : 0
   name = "${local.std_name}-${var.userpool_name}"
   dynamic "account_recovery_setting" {
     for_each = length(var.userpool_recovery_mechanisms) == 0 ? [] : [1]
@@ -73,26 +74,26 @@ resource "aws_cognito_user_pool" "user_pool" {
       }
     }
   }
-
   tags = merge(
     local.tags,
     {
-      "Name"         = "${local.std_name}-${var.userpool_name}"
-      "Cluster_type" = "application"
+      "name"         = "${local.std_name}-${var.userpool_name}"
+      "cluster_type" = "application"
   }, )
 }
-#setting up cognito application client in the userpool
+#Setting up cognito application client in the userpool
 resource "aws_cognito_user_pool_client" "cognito_app_client" {
-  name                                 = "${local.std_name}-${var.client_app_name}"
-  user_pool_id                         = aws_cognito_user_pool.user_pool.id
+  count = var.create_cognito_userpool ? 1 : 0
+  name                                 = "${local.client_app_name}"
+  user_pool_id                         = aws_cognito_user_pool.user_pool[0].id
   allowed_oauth_flows                  = var.client_allowed_oauth_flows
   allowed_oauth_flows_user_pool_client = var.client_allowed_oauth_flows_user_pool_client
   allowed_oauth_scopes                 = var.client_allowed_oauth_scopes
-  callback_urls                        = var.client_callback_urls
-  default_redirect_uri                 = var.client_default_redirect_url
+  callback_urls                        = local.client_callback_urls
+  default_redirect_uri                 = local.client_default_redirect_url
   explicit_auth_flows                  = var.client_explicit_auth_flows
   generate_secret                      = var.client_generate_secret
-  logout_urls                          = var.client_logout_urls
+  logout_urls                          = local.client_logout_urls
   read_attributes                      = var.client_read_attributes
   refresh_token_validity               = var.client_refresh_token_validity
   supported_identity_providers         = var.client_supported_idp
@@ -106,9 +107,10 @@ resource "aws_cognito_user_pool_client" "cognito_app_client" {
     refresh_token = lookup(var.client_token_validity_units, "refresh_token", null)
   }
 }
-#aws cognito domain (custom/out-of-box) specification
+#AWS cognito domain (custom/out-of-box) specification
 resource "aws_cognito_user_pool_domain" "domain" {
-  domain = var.cognito_domain
+  count = var.create_cognito_userpool ? 1 : 0
+  domain = local.cognito_domain
   # certificate_arn = var.acm_cert_arn #activate when custom domain is required
-  user_pool_id = aws_cognito_user_pool.user_pool.id
+  user_pool_id = aws_cognito_user_pool.user_pool[0].id
 }

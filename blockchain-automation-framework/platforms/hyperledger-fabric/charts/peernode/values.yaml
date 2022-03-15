@@ -151,7 +151,7 @@ annotations:
   deployment: {}
 
 proxy:
-  #This will be the proxy/ingress provider. Can have values "ambassador" or "haproxy"
+  #This will be the proxy/ingress provider. Can have values "ambassador" or "haproxy" or "nginx"
   #Eg. provider: "haproxy"
   provider: 
   #This field contains the external URL of the organization

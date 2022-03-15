@@ -50,6 +50,7 @@
 # This task enables the path for the organizations and orderers on vault
 # This task runs only when {{auth_path}} is not already created
 - name: Enable and configure Kubernetes-auth for Organization
+  no_log: true
   shell: |
     vault auth enable --path="{{ auth_path }}" kubernetes
   environment:
@@ -62,6 +63,7 @@
 # This task get the certificate for the cluster mentioned in k8 secret
 # This task runs only when {{auth_path}} is not already created
 - name: Get Kubernetes cert files for organizations
+  no_log: true
   shell: |
     KUBECONFIG={{ kubernetes.config_file }} kubectl -n {{ component_name }} get secrets $(KUBECONFIG={{ kubernetes.config_file }} kubectl -n {{ component_name }} get secrets | grep "default" | awk '{print $1}') -o jsonpath="{.data['ca\.crt']}" | base64 -d > "./build/{{ component_name }}.ca.cert"
   when: not vault_auth_status
@@ -70,6 +72,7 @@
 # This task writes the Service Account token to the vault for Organisations
 # This task runs only when {{auth_path}} is not already created
 - name: Write reviewer token for Organisations
+  no_log: true
   shell: |
     export REVIEWER_TOKEN=$(KUBECONFIG={{ kubernetes.config_file }} kubectl get secret $(KUBECONFIG={{ kubernetes.config_file }} kubectl get serviceaccount -n {{ component_name }} vault-reviewer -o jsonpath={.secrets[0].name}) -n {{ component_name }} -o  jsonpath={.data.token} | base64 -d)
     vault write auth/{{ auth_path }}/config token_reviewer_jwt="$REVIEWER_TOKEN" kubernetes_host=$(KUBECONFIG={{ kubernetes.config_file }} kubectl config view -o jsonpath="{.clusters[?(@.name==\"{{ kubernetes.context }}\")].cluster.server}") kubernetes_ca_cert=@"./build/{{ component_name }}.ca.cert"
@@ -114,6 +117,7 @@
 ############################################################################################
 # This task writes the policies to the vault
 - name: Write Policy to Vault
+  no_log: true 
   shell: |
     vault write sys/policy/vault-crypto-{{ component_type }}-{{ component_name }}-ro policy="@./build/vault-crypto-{{ component_name | lower }}-ro.hcl"
   environment:
@@ -123,6 +127,7 @@
 
 # This task creates the vault auth
 - name: Create Vault auth role
+  no_log: true
   shell: |
     vault write auth/{{ auth_path }}/role/vault-role bound_service_account_names=vault-auth bound_service_account_namespaces={{ component_name }} policies="vault-crypto-{{ component_type }}-{{ component_name }}-ro" ttl=1200s
   environment:
@@ -141,6 +146,7 @@
 #####################################################################################################################
 # This task creates the docker pull credentials for image registry
 - name: Create the docker pull credentials
+  no_log: true
   shell: |
     KUBECONFIG={{ kubernetes.config_file }} kubectl create secret -n {{ component_name }} docker-registry regcred --docker-server={{ network.docker.url }} --docker-username={{ network.docker.username }} --docker-password={{ network.docker.password }} --docker-email="test@abc.mail"
   when: get_regcred.resources|length == 0

@@ -1,0 +1,161 @@
+#!/bin/bash
+# export path
+export PATH=${PWD}/bin:$PATH
+export GODEBUG=x509ignoreCN=0
+
+# sample command
+#./pre-register-users.sh -N admin -P adminpw -p password -u localhost:7054 -n ca-aais  -c http://admin:adminpw@localhost:9984/wallet/ -o aais -m aaismsp -U "openidl-aais-insurance-data-manager-ibp-2.0 openidl-aais-data-call-processor-ibp-2.0" -r true -V http://127.0.0.1:8200 -l user-data-call-app -t password -b AAISOrg -q data-call-app -w vault
+
+JQ=$(which jq)
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+    echo "Failed to execute jq."
+    exit 1
+fi
+if [ ! -x "${JQ}" ]; then
+    echo "jq not found."
+    exit 1
+fi
+
+preRegisterUser() {
+
+    if ${RESET_WALLET}; then
+        echo "reset couchdb wallet"
+        # delete wallet store
+        curl -X DELETE ${COUCH_URL}
+        # create a wallet in couchdb
+        curl -X PUT ${COUCH_URL}
+    fi
+    mkdir -p ${PWD}/organizations/fabric-ca/${ORG}
+    mkdir -p ${PWD}/organizations/peerOrganizations/${ORG}
+    curl -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" ${VAULT_URL}/v1/${ORG}/crypto/peerOrganizations/${ORG}-net/peers/peer0.${ORG}-net/msp | jq -r .data.cacerts > ${PWD}/organizations/fabric-ca/${ORG}/tls-cert.pem
+    export CA_ADMIN_PASSWORD=$(curl -H "X-Vault-Token: ${VAULT_ROOT_TOKEN}" ${VAULT_URL}/v1/${ORG}/credentials/${ORG}-net/ca/${ORG} | jq -r .data.user)
+    export FABRIC_CA_CLIENT_HOME=${PWD}/organizations/peerOrganizations/${ORG}/
+    # enroll admin
+    fabric-ca-client enroll -u https://${CA_ADMIN_USERNAME}:${CA_ADMIN_PASSWORD}@${CA_URL} --caname ${CA_NAME} --tls.certfiles ${PWD}/organizations/fabric-ca/${ORG}/tls-cert.pem
+
+    read -r -a USERNAMES <<<"$USERNAMES"
+    for user in ${USERNAMES[@]}; do
+        # register user
+        {% if ca_user_token_status == "null" %}		
+        fabric-ca-client register --caname ${CA_NAME} --id.name ${user} --id.secret ${CA_USER_PASSWORD} --id.type client --id.attrs 'orgType=advisory:ecert' --tls.certfiles ${PWD}/organizations/fabric-ca/${ORG}/tls-cert.pem
+	    {% endif %}
+        # enroll user
+        rm -rf ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}
+        fabric-ca-client enroll -u https://${user}:${CA_USER_PASSWORD}@${CA_URL} --caname ${CA_NAME} -M ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}/msp --tls.certfiles ${PWD}/organizations/fabric-ca/${ORG}/tls-cert.pem
+        # cp ${PWD}/organizations/peerOrganizations/${ORG}/msp/config.yaml ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}/msp/config.yaml
+        # prepare signcerts data
+        signcerts=$(cat ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}/msp/signcerts/cert.pem)
+        signingIdentity="${signcerts//$'\n'/\\\\n}"
+        privKey=$(cat ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}/msp/keystore/*)
+        signingPrivKey="${privKey//$'\n'/\\\\r\\\\n}"
+        initCommand='"{\"credentials\":{\"certificate\":\"signcerts\\n\",\"privateKey\":\"privatekey\\r\\n\"},\"mspId\":\"MSP\",\"type\":\"X.509\",\"version\":1}"'
+        data="${initCommand/signcerts/$signingIdentity}"
+        data="${data/privatekey/$signingPrivKey}"
+        data="${data/MSP/$MSP}"
+        if [ "$DESTINATION" = "vault" ]; then
+            # login to Vault to get the user token
+            LOGIN_RESPONSE=$(curl \
+                --request POST \
+                --data "{\"password\":\"${VAULT_PASSWORD}\"}" \
+                ${VAULT_URL}/v1/auth/${VAULT_ORG}/login/${VAULT_USER_NAME} --insecure)
+
+            RESULT=$?
+            if [ $RESULT -ne 0 ]; then
+                echo "Failed to execute curl."
+                exit 1
+            fi
+            LOGIN_RESPONSE=${LOGIN_RESPONSE}
+            USER_TOKEN=$(echo ${LOGIN_RESPONSE} | ${JQ} ".auth.client_token" | sed "s/\"//g")
+            signcertsJSON="{\"id\":\"$user\",\"data\":$data}"
+            # export to vault
+            curl -H "X-Vault-Token: ${USER_TOKEN}" -H "Content-Type: application/json" -X POST -d "{\"data\":$signcertsJSON}" ${VAULT_URL}/v1/${VAULT_ORG}/data/${APP}/${user}
+        elif [ "$DESTINATION" = "couch" ]; then
+            signcertsJSON="{\"data\":$data}"
+            # export to couch
+            curl -X PUT ${COUCH_URL}"${user}" -d "$signcertsJSON"
+        else
+            echo "The export destination is UNKNOWN."
+        fi
+    done
+}
+
+CA_ADMIN_USERNAME=""
+CA_ADMIN_PASSWORD=""
+CA_USER_PASSWORD=""
+CA_URL=""
+CA_NAME=""
+COUCH_URL=""
+MSP=""
+ORG=""
+RESET_WALLET=false
+VAULT_URL=""
+VAULT_USER_NAME=""
+VAULT_PASSWORD=""
+VAULT_ROOT_TOKEN=""
+VAULT_ORG=""
+APP=""
+DESTINATION=""
+declare -a USERNAMES
+while getopts "N:P:p:u:n:c:o:m:U:r:V:l:t:b:q:w:T:" key; do
+    case ${key} in
+    N)
+        CA_ADMIN_USERNAME=${OPTARG}
+        ;;
+    P)
+        CA_ADMIN_PASSWORD=${OPTARG}
+        ;;
+    p)
+        CA_USER_PASSWORD=${OPTARG}
+        ;;
+    u)
+        CA_URL=${OPTARG}
+        ;;
+    n)
+        CA_NAME=${OPTARG}
+        ;;
+    c)
+        COUCH_URL=${OPTARG}
+        ;;
+    o)
+        ORG=${OPTARG}
+        ;;
+    m)
+        MSP=${OPTARG}
+        ;;
+    U)
+        USERNAMES=("${OPTARG}")
+        ;;
+    r)
+        RESET_WALLET=${OPTARG}
+        ;;
+    V)
+        VAULT_URL=${OPTARG}
+        ;;
+    l)
+        VAULT_USER_NAME=${OPTARG}
+        ;;
+    t)
+        VAULT_PASSWORD=${OPTARG}
+        ;;
+    b)
+        VAULT_ORG=${OPTARG}
+        ;;
+    q)
+        APP=${OPTARG}
+        ;;
+    w)
+        DESTINATION=${OPTARG}
+        ;;
+    T)
+        VAULT_ROOT_TOKEN=${OPTARG}
+        ;;
+    \?)
+        echo "Unknown flag: ${key}"
+        ;;
+    esac
+done
+
+preRegisterUser
+
+exit 0

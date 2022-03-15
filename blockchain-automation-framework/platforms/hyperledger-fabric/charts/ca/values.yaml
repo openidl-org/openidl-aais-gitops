@@ -89,7 +89,7 @@ annotations:
   pvc: {}
 
 proxy:
-  #This will be the proxy/ingress provider. Can have values "ambassador" or "haproxy"
+  #This will be the proxy/ingress provider. Can have values "ambassador" or "haproxy" or "nginx"
   #Eg. provider: "haproxy"
   provider: 
   #Type can be "orderer" or "peer"; "test" is defaulted

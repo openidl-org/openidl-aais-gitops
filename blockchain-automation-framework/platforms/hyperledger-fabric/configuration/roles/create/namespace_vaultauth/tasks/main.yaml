@@ -118,3 +118,8 @@
     type: "retry"
   tags:
     - notest
+
+- name: Create Secret for github over https connection
+  no_log: true
+  shell: |
+    KUBECONFIG={{ item.k8s.config_file }} kubectl create secret generic git-auth-{{ network.env.type }} --from-literal=username={{ item.gitops.username }}  --from-literal=password={{ item.gitops.password }} --namespace {{ item.name | lower }}-net

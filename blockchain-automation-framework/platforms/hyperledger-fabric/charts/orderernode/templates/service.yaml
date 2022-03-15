@@ -68,23 +68,28 @@ spec:
   clusterIP: None
   {{- end }}
   
-{{ if eq $.Values.proxy.provider "haproxy" }}
+{{ if eq $.Values.proxy.provider "nginx" }}
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $.Values.orderer.name }}
   namespace: {{ $.Values.metadata.namespace }}
   annotations:
-    kubernetes.io/ingress.class: "haproxy"
-    ingress.kubernetes.io/ssl-passthrough: "true"  
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    #nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: {{ $.Values.orderer.name }}.{{ $.Values.proxy.external_url_suffix }}
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: {{ $.Values.orderer.name }}
-          servicePort: {{ $.Values.service.ports.grpc.clusteripport }}
+          service:
+            name: {{ $.Values.orderer.name }}
+            port:
+              number: {{ $.Values.service.ports.grpc.clusteripport }}
 {{ end }}

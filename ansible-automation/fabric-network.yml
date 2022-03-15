@@ -3,6 +3,7 @@
   no_log: "{{ no_ansible_log | default(false) }}"
   tasks:
     - name: Get vault root token
+      no_log: true
       shell: |
         aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --version-stage AWSCURRENT | jq -r .SecretString
       register: vault
