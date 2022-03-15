@@ -1,4 +1,4 @@
-#setting up configmap/aws-auth for app cluster
+ #Setting up configmap/aws-auth for app cluster
 resource "kubernetes_config_map" "app_config_map" {
   provider = kubernetes.app_cluster
   depends_on = [data.aws_eks_cluster.app_eks_cluster]
@@ -15,7 +15,7 @@ resource "kubernetes_config_map" "app_config_map" {
       mapUsers = yamlencode(distinct(concat(local.app_cluster_map_users, local.app_cluster_map_users_list)))
   }
 }
-#setting up configmap/aws-auth for blk cluster
+#Setting up configmap/aws-auth for blk cluster
 resource "kubernetes_config_map" "blk_config_map" {
   provider = kubernetes.blk_cluster
   depends_on = [data.aws_eks_cluster.blk_eks_cluster]

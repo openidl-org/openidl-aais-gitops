@@ -21,6 +21,7 @@
 
   #Fetch msp files from Vault 
 - name: Check if msp admincerts already created
+  no_log: true
   vars:
     query: "organizations[?name=='{{organization.name}}'].services.ca.grpc.port"
     query_vault_url: "organizations[?name=='{{organization.name}}'].vault.url"
@@ -40,6 +41,7 @@
  #Fetch msp files from Vault 
 
 - name: Check if msp cacerts already created
+  no_log: true
   vars:
     query: "organizations[?name=='{{organization.name}}'].services.ca.grpc.port"
     query_vault_url: "organizations[?name=='{{organization.name}}'].vault.url"
@@ -58,6 +60,7 @@
   
   #Fetch msp files from Vault 
 - name: Check if msp tlscacerts already created
+  no_log: true
   vars:
     query: "organizations[?name=='{{organization.name}}'].services.ca.grpc.port"
     query_vault_url: "organizations[?name=='{{organization.name}}'].vault.url"
@@ -156,6 +159,7 @@
   
 # Copy the JSON configuration for new organization
 - name: Copy the JSON configuration for new organization
+  no_log: true
   vars:
     query_vault_url: "organizations[?name=='{{organization.name}}'].vault.url"
     query_vault_token: "organizations[?name=='{{organization.name}}'].vault.root_token"

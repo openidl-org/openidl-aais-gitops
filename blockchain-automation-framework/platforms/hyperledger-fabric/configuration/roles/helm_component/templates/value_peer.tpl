@@ -10,7 +10,9 @@ spec:
   chart:
     git: {{ git_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/peernode    
+    path: {{ charts_dir }}/peernode
+    secretRef:
+      name: git-auth-{{ network.env.type }}
   values:
     metadata:
       namespace: {{ peer_ns }}

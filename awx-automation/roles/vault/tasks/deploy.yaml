@@ -1,0 +1,309 @@
+---
+- name: generate vault values template from vault.j2 file
+  template:
+    src: templates/vault.j2
+    dest: "./vault-values.yaml"
+    mode: 0755
+
+- name: generate aws resource policy from template aws_resource_policy.json.j2
+  template:
+    src: templates/aws_resource_policy.json.j2
+    dest: "./aws_resource_policy.json"
+    mode: 0755
+
+- name: Create a k8s namespace
+  community.kubernetes.k8s:
+    name: vault
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Add vault Helm chart repo
+  shell: |
+    helm repo add hashicorp https://helm.releases.hashicorp.com
+    helm repo update
+  tags:
+    - hashicorp-vault
+    - hashicorp-vault-helm
+    - hashicorp-vault
+
+- name: Install vault helm chart
+  shell: |
+    helm --namespace=vault install vault hashicorp/vault -f ./vault-values.yaml \
+    --set server.ha.enabled=true \
+    --set server.ha.raft.enabled=true \
+    --set tlsDisable=false \
+    --set server.ingress.enabled=true \
+    --set server.ingress.hosts[0].host=vault.{{ env }}.{{ internal_domain }} \
+    --set server.ingress.annotations."kubernetes\.io/ingress\.class"=haproxy \
+    --set server.ingress.annotations."nginx\.ingress\.kubernetes\.io/rewrite-target"=/ \
+    --set server.dataStorage.storageClass=openidl-sc \
+    --version="0.16.1"
+  tags:
+    - hashicorp-vault
+    - hashicorp-vault-helm
+    - hashicorp-vault
+
+- name: Wait till vault deployment completes and vault status availability
+  shell: |
+    sleep 60
+
+- name: Initialize and unseal the vault
+  no_log: true
+  shell: |
+    kubectl -n vault exec vault-0 -- vault operator init > ./vault-unseal-keys.txt
+
+- name: Get the vault-unseal-key from the server
+  no_log: true
+  slurp:
+    src: "./vault-unseal-keys.txt"
+  register: unsealkey
+
+- name: upload Vault unseal keys to aws secrets manager
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-vault-unseal-key --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+
+- name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-vault-unseal-key
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+
+- name: Delete unseal keys file
+  file:
+    path: ./vault-unseal-keys.txt
+    state: absent
+
+- name: Wait till vault deployment completes and vault status availability
+  shell: sleep 120
+
+- name: Create secret path for org
+  no_log: true
+  shell: |
+    kubectl -n vault exec vault-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+    kubectl -n vault exec vault-0 -- vault secrets enable -version=1 -path={{ network.org_name }} kv
+
+- name: Create secret path for orderer org
+  no_log: true
+  shell: |
+    kubectl -n vault exec vault-0 -- vault secrets enable -version=1 -path={{ network.ordererorg_name }} kv
+  when: network.ordererorg == "true"
+
+- name: Join Vault-1 to vault cluster
+  shell: |
+    kubectl -n vault exec vault-1 vault operator raft join http://vault-0.vault-internal:8200
+
+- name: Join Vault-1 to vault cluster
+  shell: |
+    kubectl -n vault exec vault-2 vault operator raft join http://vault-0.vault-internal:8200
+
+- name: Generate vault-add-user script
+  template:
+    src: templates/add-vault-user.sh.j2
+    dest: ./add-vault-user.sh
+    mode: 0755
+
+- name: Create configmap for network configuration file
+  shell: |
+    kubectl -n vault create configmap add-vault-user-script --from-file=add-vault-user.sh=./add-vault-user.sh
+
+- name: Create secret for credentials
+  no_log: true
+  community.kubernetes.k8s:
+    state: present
+    definition: 
+      apiVersion: v1
+      kind: Secret
+      type: Opaque             
+      metadata:
+        name: vault-user-creds
+        namespace: vault   
+      data:
+        VAULT_ROOT_TOKEN: "{{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last | b64encode }}"
+        VAULT_CONFIG_USER: "{{ vault_config_user | b64encode }}"
+        VAULT_CONFIG_USER_TOKEN: "{{ vault_config_user_token | b64encode }}"
+        VAULT_KVS_USER: "{{ vault_kvs_user | b64encode }}"
+        VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
+
+- name: Launch Pod for vault user
+  no_log: true
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: vault-user-script
+        namespace: vault
+      spec:
+        containers:
+        - name: config-user-script
+          image: "{{ registry }}/openidl-baf"
+          env:
+          - name: VAULT_CONFIG_USER
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_CONFIG_USER
+          - name: VAULT_ROOT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_ROOT_TOKEN
+          - name: VAULT_CONFIG_USER_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_CONFIG_USER_TOKEN
+          - name: VAULT_KVS_USER
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_KVS_USER
+          - name: VAULT_KVS_USER_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: vault-user-creds
+                key: VAULT_KVS_USER_TOKEN
+          - name: ORG_NAME
+            value: "{{ network.org_name }}"
+          - name: VAULT_URL
+            value: "http://vault.{{ env }}.{{ internal_domain }}"
+          command: ["sh", "-c"]
+          args: 
+          - |-
+            #!/bin/bash -e
+            cd /home/config
+            echo "Adding config user"
+            ./add-vault-user.sh -V ${VAULT_URL} \
+              -t ${VAULT_ROOT_TOKEN} \
+              -U ${VAULT_CONFIG_USER} \
+              -P ${VAULT_CONFIG_USER_TOKEN} \
+              -a config-${ORG_NAME} \
+              -o config \
+              -e '"create","update","read","list"'
+            echo "Adding kvs user"
+            ./add-vault-user.sh -V ${VAULT_URL} \
+              -t ${VAULT_ROOT_TOKEN} \
+              -U ${VAULT_KVS_USER} \
+              -P ${VAULT_KVS_USER_TOKEN} \
+              -a kvs-${ORG_NAME} \
+              -o kvs \
+              -e '"create","update","read","list"'
+          volumeMounts:
+          - name: vault-user-script
+            mountPath: "/home/config/"
+            readOnly: true
+        volumes:
+        - name: vault-user-script
+          configMap:
+            name: add-vault-user-script
+            defaultMode: 0777
+        restartPolicy: Never
+        backoffLimit: 0
+
+- name: Pod logs
+  shell: |
+    sleep 60
+    kubectl -n vault logs -f vault-user-script
+  register: baf_logs
+  ignore_errors: yes
+
+- name: Pod logs 
+  debug:
+    msg: '{{ baf_logs.stdout_lines }}'
+
+- name: Generate user credentials json
+  no_log: true
+  template:
+    src: templates/creds.json.j2
+    dest: ./creds.json
+  vars:
+    vault_path: "config-{{ network.org_name }}"
+    vault_user: "{{ vault_config_user }}"
+    vault_user_token: "{{ vault_config_user_token }}"
+    vault_org_name: "config"
+
+- name: Upload config user credentials to secrets manager
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-config-vault --description "Vault Credentials for config user" --secret-string file://creds.json
+
+- name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-config-vault
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-config-vault --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+
+- name: Delete config user credentials json file
+  file:
+    state: absent
+    path: ./creds.json
+
+- name: Generate user credentials json
+  no_log: true
+  template:
+    src: templates/creds.json.j2
+    dest: ./creds.json
+  vars:
+    vault_path: "kvs-{{ network.org_name }}"
+    vault_user: "{{ vault_kvs_user }}"
+    vault_user_token: "{{ vault_kvs_user_token }}"
+    vault_org_name: "kvs"
+
+- name: Upload kvs user credentials to secrets manager
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-kvs-vault --description "Vault Credentials for kvs user" --secret-string file://creds.json
+
+- name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-kvs-vault
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-kvs-vault --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+
+- name: Delete config user credentials json file
+  file:
+    state: absent
+    path: ./creds.json
+
+- name: Delete user script pod
+  community.kubernetes.k8s:
+    name: vault-user-script
+    namespace: vault
+    api_version: v1
+    kind: Pod
+    state: absent
+    wait: yes
+
+- name: Delete Script Configmap
+  community.kubernetes.k8s:
+    name: add-vault-user-script
+    namespace: vault
+    api_version: v1
+    kind: ConfigMap
+    state: absent
+
+- name: Delete User Creds Secret
+  community.kubernetes.k8s:
+    name: vault-user-creds
+    namespace: vault
+    api_version: v1
+    kind: Secret
+    state: absent
+
+- name: Delete add-vault-user-script
+  file:
+    state: absent
+    path: ./add-vault-user.sh
+
+- name: Delete vault values file
+  file:
+    state: absent
+    path: ./vault-values.yaml
+
+- name: Delete aws resource policy file
+  file:
+    state: absent
+    path: ./aws_resources_policy.json

@@ -8,7 +8,7 @@ metadata:
   # This can be fixed only when https://jira.hyperledger.org/browse/FAB-8131 issue is fixed
   # After the issue is fixed, changes similar to the commented code has to be done by using correct secrets.
   # Otherwise as ambassador is not able to passthrough TLS connection, grpc over ambassador is not going to work
-  # hence we have used a HAProxy ingress whoich does ssl-passthrough.  
+  # hence we have used a HAProxy ingress which does ssl-passthrough.
   annotations:
     {{- if $.Values.annotations }}
     {{- range $key, $value := $.Values.annotations.service }}
@@ -97,21 +97,26 @@ spec:
 
 {{- if eq $.Values.proxy.provider "haproxy" }}
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $.Values.peer.name }}
   namespace:  {{ $.Values.metadata.namespace }}
   annotations:
     kubernetes.io/ingress.class: "haproxy"
-    ingress.kubernetes.io/ssl-passthrough: "true"  
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    ngress.kubernetes.io/backend-protocol: "GRPC"
+    #nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: {{ $.Values.peer.name }}.{{ $.Values.metadata.namespace }}.{{ $.Values.proxy.external_url_suffix }}
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: {{ $.Values.peer.name }}
-          servicePort: {{ $.Values.service.ports.grpc.clusteripport }}
+          service:
+            name: {{ $.Values.peer.name }}
+            port:
+              number: {{ $.Values.service.ports.grpc.clusteripport }}
 {{- end }}

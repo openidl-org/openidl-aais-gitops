@@ -11,6 +11,8 @@ spec:
     git: {{ git_url }}
     ref: {{ git_branch }}
     path: {{ charts_dir }}/join_channel
+    secretRef:
+      name: git-auth-{{ network.env.type }}
   values:
     metadata:
       namespace: {{ component_ns }}

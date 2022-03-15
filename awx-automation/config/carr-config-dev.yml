@@ -1,0 +1,27 @@
+ordererorg_domain: ""
+domain: ""
+internal_domain: ""
+node_type: "carrier"
+network:
+  org_name: ""
+  ordererorg: ""
+  ordererorg_name: ""
+  organizations:
+    - name: ""
+      domain: ""
+  channels:
+  - name: ""
+    chaincode:
+      name: ""
+      repo_url: ""
+      repo_branch: ""
+      repo_path: ""
+  - name: ""
+    chaincode:
+      name: ""
+      repo_url: ""
+      repo_branch: ""
+      repo_path: ""
+      collectionconfig:
+        - name: ""
+          policy: ""

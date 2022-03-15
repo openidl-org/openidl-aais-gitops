@@ -1,0 +1,448 @@
+{% if channel_name is not defined %}
+{% set channel_name = 'defaultchannel' %}
+{% endif %}
+---
+# This is a sample configuration file for setting up initial Fabric network with 1 RAFT Orderer and 5 Nodes.
+network:
+  # Network level configuration specifies the attributes required for each organization
+  # to join an new network.
+  type: fabric
+  version: 2.2.3                # currently tested 1.4.8 and 2.2.0
+  #Flag for frontend to enabled for nodes/peers
+
+  #Environment section for Kubernetes setup
+  env:
+    type: "{{ env }}"              # tag for the environment. Important to run multiple flux on single cluster
+    proxy: 'haproxy'                  # values can be 'haproxy' or 'ambassador'
+    ambassadorPorts:                # Any additional Ambassador ports can be given here, this is valid only if proxy='ambassador'
+      portRange:              # For a range of ports 
+        from: 8443 
+        to: 8443
+    ports: 8443      # For specific ports
+    loadBalancerSourceRanges: '0.0.0.0/0' # (Optional) Default value is '0.0.0.0/0', this value can be changed to any other IP adres or list (comma-separated without spaces) of IP adresses, this is valid only if proxy='ambassador'
+    retry_count: 20                 # Retry count for the checks
+    external_dns: enabled           # Should be enabled if using external-dns for automatic route configuration
+
+  # Docker registry details where images are stored. This will be used to create k8s secrets
+  # Please ensure all required images are built and stored in this registry.
+  # Do not check-in docker_password.
+  docker:
+    url: "index.docker.io/hyperledgerlabs"
+    username: "docker_username"
+    password: "docker_password"
+  
+  # Remote connection information for orderer (will be blank or removed for orderer hosting organization)
+  # For RAFT consensus, have odd number (2n+1) of orderers for consensus agreement to have a majority.
+  orderers:
+    - orderer:
+      type: orderer
+      name: orderer1
+      org_name: "{{ network.ordererorg_name }}"               #org_name should match one organization definition below in organizations: key            
+      uri: orderer1.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443   # Can be external or internal URI for orderer which should be reachable by all peers
+      certificate: /home/blockchain-automation-framework/build/orderer1.crt           # Ensure that the directory exists
+    - orderer:
+      type: orderer
+      name: orderer2
+      org_name: "{{ network.ordererorg_name }}"               #org_name should match one organization definition below in organizations: key            
+      uri: orderer2.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443   # Can be external or internal URI for orderer which should be reachable by all peers
+      certificate: /home/blockchain-automation-framework/build/orderer2.crt           # Ensure that the directory exists
+    - orderer:
+      type: orderer
+      name: orderer3
+      org_name: "{{ network.ordererorg_name }}"               #org_name should match one organization definition below in organizations: key            
+      uri: orderer3.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443   # Can be external or internal URI for orderer which should be reachable by all peers
+      certificate: /home/blockchain-automation-framework/build/orderer3.crt           # Ensure that the directory exists
+    - orderer:
+      type: orderer
+      name: orderer4
+      org_name: "{{ network.ordererorg_name }}"               #org_name should match one organization definition below in organizations: key            
+      uri: orderer4.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443   # Can be external or internal URI for orderer which should be reachable by all peers
+      certificate: /home/blockchain-automation-framework/build/orderer4.crt           # Ensure that the directory exists
+    - orderer:
+      type: orderer
+      name: orderer5
+      org_name: "{{ network.ordererorg_name }}"               #org_name should match one organization definition below in organizations: key            
+      uri: orderer5.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443   # Can be external or internal URI for orderer which should be reachable by all peers
+      certificate: /home/blockchain-automation-framework/build/orderer5.crt           # Ensure that the directory exists
+
+  channels:
+{% for channellist in network.channels %}
+{% if channellist.name == channel_name %}
+  - channel:
+{% if action == 'deploy_network' or action == 'add_new_channel' %}
+    channel_status: new
+{% else %}
+    channel_status: existing
+{% endif %}
+    consortium: OpenIDLConsortium
+    channel_name: {{ channel_name }}
+    orderer:
+      name: "{{ network.ordererorg_name }}"
+    participants:
+    - organization:
+      name: {{ network.org_name }}
+      type: creator       # creator organization will create the channel and instantiate chaincode, in addition to joining the channel and install chaincode
+{% if action == 'deploy_network' or action == 'new_org' %}
+      org_status: new
+{% else %}
+      org_status: existing
+{% endif %}
+      peers:
+      - peer:
+        name: peer0
+        gossipAddress: peer0.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}:8443  # External or internal URI of the gossip peer
+        peerAddress: peer0.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}:8443 # External URI of the peer
+      ordererAddress: orderer1.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443             # External or internal URI of the orderer
+{% if add_org is defined and add_org != "" %}
+{% for org in network.organizations %}
+{% if org.name == add_org %}
+    - organization:
+      name: "{{ org.name }}"
+      type: joiner       # creator organization will create the channel and instantiate chaincode, in addition to joining the channel and install chaincode
+      org_status: new
+      peers:
+      - peer:
+        name: peer0
+        gossipAddress: peer0.{{ org.name }}-net.{{ org.name }}.{{ env }}.{{ org.domain }}:8443  # External or internal URI of the gossip peer
+        peerAddress: peer0.{{ org.name }}-net.{{ org.name }}.{{ env }}.{{ org.domain }}:8443 # External URI of the peer
+      ordererAddress: orderer1.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443             # External or internal URI of the orderer
+{% endif %}
+{% endfor %}
+{% endif %}
+    endorsers:
+      name:
+      - "{{ network.org_name }}"
+      corepeerAddress:
+      - peer0.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}:8443
+    genesis:
+{% if channel_name == 'defaultchannel' %}
+      name: OrdererGenesis
+{% else %}
+      name: "{{ channel_name | trim | replace('-', '') | upper }}Channel"
+{% endif %}
+{% endif %}
+{% endfor %}
+
+  # Allows specification of one or many organizations that will be connecting to a network.
+  # If an organization is also hosting the root of the network (e.g. doorman, membership service, etc),
+  # then these services should be listed in this section as well.
+  organizations:
+{% if ( (action == 'new_org_prereq') or (action == 'reset' and network.ordererorg == 'false') ) %}
+{% else %}
+    # Specification for the 1st organization. Each organization maps to a VPC and a separate k8s cluster
+    - organization:
+      name: "{{ network.ordererorg_name }}"
+      country: US
+      state: Illinois
+      location: Illinois
+      subject: "O=Orderer,L=Illinois,C=US"
+      type: orderer
+      external_url_suffix: "{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}"
+{% if action == 'deploy_network' %}
+      org_status: new
+{% else %}
+      org_status: existing
+{% endif %}
+      ca_data:
+        url: ca.{{ network.ordererorg_name }}-net.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}:8443
+        certificate: file/server.crt        # This has not been implemented in 0.2.0.0
+  
+      cloud_provider: aws   # Options: aws, azure, gcp, digitalocean, minikube        # AWS Secret key, only used when cloud_provider=aws
+{% if network.ordererorg == "true" %} 
+      aws:
+        access_key: "{{ access_id }}"        # AWS Access key, only used when cloud_provider=aws
+        secret_key: "{{ access_key }}"
+      # Kubernetes cluster deployment variables. The config file path and name has to be provided in case
+      # the cluster has already been created.
+      k8s:
+        region: "{{ region }}"
+        context: "arn:aws:eks:{{ region }}:{{ account }}:cluster/{{ cluster_name }}"
+        config_file: "/root/.kube/config"
+
+      # Hashicorp Vault server address and root-token. Vault should be unsealed.
+      # Do not check-in root_token
+      vault:
+        url: "http://vault.{{ env }}.{{ internal_domain }}"
+        root_token: "{{ vault_token }}"
+        secret_path: "{{ network.ordererorg_name }}"
+{% else %}
+      aws:
+        access_key: ""        # AWS Access key, only used when cloud_provider=aws
+        secret_key: ""
+      # Kubernetes cluster deployment variables. The config file path and name has to be provided in case
+      # the cluster has already been created.
+      k8s:
+        region: ""
+        context: ""
+        config_file: ""
+
+      # Hashicorp Vault server address and root-token. Vault should be unsealed.
+      # Do not check-in root_token
+      vault:
+        url: ""
+        root_token: ""
+        secret_path: ""
+{% endif %}
+
+      # Git Repo details which will be used by GitOps/Flux.
+      # Do not check-in git_access_token
+      gitops:
+        git_protocol: "https" # Option for git over https or ssh
+        git_url: "https://{{ gitops_repo_url }}"         # Gitops https or ssh url for flux value files 
+        branch: "{{ gitops_repo_branch }}"           # Git branch where release is being made
+        release_dir: "platforms/hyperledger-fabric/releases/{{ env }}-{{ network.org_name }}" # Relative Path in the Git repo for flux sync per environment.
+        chart_source: "blockchain-automation-framework/platforms/hyperledger-fabric/charts"     # Relative Path where the Helm charts are stored in Git repo
+        git_repo: "{{ gitops_repo_url }}"   # Gitops git repository URL for git push  (without https://)
+        username: "{{ gitops_repo_user }}"          # Git Service user who has rights to check-in in all branches
+        password: "{{ gitops_repo_user_token }}"          # Git Server user password/token (Optional for ssh; Required for https)
+        email: "{{ gitops_repo_user_email }}"                # Email to use in git config
+        private_key: ""          # Path to private key file which has write-access to the git repo (Optional for https; Required for ssh)
+     
+      # Services maps to the pods that will be deployed on the k8s cluster
+      # This sample is an orderer service and includes a zk-kafka consensus
+      services:
+        ca:
+          name: ca
+          subject: "/C=US/ST=Illinois/L=Illinois/O=Orderer/CN=ca.{{ network.ordererorg_name }}-net.{{ network.ordererorg_name }}.{{ env }}.{{ ordererorg_domain }}"
+          type: ca
+          grpc:
+            port: 7054
+        
+        consensus:
+          name: raft
+          type: broker        #This field is not consumed for raft consensus
+          replicas: 1         #This field is not consumed for raft consensus
+          grpc:
+            port: 9092        #This field is not consumed for raft consensus
+                
+        orderers:
+        # This sample has multiple orderers as an example.
+        # You can use a single orderer for most production implementations.
+        # For RAFT consensus, have odd number (2n+1) of orderers for consensus agreement to have a majority.
+        - orderer:
+          name: orderer1
+          type: orderer
+          consensus: raft
+          grpc:
+            port: 7050
+        - orderer:
+          name: orderer2
+          type: orderer
+          consensus: raft
+          grpc:
+            port: 7050
+        - orderer:
+          name: orderer3
+          type: orderer
+          consensus: raft
+          grpc:
+            port: 7050
+        - orderer:
+          name: orderer4
+          type: orderer
+          consensus: raft
+          grpc:
+            port: 7050
+        - orderer:
+          name: orderer5
+          type: orderer
+          consensus: raft
+          grpc:
+            port: 7050
+{% endif %}
+    # Specification for the 2nd organization. Each organization maps to a VPC and a separate k8s cluster
+    - organization:
+      name: "{{ network.org_name }}"
+      country: US
+      state: Illinois
+      location: Illinois
+      subject: "O={{ network.org_name }},OU={{ network.org_name }},L=Illinois,C=US"
+      type: peer
+      external_url_suffix: "{{ network.org_name }}.{{ env }}.{{ domain }}"
+{% if action == 'deploy_network' or action == 'new_org' %}
+      org_status: new
+{% else %}
+      org_status: existing
+{% endif %}
+      ca_data:
+        url: ca.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}:8443
+        certificate: file/server.crt
+
+      cloud_provider: aws   # Options: aws, azure, gcp, digitalocean, minikube
+      aws:
+        access_key: "{{ access_id }}"        # AWS Access key, only used when cloud_provider=aws
+        secret_key: "{{ access_key }}"        # AWS Secret key, only used when cloud_provider=aws
+  
+      # Kubernetes cluster deployment variables. The config file path and name has to be provided in case
+      # the cluster has already been created.
+      k8s:
+        region: "{{ region }}"
+        context: "arn:aws:eks:{{ region }}:{{ account }}:cluster/{{ cluster_name }}"
+        config_file: "/root/.kube/config"
+
+      # Hashicorp Vault server address and root-token. Vault should be unsealed.
+      # Do not check-in root_token
+      vault:
+        url: "http://vault.{{ env }}.{{ internal_domain }}"
+        root_token: "{{ vault_token }}"
+        secret_path: "{{ network.org_name }}"
+      # Git Repo details which will be used by GitOps/Flux.
+      # Do not check-in git_access_token
+      gitops:
+        git_protocol: "https" # Option for git over https or ssh
+        git_url: "https://{{ gitops_repo_url }}"         # Gitops https or ssh url for flux value files 
+        branch: "{{ gitops_repo_branch }}"           # Git branch where release is being made
+        release_dir: "platforms/hyperledger-fabric/releases/{{ env }}-{{ network.org_name }}" # Relative Path in the Git repo for flux sync per environment. 
+        chart_source: "blockchain-automation-framework/platforms/hyperledger-fabric/charts"     # Relative Path where the Helm charts are stored in Git repo
+        git_repo: "{{ gitops_repo_url }}"   # Gitops git repository URL for git push  (without https://)
+        username: "{{ gitops_repo_user }}"          # Git Service user who has rights to check-in in all branches
+        password: "{{ gitops_repo_user_token }}"          # Git Server user password/token (Optional for ssh; Required for https)
+        email: "{{ gitops_repo_user_email }}"                # Email to use in git config
+        private_key: ""          # Path to private key file which has write-access to the git repo (Optional for https; Required for ssh)
+
+      # The participating nodes are peers
+      # This organization hosts it's own CA server
+      services:
+        ca:
+          name: ca
+          subject: "/C=US/ST=Illinois/L=Illinois/O={{ network.org_name }}/CN=ca.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}"
+          type: ca
+          grpc:
+            port: 7054
+        peers:
+        - peer:
+          name: peer0          
+          type: anchor    # This can be anchor/nonanchor. Atleast one peer should be anchor peer.         
+          gossippeeraddress: peer0.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}:8443 # Internal Address of the other peer in same Org for gossip, same peer if there is only one peer 
+          peerAddress: peer0.{{ network.org_name }}-net.{{ network.org_name }}.{{ env }}.{{ domain }}:8443 # External URI of the peer 
+          certificate: "/home/blockchain-automation-framework/build/{{ network.org_name }}-ca.crt" # certificate path for peer
+          cli: disabled      # Creates a peer cli pod depending upon the (enabled/disabled) tag.   
+          grpc:
+            port: 7051
+          couchdb:
+            port: 5984
+          events:
+            port: 7053
+          chaincode:
+{% for channellist in network.channels %}
+{% if channellist.name == channel_name %}
+            name: "{{ channellist.chaincode.name }}" #This has to be replaced with the name of the chaincode
+            version: "{{ chaincode_version | default('1') }}" #This has to be replaced with the version of the chaincode
+            maindirectory: "main"  #The main directory where chaincode is needed to be placed
+            lang: "golang"  # The language in which the chaincode is written ( golang/java/node )
+            repository:
+              username: ""          # Git Service user who has rights to check-in in all branches
+              password: ""
+              url: "{{ channellist.chaincode.repo_url }}"
+              branch: "{{ channellist.chaincode.repo_branch }}"
+              path: "{{ channellist.chaincode.repo_path }}"   #The path to the chaincode 
+            arguments: '' #Arguments to be passed along with the chaincode parameters
+            endorsements: "" #Endorsements (if any) provided along with the chaincode
+{% if channellist.chaincode.collectionconfig is defined %}
+            collectionconfig:
+{% for collectionconfig in channellist.chaincode.collectionconfig %}
+             - name: "{{ collectionconfig.name }}"
+               policy: "{{ collectionconfig.policy }}"
+               channel_name: {{ channellist.name }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% if add_org is defined and add_org != "" %}
+{% for org in network.organizations %}
+{% if org.name == add_org %}
+    - organization:
+      name: "{{ org.name }}"
+      country: US
+      state: Illinois
+      location: Illinois
+      subject: "O={{ org.name }},OU={{ org.name }},L=Illinois,C=US"
+      type: peer
+      external_url_suffix: "{{ org.name }}.{{ env }}.{{ org.domain }}"
+      org_status: new
+      ca_data:
+        url: ca.{{ org.name }}-net.{{ org.name }}.{{ env }}.{{ org.domain }}:8443
+        certificate: file/server.crt
+
+      cloud_provider: aws   # Options: aws, azure, gcp, digitalocean, minikube
+      aws:
+        access_key: ""        # AWS Access key, only used when cloud_provider=aws
+        secret_key: ""        # AWS Secret key, only used when cloud_provider=aws
+
+      # Kubernetes cluster deployment variables. The config file path and name has to be provided in case
+      # the cluster has already been created.
+      k8s:
+        region: ""
+        context: ""
+        config_file: ""
+
+      # Hashicorp Vault server address and root-token. Vault should be unsealed.
+      # Do not check-in root_token
+      vault:
+        url: ""
+        root_token: ""
+        secret_path: ""
+      # Git Repo details which will be used by GitOps/Flux.
+      # Do not check-in git_access_token
+      gitops:
+        git_protocol: "https" # Option for git over https or ssh
+        git_url: "https://{{ gitops_repo_url }}"         # Gitops https or ssh url for flux value files
+        branch: "{{ gitops_repo_branch }}"           # Git branch where release is being made
+        release_dir: "platforms/hyperledger-fabric/releases/{{ env }}-{{ org.name }}" # Relative Path in the Git repo for flux sync per environment.
+        chart_source: "blockchain-automation-framework/platforms/hyperledger-fabric/charts"     # Relative Path where the Helm charts are stored in Git repo
+        git_repo: ""   # Gitops git repository URL for git push  (without https://)
+        username: ""          # Git Service user who has rights to check-in in all branches
+        password: ""          # Git Server user password/token (Optional for ssh; Required for https)
+        email: ""                # Email to use in git config
+        private_key: ""          # Path to private key file which has write-access to the git repo (Optional for https; Required for ssh)
+
+      # The participating nodes are peers
+      # This organization hosts it's own CA server
+      services:
+        ca:
+          name: ca
+          subject: "/C=US/ST=Illinois/L=Illinois/O={{ org.name }}/CN=ca.{{ org.name }}-net.{{ org.name }}.{{ env }}.{{ org.domain }}"
+          type: ca
+          grpc:
+            port: 7054
+        peers:
+        - peer:
+          name: peer0
+          type: anchor    # This can be anchor/nonanchor. Atleast one peer should be anchor peer.
+          gossippeeraddress: peer0.{{ org.name }}-net.{{ org.name }}.{{ env }}.{{ org.domain }}:8443 # Internal Address of the other peer in same Org for gossip, same peer if there is only one peer
+          peerAddress: peer0.{{ org.name }}-net.{{ org.name }}.{{ env }}.{{ org.domain }}:8443 # External URI of the peer
+          certificate: "/home/blockchain-automation-framework/build/{{ org.name }}-ca.crt" # certificate path for peer
+          cli: disabled      # Creates a peer cli pod depending upon the (enabled/disabled) tag.
+          grpc:
+            port: 7051
+          couchdb:
+            port: 5984
+          events:
+            port: 7053
+{% for channellist in network.channels %}
+{% if channellist.name == channel_name %}
+            name: "{{ channellist.chaincode.name }}" #This has to be replaced with the name of the chaincode
+            version: "{{ chaincode_version | default('1') }}" #This has to be replaced with the version of the chaincode
+            maindirectory: "main"  #The main directory where chaincode is needed to be placed
+            lang: "golang"  # The language in which the chaincode is written ( golang/java/node )
+            repository:
+              username: ""          # Git Service user who has rights to check-in in all branches
+              password: ""
+              url: "{{ channellist.chaincode.repo_url }}"
+              branch: "{{ channellist.chaincode.repo_branch }}"
+              path: "{{ channellist.chaincode.repo_path }}"   #The path to the chaincode
+            arguments: '' #Arguments to be passed along with the chaincode parameters
+            endorsements: "" #Endorsements (if any) provided along with the chaincode
+{% if channellist.chaincode.collectionconfig is defined %}
+            collectionconfig:
+{% for collectionconfig in channellist.chaincode.collectionconfig %}
+             - name: "{{ collectionconfig.name }}"
+               policy: "{{ collectionconfig.policy }}"
+               channel_name: {{ channellist.name }}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}

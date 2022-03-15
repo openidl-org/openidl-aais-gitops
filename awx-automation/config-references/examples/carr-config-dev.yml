@@ -1,0 +1,29 @@
+ordererorg_domain: "aais.thetech.digital"
+domain: "carrier.thetech.digital"
+internal_domain: "carrier.internal.thetech.digital"
+node_type: "carrier"
+network:
+  org_name: "carrier"
+  ordererorg: "false"
+  ordererorg_name: "ordererorg"
+  organizations:
+    - name: "carrier"
+      domain: "carrier.thetech.digital"
+    - name: "analytics"
+      name: "analytics.thetech.digital"
+  channels:
+  - name: defaultchannel
+    chaincode:
+      name: openidl-cc-default
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_branch: hig-carrier
+      repo_path: openidl-chaincode/chaincode/openidl
+  - name: anal-carr
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_branch: hig-carrier
+      repo_path: openidl-chaincode/chaincode/openidl
+      collectionconfig:
+        - name: "anal_carr_pdc"
+          policy: "OR('analyticsMSP.member', 'carrierMSP.member')"

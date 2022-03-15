@@ -6,6 +6,7 @@
 
 # This task creates the genesis block by consuming the configtx.yaml file
 - name: "Create genesis block"
+  no_log: true
   shell: |
     cd {{ build_path }}
     {% if '2.' in network.version %}
@@ -18,7 +19,8 @@
   tags:
     - molecule-idempotence-notest
 
-- name: "Write genesis block to Vault"  
+- name: "Write genesis block to Vault"
+  no_log: true
   shell: |
     vault write {{ org.vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ org.name }}-net {{ network.env.type }}GenesisBlock="$(cat {{build_path}}/channel-artifacts/genesis.block.base64)"
   environment:
