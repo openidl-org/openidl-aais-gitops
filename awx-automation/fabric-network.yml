@@ -61,6 +61,8 @@
         region: "{{ aws_region }}"
         access_id: "{{ baf_user_access_key }}"
         access_key: "{{ baf_user_secret_key }}"
+        external_id: "{{ baf_user_external_id }}"
+        iam_role: "{{ baf_user_assume_role_arn }}"
         gitops_repo_user: "{{ gitops_repo_user }}"
         gitops_repo_user_token: "{{ gitops_repo_user_token }}"
         gitops_repo_user_email: "{{ gitops_repo_user_email }}"
