@@ -1,15 +1,15 @@
 ##The below config declaration is applicable when using remote backend as S3 in terraform
 #This backend configuration is used for 2nd pipeline to setup k8s resources
 
-bucket               = "carrier-dev-hig-backend-state"
+bucket               = ""
 key                  = "k8s/terraform.tfstate"
-region               = "us-east-1"
+region               = ""
 encrypt              = true
-workspace_key_prefix = "dev"
+workspace_key_prefix = ""
 ##################reference example: https://dynamodb.us-east-1.amazonaws.com#################
-dynamodb_endpoint    = "https://dynamodb.us-east-1.amazonaws.com"
-dynamodb_table       = "carrier-dev-hig-k8s-resources"
-role_arn             = "arn:aws:iam::685993417699:role/tf_automation"
+dynamodb_endpoint    = "https://dynamodb.<region>.amazonaws.com"
+dynamodb_table       = ""
+role_arn             = ""
 session_name         = "terraform-session"
 external_id          = "terraform" #external id setup during IAM user and role setup for access
 
