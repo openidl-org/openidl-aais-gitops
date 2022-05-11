@@ -78,63 +78,6 @@ module "bastion_host_key_pair_external" {
       "cluster_type" = "both"
   }, )
 }
-#Network load balancer used for the bastion host access
-/*
-module "bastion_nlb" {
-  count = var.create_bastion_host ? 1 : 0
-  source     = "terraform-aws-modules/alb/aws"
-  version    = "~> 6.0"
-  name       = "${local.std_name}-bastion-nlb"
-  create_lb                        = true
-  load_balancer_type               = "network"
-  enable_cross_zone_load_balancing = true
-  internal                         = false
-  ip_address_type                  = "ipv4"
-  vpc_id                           = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
-  subnets                          = var.create_vpc ? module.vpc[0].public_subnets : data.aws_subnet_ids.vpc_public_subnets.ids
-  http_tcp_listeners = [
-    {
-      port        = 22
-      protocol    = "TCP"
-      action_type = "forward"
-    }
-  ]
-  target_groups = [
-    {
-      name_prefix        = "bst-"
-      backend_protocol   = "TCP"
-      backend_port       = 22
-      target_type        = "instance"
-      preserve_client_ip = true
-      tags               = merge(local.tags, { tcp_udp = true }, )
-      health_check = {
-        enabled             = true
-        interval            = 30
-        port                = "22"
-        protocol            = "TCP"
-        healthy_threshold   = 3
-        unhealthy_threshold = 3
-      }
-    }
-  ]
-  tags = merge(
-    local.tags,
-    {
-      "cluster_type" = "both"
-  }, )
-  lb_tags = merge(
-    local.tags,
-    {
-      "cluster_type" = "both"
-  }, )
-  idle_timeout = 180
-  target_group_tags = merge(
-    local.tags,
-    {
-      "name"         = "tg-bst"
-      "cluster_type" = "both"
-  }, )
-}*/
 #Autoscaling group used for the bastion host
 module "bastion_host_asg" {
   count = var.create_bastion_host ? 1 : 0
