@@ -114,7 +114,7 @@ output "vault_kms_key_alias_name" {
 #KMS key used for AWS secrets
 output "secrets_kms_key_arn" {
   value = var.create_kms_keys ? aws_kms_key.sm_kms_key[0].arn : "Provision KMS key named ${local.std_name}-secrets-kms-key and set access to ${aws_iam_role.git_actions_admin_role.arn}, ${var.aws_role_arn}, ${aws_iam_role.openidl_apps_iam_role.arn}, ${aws_iam_role.baf_user_role.arn}"
-  sensitive = true 
+  sensitive = true
 }
 output "secrets_kms_key_alias_name" {
   value = var.create_kms_keys ? aws_kms_alias.sm_kms_key_alias[0].name : ""

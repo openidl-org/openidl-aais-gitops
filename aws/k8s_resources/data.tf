@@ -26,7 +26,7 @@ data "terraform_remote_state" "base_setup" {
 data aws_alb "app_nlb_external" {
   tags = {
     "kubernetes.io/cluster/${local.app_cluster_name}" = "owned",
-    "kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx"
+    #"kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx"
   }
   depends_on = [helm_release.app_haproxy]
 }
@@ -42,7 +42,7 @@ data aws_alb "app_nlb_internal" {
 data aws_alb "blk_nlb_external" {
   tags = {
     "kubernetes.io/cluster/${local.blk_cluster_name}" = "owned",
-    "kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx"
+    #"kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx"
   }
   depends_on = [helm_release.blk_haproxy]
 }
