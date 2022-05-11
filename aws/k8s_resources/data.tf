@@ -55,7 +55,7 @@ data aws_alb "blk_nlb_internal" {
     "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-internal"
   }
   depends_on = [helm_release.blk_haproxy]
-}*/
+}
 #Reading application cluster info
 data "aws_eks_cluster" "app_eks_cluster" {
   name = data.terraform_remote_state.base_setup.outputs.app_cluster_name
