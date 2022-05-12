@@ -63,9 +63,9 @@ spec:
     port: {{ .Values.service.ports.http }}
     protocol: TCP
     targetPort: 80
-    nodePort: 30100
+    nodePort: 30300
   - name: https
     port: {{ .Values.service.ports.https }}
     protocol: TCP
     targetPort: 443
-    nodePort: 30200
+    nodePort: 30400
