@@ -36,7 +36,7 @@ resource "aws_iam_user_policy" "baf_user_policy" {
 }
 #IAM user role for baf user to allow assume role
 resource "aws_iam_role" "baf_user_role" {
-  name = "${local.std_name}-baf-automation1"
+  name = "${local.std_name}-baf-automation"
   assume_role_policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -56,7 +56,7 @@ resource "aws_iam_role" "baf_user_role" {
     ]
   })
   managed_policy_arns = [aws_iam_policy.baf_user_role_policy.arn]
-  tags = merge(local.tags, {name = "${local.std_name}-baf-automation1", cluster_type = "blockchain"})
+  tags = merge(local.tags, {name = "${local.std_name}-baf-automation", cluster_type = "blockchain"})
   description = "The iam role that is used for baf automation"
   max_session_duration = 3600
 }
