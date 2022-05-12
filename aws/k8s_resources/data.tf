@@ -27,7 +27,7 @@ data aws_alb "app_nlb_external" {
   tags = {
     "kubernetes.io/cluster/${local.app_cluster_name}" = "owned",
     #"kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx"
-    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-external"
+    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress"
   }
   depends_on = [helm_release.app_haproxy]
 }
@@ -35,7 +35,7 @@ data aws_alb "app_nlb_internal" {
   tags = {
     "kubernetes.io/cluster/${local.app_cluster_name}" = "owned",
     #"kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx-internal"
-    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-internal"
+    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress"
   }
   depends_on = [helm_release.app_haproxy]
 }
@@ -44,7 +44,7 @@ data aws_alb "blk_nlb_external" {
   tags = {
     "kubernetes.io/cluster/${local.blk_cluster_name}" = "owned",
     #"kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx"
-    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-external"
+    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress"
   }
   depends_on = [helm_release.blk_haproxy]
 }
@@ -52,7 +52,7 @@ data aws_alb "blk_nlb_internal" {
   tags = {
     "kubernetes.io/cluster/${local.blk_cluster_name}" = "owned",
     #"kubernetes.io/service-name" = "nginx/nginx-ingress-ingress-nginx-nginx-internal"
-    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-internal"
+    "kubernetes.io/service-name" = "ingress-controller/haproxy-ingress"
   }
   depends_on = [helm_release.blk_haproxy]
 }
