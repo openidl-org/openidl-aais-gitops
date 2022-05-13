@@ -34,9 +34,8 @@
     --set tlsDisable=false \
     --set server.ingress.enabled=true \
     --set server.ingress.hosts[0].host=vault.{{ env }}.{{ internal_domain }} \
-    --set server.ingress.annotations."kubernetes\.io/ingress\.class"=nginx \
+    --set server.ingress.annotations."kubernetes\.io/ingress\.class"=haproxy \
     --set server.dataStorage.storageClass=openidl-sc \
-    --set server.ingress.annotations."nginx\.ingress\.kubernetes\.io/rewrite-target"=/ \
     --version="0.16.1"
   tags:
     - hashicorp-vault
@@ -70,7 +69,7 @@
 
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-vault-unseal-key
   shell: |
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --resource-policy file://aws_resource_policy.json --block-public-policy
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --resource-policy file://aws_resource_policy.json
 
 - name: Delete unseal keys file
   file:
@@ -239,7 +238,7 @@
 
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-config-vault
   shell: |
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-config-vault --resource-policy file://aws_resource_policy.json --block-public-policy
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-config-vault --resource-policy file://aws_resource_policy.json
 
 - name: Delete config user credentials json file
   file:
@@ -269,7 +268,7 @@
 
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-kvs-vault
   shell: |
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-kvs-vault --resource-policy file://aws_resource_policy.json --block-public-policy
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-kvs-vault --resource-policy file://aws_resource_policy.json
 
 - name: Delete config user credentials json file
   file:
