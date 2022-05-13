@@ -68,7 +68,6 @@
     kubectl -n openidl-baf create configmap network-setup --from-file=network-setup.yml=./network-setup.yml
 
 - name: Launch baf container
-  #no_log: true
   community.kubernetes.k8s:
     state: present
     wait: yes
