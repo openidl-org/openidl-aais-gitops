@@ -36,7 +36,7 @@
     --set server.ingress.enabled=true \
     --set server.ingress.hosts[0].host=vault.{{ env }}.{{ internal_domain }} \
     --set server.ingress.annotations."kubernetes\.io/ingress\.class"=haproxy \
-    --set server.ingress.annotations."nginx\.ingress\.kubernetes\.io/rewrite-target"=/ \
+#   --set server.ingress.annotations."nginx\.ingress\.kubernetes\.io/rewrite-target"=/ \
     --set server.dataStorage.storageClass=openidl-sc \
     --version="0.16.1"
   tags:

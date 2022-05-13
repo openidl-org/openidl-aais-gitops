@@ -1,41 +1,27 @@
-ordererorg_domain: ""
-domain: ""
-internal_domain: ""
+ordererorg_domain: "thetech.digital"
+domain: "thetech.digital"
+internal_domain: "internal.thetech.digital"
 node_type: "aais"
 network:
-  org_name: ""
-  ordererorg: ""
-  ordererorg_name: ""
+  org_name: "aais"
+  ordererorg: "true"
+  ordererorg_name: "ordererorg"
   organizations:
     - name: ""
       domain: ""
-    - name: ""
-      domain: ""
   channels:
-  - name: ""
+  - name: "defaultchannel"
     chaincode:
-      name: ""
-      repo_url: ""
-      repo_branch: "" 
-      repo_path: ""
-  - name: ""
+      name: "openidl-cc-default"
+      repo_url: "https://github.com/openidl-org/openidl-main.git"
+      repo_branch: "develop-nd"
+      repo_path: "openidl-chaincode/chaincode/openidl"
+  - name: "anal-aais"
     chaincode:
-      name: ""
-      repo_url: ""
-      repo_branch: "" 
-      repo_path: ""
+      name: "openidl-cc-aais-carriers"
+      repo_url: "https://github.com/openidl-org/openidl-main.git"
+      repo_branch: "develop-nd"
+      repo_path: "openidl-chaincode/chaincode/openidl"
       collectionconfig:
-        - name: ""
-          policy: ""
-  - name: ""
-    chaincode:
-      name: ""
-      repo_url: ""
-      repo_branch: "" 
-      repo_path: ""
-      collectionconfig:
-        - name: ""
-          policy: ""
-
-
-
+        - name: "anal_aais_pdc"
+          policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
