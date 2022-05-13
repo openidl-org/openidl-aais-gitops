@@ -76,7 +76,7 @@
 - name: Add resource policy to the secret created {{ item }}
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+    aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --region {{ aws_region }}
   with_items:
   - "{{ network.org_name }}-{{ env }}-mongodb-user-token"
   - "{{ network.org_name }}-{{ env }}-mongodb-root-token"
