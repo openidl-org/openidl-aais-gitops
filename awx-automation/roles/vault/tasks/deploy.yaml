@@ -67,7 +67,7 @@
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-vault-unseal-key
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --resource-policy file://aws_resource_policy.json --region {{ aws_region }}
 
 - name: Delete unseal keys file
   file:
@@ -233,7 +233,7 @@
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-config-vault
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-config-vault --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-config-vault --resource-policy file://aws_resource_policy.json --region {{ aws_region }}
 
 - name: Delete config user credentials json file
   file:
@@ -260,7 +260,7 @@
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-kvs-vault
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-kvs-vault --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-kvs-vault --resource-policy file://aws_resource_policy.json --region {{ aws_region }}
 
 - name: Delete config user credentials json file
   file:
