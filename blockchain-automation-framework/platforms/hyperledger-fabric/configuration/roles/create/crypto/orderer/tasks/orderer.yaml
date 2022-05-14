@@ -130,7 +130,6 @@
 # This task copies the generated crypto material from the respective CA Tools CLI
 # to the Ansible container
 - name: Copy the crypto config folder from the ca tools
-  no_log: true
   shell: |
     export CA_TOOL_CLI=$(KUBECONFIG={{ kubernetes.config_file }}  kubectl get po -n {{ component_name }} | grep "ca-tools" | awk '{print $1}')
     KUBECONFIG={{ kubernetes.config_file }} kubectl cp {{ component_name }}/${CA_TOOL_CLI}:crypto-config ./build/crypto-config
@@ -141,7 +140,6 @@
 ############################################################################################
 # These roles put the above created crypto material in the vault
 - name: Copy the crypto material for orderer
-  no_log: true
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls ca.crt="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls/ca.crt)" server.crt="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls/server.crt)" server.key="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls/server.key)"
     vault write {{ vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp admincerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/admincerts/Admin@{{ component_name }}-cert.pem)" cacerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/cacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem)" keystore="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/keystore/*_sk)" signcerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/signcerts/cert.pem)" tlscacerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/tlscacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem)"
@@ -156,7 +154,6 @@
 ############################################################################################
 # These roles put the above created crypto material in the vault (proxy != none)
 - name: Copy the crypto material for orderer
-  no_log: true
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls ca.crt="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls/ca.crt)" server.crt="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls/server.crt)" server.key="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls/server.key)"
     vault write {{ vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp admincerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/admincerts/Admin@{{ component_name }}-cert.pem)" cacerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/cacerts/ca-{{ component_name }}-7054.pem)" keystore="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/keystore/*_sk)" signcerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/signcerts/cert.pem)" tlscacerts="$(cat ./build/crypto-config/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/msp/tlscacerts/ca-{{ component_name }}-7054.pem)"
@@ -210,7 +207,6 @@
 
 # This task generates orderer certificates
 - name: Generate the orderer certificate
-  no_log: true
   shell: |
     cd "./build/crypto-config/ordererOrganizations/{{ component_name }}"
     openssl ecparam -name prime256v1 -genkey -noout -out {{ orderer.name }}-{{ component_name }}.key
@@ -239,7 +235,6 @@
 
  # This task copy the orderer certificates generated above, to the Vault
 - name: Copy the crypto material to Vault
-  no_log: true
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/{{ component_type }}Organizations/{{ component_name }}/ambassador/{{ orderer.name }} certificate="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/{{orderer.name}}-{{ component_name }}-certchain.pem")" key="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/{{ orderer.name }}-{{ component_name }}.key")"
   environment:

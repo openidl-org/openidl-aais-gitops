@@ -134,7 +134,7 @@
             aws sts get-caller-identity
             aws eks --region {{ region }} update-kubeconfig --name {{ cluster_name }}
             cd $LOCAL_PATH
-            ansible-playbook blockchain-automation-framework/platforms/shared/configuration/environment-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true"
+            ansible-playbook blockchain-automation-framework/platforms/shared/configuration/environment-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=false"
             if [ ${ACTION} != "deploy_network" ] || [ ${ACTION} != "reset" ] || [ ${ACTION} != "new_org" ]; then
               POD_NAME=$(kubectl -n ${ORG_NAME}-net get pods --selector=name=ca-tools --output=jsonpath={.items..metadata.name})
               mkdir -p $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/channel-artifacts
@@ -147,8 +147,8 @@
               fi              
             fi
             if [ $ACTION = "deploy_network" ]; then
-              ansible-playbook blockchain-automation-framework/platforms/shared/configuration/kubernetes-env-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true"
-              ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/deploy-network.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=false" -e "no_ansible_log=true" $EXTRA_VARS
+              ansible-playbook blockchain-automation-framework/platforms/shared/configuration/kubernetes-env-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=false"
+              ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/deploy-network.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=false" -e "no_ansible_log=false" $EXTRA_VARS
             elif [ $ACTION = "chaincode" ]; then
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/chaincode-ops.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true" -e "add_peer=true" $EXTRA_VARS
             elif [ $ACTION = "reset" ]; then
