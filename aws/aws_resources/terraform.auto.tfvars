@@ -37,7 +37,7 @@ userpool_email_verification_message              = "Your username is {username} 
 #-------------------------------------------------------------------------------------------------------------------
 #EKS cluster default specifications
 app_eks_worker_instance_type         = "t3.medium"
-blk_eks_worker_instance_type         = "t3.medium"
+blk_eks_worker_instance_type         = "t3x.large"
 kubeconfig_output_path               = "./kubeconfig_file/"
 manage_aws_auth                      = false
 cluster_endpoint_private_access      = true
