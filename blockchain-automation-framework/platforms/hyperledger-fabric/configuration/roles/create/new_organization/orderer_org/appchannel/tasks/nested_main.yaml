@@ -16,7 +16,7 @@
 
 # creating new orderer file
 - name: Creating new orderer file
-  no_log: true
+  #no_log: true
   file:
     path: "{{ build_path }}/channel-artifacts/{{ channel_name }}-orderer"
     state: touch
@@ -29,14 +29,14 @@
 
 # creating new orderer-tls file
 - name: Creating new orderer-tls file
-  no_log: true
+  #no_log: true
   file:
     path: "{{ build_path }}/channel-artifacts/{{ channel_name }}-orderer-tls"
     state: touch
 
 # Create orderer-tls for tls certificate information
 - name: "adding tls certificate information"
-  no_log: true
+  #no_log: true
   shell: |
     if [ {{ network.env.proxy }} == 'none' ]
     then

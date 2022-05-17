@@ -4,7 +4,7 @@
 
 # This task deletes the BASE 64 encoded genesis blocks for all channels
 - name: Delete genesis block from Vault
-  no_log: true
+  #no_log: true
   shell: |
     vault delete {{ item.vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}
   environment:

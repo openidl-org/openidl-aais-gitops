@@ -1,6 +1,6 @@
 # Check peer msp already created
 - name: Check if peer msp already created
-  no_log: true
+  #no_log: true
   shell: |
     vault kv get -format=yaml {{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp
   environment:
