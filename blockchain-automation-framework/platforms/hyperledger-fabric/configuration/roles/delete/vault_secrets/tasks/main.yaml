@@ -5,7 +5,6 @@
 #############################################################################################
 # This task deletes the Docker credentials
 - name: Delete docker creds
-  #no_log: true
   k8s:
     kind: Secret
     namespace: "{{ component_name }}"
@@ -17,7 +16,6 @@
 
 # Delete the Ambassador Creds for CA
 - name: Delete Ambassador creds
-  #no_log: true
   k8s:
     kind: Secret
     namespace: default
@@ -28,7 +26,6 @@
   ignore_errors: yes
 
 - name: Delete Ambassador creds
-  #no_log: true
   k8s:
     kind: Secret
     namespace: default
@@ -39,7 +36,6 @@
   ignore_errors: yes
 
 - name: Delete Ambassador creds
-  #no_log: true
   k8s:
     kind: Secret
     namespace: "{{ component_name }}"
@@ -47,11 +43,10 @@
     kubeconfig: "{{ kubernetes.config_file }}"
     context: "{{ kubernetes.context }}"
     state: absent
-  when: network.env.proxy == 'haproxy' or network.env.proxy == 'nginx'
+  when: network.env.proxy == 'haproxy'
   ignore_errors: yes
   
 - name: Delete Ambassador creds
-  #no_log: true
   k8s:
     kind: Secret
     namespace: default
@@ -62,7 +57,6 @@
   ignore_errors: yes
 
 - name: Delete Ambassador creds
-  #no_log: true
   k8s:
     kind: Secret
     namespace: "{{ component_name }}"
@@ -70,23 +64,21 @@
     kubeconfig: "{{ kubernetes.config_file }}"
     context: "{{ kubernetes.context }}"
     state: absent
-  when: network.env.proxy == 'haproxy' or network.env.proxy == 'nginx'
+  when: network.env.proxy == 'haproxy'
   ignore_errors: yes
 
 ############################################################################################
 # This task deletes vault auth
 - name: Delete vault-auth path
-  #no_log: true
   shell: |
     vault delete sys/auth/{{ network.env.type }}{{ component_name }}-auth
   environment:
     VAULT_ADDR: "{{ item.vault.url }}"
     VAULT_TOKEN: "{{ item.vault.root_token }}"
-  ignore_errors: yes
+
 ############################################################################################
 # This task deletes crypto materials from vault
 - name: Delete Crypto for orderers
-  #no_log: true
   shell: |
     vault delete {{ item.vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}/ca
     vault delete {{ item.vault.secret_path | default('secret') }}/crypto/ordererOrganizations/{{ component_name }}/orderers/{{orderer.name}}.{{ component_name }}/tls
@@ -102,12 +94,10 @@
     VAULT_ADDR: "{{ item.vault.url }}"
     VAULT_TOKEN: "{{ item.vault.root_token }}"
   when: component_type == 'orderer'
-  ignore_errors: yes
 
 ############################################################################################
 # This task deletes crypto materials from vault
 - name: Delete Crypto for peers
-  #no_log: true
   shell: |
     vault delete {{ item.vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/ca
     vault delete {{ item.vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/users/admin/tls
@@ -129,10 +119,8 @@
     VAULT_ADDR: "{{ item.vault.url }}"
     VAULT_TOKEN: "{{ item.vault.root_token }}"
   when: component_type == 'peer'
-  ignore_errors: yes
 
 - name: Remove all endorsers
-  #no_log: true
   args:
     executable: /bin/bash
   shell: |    
@@ -146,7 +134,6 @@
   ignore_errors: yes
 
 - name: Delete policy
-  #no_log: true
   shell: |
     vault policy delete vault-crypto-{{ component_type }}-{{ component_name }}-ro
   environment:

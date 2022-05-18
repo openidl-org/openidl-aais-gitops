@@ -16,7 +16,6 @@
 
 # creating new orderer file
 - name: Creating new orderer file
-  no_log: true
   file:
     path: "{{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer"
     state: touch
@@ -29,14 +28,12 @@
 
 # creating new orderer-tls file
 - name: Creating new orderer-tls file
-  no_log: true
   file:
     path: "{{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer-tls"
     state: touch
 
 # Create orderer-tls for tls certificate information
 - name: "adding tls certificate information"
-  #no_log: true
   shell: |
     if [ {{ network.env.proxy }} == 'none' ]
     then
@@ -47,7 +44,6 @@
 
 # Create orderer file for adding new endpoint information
 - name: "adding new endpoint information"
-  #no_log: true
   shell: |
     if [ {{ network.env.proxy }} == 'none' ]
     then
@@ -58,7 +54,6 @@
 
 # Create the values for orderer files
 - name: "adding new org peers anchor peer information"
-  #no_log: true
   shell: |
     echo -n "[$(cat {{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer )]" > {{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer
     echo -n "[$(cat {{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer-tls )]" > {{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer-tls

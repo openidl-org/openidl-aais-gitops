@@ -71,7 +71,6 @@
 ############################################################################################
 # This task updates the blockchain after signature from the first peer of the creator
 - name: updating the channel with the new configuration block
-  no_log: true
   shell: |
     export PEER_CLI=$(KUBECONFIG={{ kubernetes.config_file }} kubectl get po -n {{ org.name | lower }}-net | grep "cli" | head -n 1 | awk '{print $1}')
     KUBECONFIG={{ kubernetes.config_file }} kubectl exec -n {{ org.name }}-net ${PEER_CLI} -- peer channel fetch config {{ channel_name | lower}}_config_block.pb -o {{ participant.ordererAddress }} -c {{ channel_name | lower }} --tls --cafile ${ORDERER_CA}

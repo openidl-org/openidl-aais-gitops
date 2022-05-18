@@ -1,7 +1,6 @@
 ---
 # This task writes the certificates of all the approving organizations to the vault so that the creator organization can use it to commit.
 - name: Copy organization level certificates for orgs {{ organization.name }}
-  #no_log: true
   shell: |
     vault write /{{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ namespace }}/endorsers/{{ organization.name }}/users/admin/msp cacerts="$(cat {{ peers.certificate }})"
   environment:

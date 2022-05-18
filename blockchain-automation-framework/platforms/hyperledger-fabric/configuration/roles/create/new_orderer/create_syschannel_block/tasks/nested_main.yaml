@@ -28,14 +28,12 @@
 
 # creating new orderer file
 - name: Creating new orderer file
-  #no_log: true
   file:
     path: "{{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer"
     state: touch
 
 # Create syschannel-orderer-tls for tls certificate information
 - name: "adding tls certificate information"
-  #no_log: true
   shell: |
     if [ {{ network.env.proxy }} == 'none' ]
     then
@@ -58,7 +56,6 @@
 
 # Adding information to orderer file
 - name: "adding information to orderer file"
-  #no_log: true
   shell: |
     echo -n "[$(cat {{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer )]" > {{ build_path }}/channel-artifacts/{{ channel_name | lower}}-orderer
 

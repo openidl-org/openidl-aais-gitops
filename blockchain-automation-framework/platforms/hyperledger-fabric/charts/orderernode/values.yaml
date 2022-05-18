@@ -109,7 +109,7 @@ kafka:
   brokers:
 
 proxy:
-  #This will be the proxy/ingress provider. Can have values "ambassador" or "haproxy" or "nginx"
+  #This will be the proxy/ingress provider. Can have values "ambassador" or "haproxy"
   #Eg. provider: "haproxy"
   provider: 
   #This field contains the external URL of the organization

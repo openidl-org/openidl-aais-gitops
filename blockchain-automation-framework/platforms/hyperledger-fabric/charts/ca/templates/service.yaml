@@ -65,7 +65,7 @@ spec:
 
 {{- if eq $.Values.proxy.provider "haproxy" }}
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ $.Values.server.name }}
@@ -73,17 +73,13 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "haproxy"
     ingress.kubernetes.io/ssl-passthrough: "true"
-    #ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: {{ $.Values.server.name }}.{{ $.Values.metadata.namespace }}.{{ $.Values.proxy.external_url_suffix }}
     http:
       paths:
       - path: /
-        pathType: Prefix
         backend:
-          service:
-            name: {{ $.Values.server.name }}
-            port:
-              number: {{ $.Values.service.ports.tcp.clusteripport }}
+          serviceName: {{ $.Values.server.name }}
+          servicePort: {{ $.Values.service.ports.tcp.clusteripport }}    
 {{- end }}
