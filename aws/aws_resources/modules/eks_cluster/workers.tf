@@ -49,8 +49,8 @@ resource "aws_autoscaling_group" "workers" {
   launch_configuration = aws_launch_configuration.workers.*.id[count.index]
   vpc_zone_identifier = lookup(
     var.worker_groups[count.index],
-    "subnets",
-    local.workers_group_defaults["subnets"]
+    "subnet_ids",
+    local.workers_group_defaults["subnet_ids"]
   )
   protect_from_scale_in = lookup(
     var.worker_groups[count.index],

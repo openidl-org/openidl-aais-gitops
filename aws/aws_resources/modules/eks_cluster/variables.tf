@@ -88,10 +88,13 @@ variable "map_users" {
 }
 
 variable "subnets" {
-  description = "A list of subnets to place the EKS cluster and workers within."
+  description = "A list of subnets to place the EKS cluster within."
   type        = list(string)
 }
-
+variable "subnet_ids" {
+  description = "A list of subnet ids to place the workers within."
+  type        = string
+}
 variable "tags" {
   description = "A map of tags to add to all resources. Tags added to launch configuration or templates override these values for ASG Tags only."
   type        = map(string)
