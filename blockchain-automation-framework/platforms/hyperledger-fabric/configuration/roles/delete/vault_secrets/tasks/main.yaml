@@ -75,6 +75,7 @@
   environment:
     VAULT_ADDR: "{{ item.vault.url }}"
     VAULT_TOKEN: "{{ item.vault.root_token }}"
+  ignore_errors: yes  
 
 ############################################################################################
 # This task deletes crypto materials from vault
