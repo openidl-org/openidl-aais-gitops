@@ -34,7 +34,6 @@
 
 # Create syschannel-orderer-tls for tls certificate information
 - name: "adding orderers information to the file"
-  #no_log: true
   shell: |    
     if [ {{ network.env.proxy }} == 'none' ]
     then

@@ -1,0 +1,5 @@
+apiVersion: v2
+appVersion: "2.0"
+description: A Helm3 chart for Ingress for Fabric
+name: haproxy
+version: 0.2.0

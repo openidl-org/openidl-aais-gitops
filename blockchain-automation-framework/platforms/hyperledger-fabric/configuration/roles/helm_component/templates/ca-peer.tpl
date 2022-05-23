@@ -10,9 +10,7 @@ spec:
   chart:
     git: {{ git_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/ca
-    secretRef:
-      name: git-auth-{{ network.env.type }}
+    path: {{ charts_dir }}/ca    
   values:
     metadata:
       namespace: {{ component_name | e }}

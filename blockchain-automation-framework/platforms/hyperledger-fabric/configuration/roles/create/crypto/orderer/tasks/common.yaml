@@ -25,7 +25,7 @@
 
 ############################################################################################
 # This task copy the generate_crypto.sh and cert files in the respective CA Tools CLI
-- name: Copy the generate_crypto.sh file into the CA Tools
+- name: Copy the generate_crypto.sh file into the CA Tools 
   shell: |
     export CA_TOOL_CLI=$(KUBECONFIG={{ kubernetes.config_file }} kubectl get po -n {{ component_name }} | grep "ca-tools" | awk '{print $1}')
     KUBECONFIG={{ kubernetes.config_file }} kubectl cp ./build/generate-crypto-{{ org_name|lower }}.sh {{ component_name }}/${CA_TOOL_CLI}:/root/ca-tools/{{org_name|lower}}/generate-crypto.sh

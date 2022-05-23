@@ -29,7 +29,6 @@
 
 # This task write the git credentials to Vault
 - name: Write the git credentials to Vault
-  #no_log: true
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/credentials/{{ namespace }}/git git_password="{{ peer.chaincode.repository.password }}"
   environment:

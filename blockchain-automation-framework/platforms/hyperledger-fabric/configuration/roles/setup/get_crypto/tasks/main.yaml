@@ -10,7 +10,6 @@
 
 # Save the admincerts file
 - name: Save admincerts
-  #no_log: true
   local_action: copy content="{{ vault_output['data'].admincerts }}" dest="{{msp_path}}/admincerts/Admin@{{component_name}}-cert.pem"
 
 # Ensure cacerts directory is present in build
@@ -21,12 +20,9 @@
 
 # Save the cacerts file
 - name: Save cacerts
-  #no_log: true
   local_action: copy content="{{ vault_output['data'].cacerts }}" dest="{{msp_path}}/cacerts/ca-{{component_name}}-7054.pem"
   when: network.env.proxy == 'none'
-
 - name: Save cacerts for other proxy
-  #no_log: true
   local_action: copy content="{{ vault_output['data'].cacerts }}" dest="{{msp_path}}/cacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem"
   when: network.env.proxy != 'none'
 
@@ -38,11 +34,8 @@
 
 # Save the tlscacerts file
 - name: Save tlscacerts
-  #no_log: true
   local_action: copy content="{{ vault_output['data'].tlscacerts }}" dest="{{msp_path}}/tlscacerts/ca-{{component_name}}-7054.pem"
   when: network.env.proxy == 'none'
-
 - name: Save tlscacerts
-  #no_log: true
   local_action: copy content="{{ vault_output['data'].tlscacerts }}" dest="{{msp_path}}/tlscacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem"
   when: network.env.proxy != 'none'

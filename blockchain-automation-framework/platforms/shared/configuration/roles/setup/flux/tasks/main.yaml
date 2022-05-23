@@ -44,7 +44,6 @@
     - molecule-idempotence-notest
 
 - name: Install flux for over https connection
-  no_log: true
   shell: |
     KUBECONFIG={{ kubeconfig_path }} kubectl create secret generic git-auth-{{ network.env.type }} --from-literal=GIT_AUTHUSER={{ git_username }}  --from-literal=GIT_AUTHKEY={{ git_password }} --namespace flux-{{ network.env.type }}
     KUBECONFIG={{ kubeconfig_path }} kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/{{ helm_operator_version }}/deploy/crds.yaml --context="{{ kubecontext }}"
@@ -56,7 +55,6 @@
     - molecule-idempotence-notest
 
 - name: Install flux for over ssh connection
-  no_log: true
   shell: |
     KUBECONFIG={{ kubeconfig_path }} kubectl create secret generic git-auth-{{ network.env.type }} --from-file=identity={{ git_key }} --namespace flux-{{ network.env.type }}
     KUBECONFIG={{ kubeconfig_path }} kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/{{ helm_operator_version }}/deploy/crds.yaml --context="{{ kubecontext }}"

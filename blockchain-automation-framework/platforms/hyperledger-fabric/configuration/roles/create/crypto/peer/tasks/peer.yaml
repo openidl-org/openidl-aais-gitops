@@ -1,6 +1,5 @@
 # Copy the crypto material for orgs
 - name: Copy the crypto material for orgs
-  #no_log: false
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls ca.crt="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls/ca.crt)" server.crt="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls/server.crt)" server.key="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls/server.key)"
     vault write {{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp admincerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/admincerts/Admin@{{ component_name }}-cert.pem)" cacerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/cacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem)" keystore="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/keystore/*_sk)" signcerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/signcerts/cert.pem)" tlscacerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/tlscacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem)"
@@ -11,7 +10,6 @@
 
 # Copy the crypto material for orgs (proxy is none)
 - name: Copy the crypto material for orgs
-  #no_log: false
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls ca.crt="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls/ca.crt)" server.crt="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls/server.crt)" server.key="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/tls/server.key)"
     vault write {{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp admincerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/admincerts/Admin@{{ component_name }}-cert.pem)" cacerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/cacerts/ca-{{ component_name }}-7054.pem)" keystore="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/keystore/*_sk)" signcerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/signcerts/cert.pem)" tlscacerts="$(cat ./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/tlscacerts/ca-{{ component_name }}-7054.pem)"
@@ -38,7 +36,6 @@
 
 # This task copy the peer certificate to the path provided in network.yaml
 - name: Copy msp cacerts from auto-generated path to given path
-  #no_log: false
   copy:
     src: "./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/cacerts/ca-{{ component_name }}-{{ item.external_url_suffix }}-8443.pem"
     dest: "{{ peer.certificate }}"
@@ -53,7 +50,6 @@
 
 # This task copy the peer certificate to the path provided in network.yaml (when proxy is none)
 - name: Copy msp cacerts from auto-generated path to given path
-  #no_log: false
   copy:
     src: "./build/crypto-config/peerOrganizations/{{ component_name }}/peers/{{ peer.name }}.{{ component_name }}/msp/cacerts/ca-{{ component_name }}-7054.pem"
     dest: "{{ peer.certificate }}"
@@ -68,7 +64,6 @@
 
 # Check if Ambassador credentials exist already
 - name: Check Ambassador cred exists
-  #no_log: true
   k8s_info:
     kind: Secret
     namespace: default
@@ -81,7 +76,6 @@
 
 #Check the existence of Peer ambassador certs secret in the vault 
 - name: Check if peer ambassador secrets certs created
-  #no_log: true
   shell: |
     vault kv get -format=yaml {{ vault.secret_path | default('secret') }}/crypto/peerOrganizations/{{ component_name }}/ambassador
   environment:
@@ -114,7 +108,6 @@
 
 # Generates the openssl file for domain
 - name: Generate openssl conf file
-  #no_log: true
   shell: |
     cd "./build/crypto-config/peerOrganizations/{{ component_name }}"
     cat <<EOF >openssl.conf
@@ -146,7 +139,6 @@
     
 # This task generates peer certificates
 - name: Generate the peer certificate
-  #no_log: true
   shell: |
     cd "./build/crypto-config/peerOrganizations/{{ component_name }}"
     openssl ecparam -name prime256v1 -genkey -noout -out {{ peer.name }}-{{ component_name }}.key
@@ -162,7 +154,6 @@
 
 # This task creates the Ambassador TLS credentials for peer
 - name: Create the Ambassador credentials
-  #no_log: true
   shell: |
     KUBECONFIG={{ kubernetes.config_file }} kubectl create secret tls {{ peer.name }}-{{ component_name }}-ambassador-certs --cert=./build/crypto-config/peerOrganizations/{{ component_name }}/{{ peer.name }}-{{ component_name }}-certchain.pem --key=./build/crypto-config/peerOrganizations/{{ component_name }}/{{ peer.name }}-{{ component_name }}.key -n default
   when: 
@@ -174,7 +165,6 @@
 
 # This task copy the peer certificates generated above, to the Vault
 - name: Copy the crypto material to Vault
-  #no_log: false
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/{{ component_type }}Organizations/{{ component_name }}/ambassador clientcert="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/{{ peer.name }}-{{ component_name }}.pem")" certificate="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/{{ peer.name }}-{{ component_name }}-certchain.pem")" key="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/{{ peer.name }}-{{ component_name }}.key")"
   environment:
