@@ -153,7 +153,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
                 "s3:AbortMultipartUpload",
                 "s3:RestoreObject",
                 "s3:DeleteObject",
-                "s3:ListMultipartUploadParts"
+                "s3:ListMultipartUploadParts",
                 "s3:ListBucket"
             ],
             "Resource": [
