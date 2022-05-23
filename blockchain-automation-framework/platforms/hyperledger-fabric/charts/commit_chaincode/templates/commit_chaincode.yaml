@@ -110,7 +110,6 @@ spec:
           validateVaultResponse "secret (${vault_secret_key})" "${LOOKUP_SECRET_RESPONSE}" "LOOKUPSECRETRESPONSE"
 
           TLS_CA_CERT=$(echo ${LOOKUP_SECRET_RESPONSE} | jq -r '.data["ca.crt"]')
-          echo "${TLS_CA_CERT}"
           mkdir -p ${OUTPUT_PATH}
           echo "${TLS_CA_CERT}" >> ${OUTPUT_PATH}/ca.crt
 
@@ -143,11 +142,6 @@ spec:
           echo "${SIGNCERTS}" >> ${OUTPUT_PATH}/signcerts/server.crt
           echo "${TLSCACERTS}" >> ${OUTPUT_PATH}/tlscacerts/tlsca.crt
 
-          echo "${ADMINCERT}"
-          echo "${CACERTS}"
-          echo "${KEYSTORE}"
-          echo "${SIGNCERTS}"
-          echo "${TLSCACERTS}"
           ######################################################################
 
           #Downloading Certificates for all admin users
@@ -170,7 +164,6 @@ spec:
             validateVaultResponse "secret (${vault_secret_key})" "${LOOKUP_SECRET_RESPONSE}" "LOOKUPSECRETRESPONSE"
 
             CACERTS=$(echo ${LOOKUP_SECRET_RESPONSE} | jq -r '.data["cacerts"]')
-            echo "${CACERTS}"
             mkdir -p ${OUTPUT_PATH}/cacerts
             echo "${CACERTS}" >> ${OUTPUT_PATH}/cacerts/ca.crt
             cat ${OUTPUT_PATH}/cacerts/ca.crt
