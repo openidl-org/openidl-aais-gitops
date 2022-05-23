@@ -4,6 +4,7 @@
 #############################################################################################
 
 - name: Check if ca certs already created
+  #no_log: true
   shell: |
     vault kv get -field=ca.{{ component_name }}-cert.pem {{ vault.secret_path | default('secret') }}/crypto/{{ component_type }}Organizations/{{ component_name }}/ca
   environment:
@@ -23,6 +24,7 @@
     check: "ensure_dir"
 
 - name: Get ca certs and key
+  #no_log: true
   shell: |
     vault kv get -field=ca.{{ component_name }}-cert.pem {{ vault.secret_path | default('secret') }}/crypto/{{ component_type }}Organizations/{{ component_name }}/ca > ca.{{ component_name }}-cert.pem
     mv ca.{{ component_name }}-cert.pem ./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/ca/
@@ -44,6 +46,7 @@
 ############################################################################################
 # This task generates initial CA certificates
 - name: Generate the CA certificate
+  #no_log: true
   shell: |
     cd "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/ca"
     openssl ecparam -name prime256v1 -genkey -noout -out {{ component_name }}-CA.key
@@ -53,6 +56,7 @@
 ############################################################################################
 # This task copy the CA certificates generated above, to the Vault
 - name: Copy the crypto material to Vault
+  #no_log: true
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/crypto/{{ component_type }}Organizations/{{ component_name }}/ca ca.{{ component_name }}-cert.pem="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/ca/ca.{{ component_name }}-cert.pem")" {{ component_name }}-CA.key="$(cat "./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/ca/{{ component_name }}-CA.key")"
   environment:
@@ -63,6 +67,7 @@
 
 
 - name: Check if ca admin credentials already created
+ # no_log: true
   shell: |
     vault kv get {{ vault.secret_path | default('secret') }}/credentials/{{ component_name }}/ca/{{ component }}
   environment:
@@ -75,6 +80,7 @@
 ############################################################################################
 # This task write the CA server admin credentials to Vault
 - name: Write the ca server admin credentials to Vault
+  #no_log: true
   shell: |
     vault write {{ vault.secret_path | default('secret') }}/credentials/{{ component_name }}/ca/{{ component }} user="{{ component }}-adminpw"
   environment:
@@ -85,6 +91,7 @@
 
 # Check if Ambassador credentials exist already
 - name: Check Ambassador cred exists
+  #no_log: true
   k8s_info:
     kind: Secret
     namespace: default
@@ -98,6 +105,7 @@
 #####################################################################################################################
 # This task creates the Ambassador TLS credentials
 - name: Create the Ambassador credentials
+  #no_log: true
   shell: |
     KUBECONFIG={{ kubernetes.config_file }} kubectl create secret tls ca-{{ component_name }}-ambassador-certs --cert=./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/ca/ca.{{ component_name }}-cert.pem --key=./build/crypto-config/{{ component_type }}Organizations/{{ component_name }}/ca/{{ component_name }}-CA.key -n default
   when: 

@@ -12,7 +12,6 @@
   gather_facts: no
   no_log: "{{ no_ansible_log | default(false) }}"
   tasks:
-  
     # delete build directory
     - name: Remove build directory
       file:

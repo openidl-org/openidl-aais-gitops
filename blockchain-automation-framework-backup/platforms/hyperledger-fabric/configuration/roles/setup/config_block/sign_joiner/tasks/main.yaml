@@ -1,0 +1,41 @@
+###########################################################################################
+# This task calls nested_sign_and_update and nested_update_channel tasks
+############################################################################################
+
+
+# Task for creating the cli for first peer of each organization
+# Config block gets signed by the admin of every organization
+- name: Call nested_sign_and_update for each peer
+  include_tasks: nested_sign_and_update.yaml
+  vars:
+    channel_name: "{{ item.channel_name | lower }}"
+    org_query: "organizations[?name=='{{participant.name}}']"
+    org: "{{ network | json_query(org_query) | first }}"
+    peer: "{{ participant.peers | first }}"
+    config_block: "{{ item.channel_name | lower }}_config_block.pb"
+  loop: "{{ participants }}"
+  loop_control:
+    loop_var: participant
+  when:
+    - participant.type != 'creator'
+    - participant.org_status != 'new'
+    - remove_org is undefined
+
+# Task for creating the cli for first peer of each organization
+# Config block gets signed by the admin of every organization
+- name: Call nested_sign_and_update for each peer
+  include_tasks: nested_sign_and_update.yaml
+  vars:
+    channel_name: "{{ item.channel_name | lower }}"
+    org_query: "organizations[?name=='{{participant.name}}']"
+    org: "{{ network | json_query(org_query) | first }}"
+    peer: "{{ participant.peers | first }}"
+    config_block: "{{ item.channel_name | lower }}_config_block.pb"
+  loop: "{{ participants }}"
+  loop_control:
+    loop_var: participant
+  when:
+    - participant.type != 'creator'
+    - participant.org_status == 'existing'
+    - remove_org is defined
+    - remove_org == "True"

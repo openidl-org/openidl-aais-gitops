@@ -11,6 +11,8 @@ spec:
     git: {{ git_url }}
     ref: {{ git_branch }}
     path: {{ charts_dir }}/catools
+    secretRef:
+      name: git-auth-{{ network.env.type }}
   values:
     metadata:
       namespace: {{ component_name }}

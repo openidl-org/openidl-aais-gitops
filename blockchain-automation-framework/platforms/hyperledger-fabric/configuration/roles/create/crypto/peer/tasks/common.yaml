@@ -40,7 +40,8 @@
 
 ############################################################################################
 # This task copy the generate_crypto.sh and cert files in the respective CA Tools CLI
-- name: Copy the generate_crypto.sh file into the CA Tools 
+- name: Copy the generate_crypto.sh file into the CA Tools
+  #no_log: true
   shell: |
     export CA_TOOL_CLI=$(KUBECONFIG={{ kubernetes.config_file }} kubectl get po -n {{ component_name }} | grep "ca-tools" | awk '{print $1}')
     KUBECONFIG={{ kubernetes.config_file }} kubectl cp ./build/generate-crypto-{{ org_name|lower }}.sh {{ component_name }}/${CA_TOOL_CLI}:/root/ca-tools/{{org_name|lower}}/generate-crypto.sh
@@ -53,6 +54,7 @@
 # This task generates the crypto material by executing the generate_crypto.sh script file
 # present in the Organizations CA Tools CLI
 - name: Generate crypto material for organization peers
+  #no_log: true
   shell: |
     export CA_TOOL_CLI=$(KUBECONFIG={{ kubernetes.config_file }} kubectl get po -n {{ component_name }} | grep "ca-tools" | awk '{print $1}')
     KUBECONFIG={{ kubernetes.config_file }} kubectl exec -n {{ component_name }} ${CA_TOOL_CLI} -- /root/ca-tools/{{org_name|lower}}/./generate-crypto.sh    
@@ -60,6 +62,7 @@
   register: output
 
 - name: Generate crypto material for organization users
+  #no_log: true
   shell: |
     export CA_TOOL_CLI=$(KUBECONFIG={{ kubernetes.config_file }} kubectl get po -n {{ component_name }} | grep "ca-tools" | awk '{print $1}')    
     KUBECONFIG={{ kubernetes.config_file }} kubectl exec -n {{ component_name }} ${CA_TOOL_CLI} -- /root/ca-tools/{{org_name|lower}}/./generate-user-crypto.sh peer {{component_name}} {{org_name|lower}} 1 {{org_name}} "{{subject}}" "{{ca_url}}"
@@ -69,6 +72,7 @@
 # This task copies the generated crypto material from the respective CA Tools CLI
 # to the Ansible container
 - name: Copy the crypto config folder from the ca tools
+  #no_log: true
   shell: |
     export CA_TOOL_CLI=$(KUBECONFIG={{ kubernetes.config_file }}  kubectl get po -n {{ component_name }} | grep "ca-tools" | awk '{print $1}')
     KUBECONFIG={{ kubernetes.config_file }} kubectl cp {{ component_name }}/${CA_TOOL_CLI}:crypto-config ./build/crypto-config
