@@ -170,7 +170,7 @@ spec:
             validateVaultResponse "secret (${vault_secret_key})" "${LOOKUP_SECRET_RESPONSE}" "LOOKUPSECRETRESPONSE"
 
             CACERTS=$(echo ${LOOKUP_SECRET_RESPONSE} | jq -r '.data["cacerts"]')
-            echo "{CACERTS}"
+            echo "${CACERTS}"
             mkdir -p ${OUTPUT_PATH}/cacerts
             echo "${CACERTS}" >> ${OUTPUT_PATH}/cacerts/ca.crt
             cat ${OUTPUT_PATH}/cacerts/ca.crt
