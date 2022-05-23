@@ -21,7 +21,7 @@ module "app_eks_worker_nodes_key_pair_external" {
 #Setting up application cluster (eks)
 module "app_eks_cluster" {
   #source                                             = "terraform-aws-modules/eks/aws"
-  source                                              = "./modules/eks-cluster"
+  source                                              = "./modules/eks_cluster"
   #version                                            = "17.1.0"
   create_eks                                         = true
   cluster_name                                       = local.app_cluster_name
@@ -155,13 +155,13 @@ module "blk_eks_worker_nodes_key_pair_external" {
 #Setting up blockchain cluster (eks)
 module "blk_eks_cluster" {
   #source                                             = "terraform-aws-modules/eks/aws"
-  source                                              = "./modules/eks-cluster"
+  source                                              = "./modules/eks_cluster"
   #version                                            = "17.1.0"
   create_eks                                         = true
   cluster_name                                       = local.blk_cluster_name
   enable_irsa                                        = true
   cluster_version                                    = var.blk_cluster_version
-  subnets                                            = var.create_vpc ? module.vpc[0].private_subnets : data.aws_subnet_ids.vpc_private_subnets.ids
+  # subnets                                            = var.create_vpc ? module.vpc[0].private_subnets : data.aws_subnet_ids.vpc_private_subnets.ids
   vpc_id                                             = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
   write_kubeconfig                                   = false
   #cluster_service_ipv4_cidr                          = var.blk_cluster_service_ipv4_cidr
@@ -210,7 +210,7 @@ module "blk_eks_cluster" {
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
       key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
-      subnet_id                     = var.create_vpc ? module.vpc[0].private_subnets[0] : tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]
+      subnets                     = var.create_vpc ? module.vpc[0].private_subnets[0] : tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]
       #target_group_arns             = module.blk_eks_nlb_public.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
       ebs_optimized                 = var.wg_ebs_optimized
@@ -237,7 +237,7 @@ module "blk_eks_cluster" {
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
       key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
-      subnet_id                     = var.create_vpc ? module.vpc[0].private_subnets[1] : tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]
+      subnets                     = var.create_vpc ? module.vpc[0].private_subnets[1] : tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]
       #target_group_arns             = module.blk_eks_nlb_public.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
       ebs_optimized                 = var.wg_ebs_optimized
@@ -264,7 +264,7 @@ module "blk_eks_cluster" {
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
       key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
-      subnet_id                     = var.create_vpc ? module.vpc[0].private_subnets[2] : tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[2]
+      subnets                     = var.create_vpc ? module.vpc[0].private_subnets[2] : tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[2]
       #target_group_arns             = module.blk_eks_nlb_public.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
       ebs_optimized                 = var.wg_ebs_optimized

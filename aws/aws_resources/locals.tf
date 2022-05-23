@@ -17,9 +17,9 @@ locals {
     managed_by  = "terraform"
   })
 
-  #bastion_host_userdata = filebase64("resources/bootstrap-scripts/bastion_host.sh")
-  worker_nodes_userdata = filebase64("resources/bootstrap-scripts/worker_nodes.sh")
-  bastion_userdata = templatefile("resources/bootstrap-scripts/bastion_host.tftpl",
+  #bastion_host_userdata = filebase64("resources/bootstrap_scripts/bastion_host.sh")
+  worker_nodes_userdata = filebase64("resources/bootstrap_scripts/worker_nodes.sh")
+  bastion_userdata = templatefile("resources/bootstrap_scripts/bastion_host.tftpl",
     { eip_id = "${aws_eip.bastion_host_eip[0].allocation_id}",
       region = "${var.aws_region}"
     })

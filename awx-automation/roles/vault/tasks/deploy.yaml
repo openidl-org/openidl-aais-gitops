@@ -93,7 +93,7 @@
   shell: |
     kubectl -n vault exec vault-1 vault operator raft join http://vault-0.vault-internal:8200
 
-- name: Join Vault-1 to vault cluster
+- name: Join Vault-2 to vault cluster
   shell: |
     kubectl -n vault exec vault-2 vault operator raft join http://vault-0.vault-internal:8200
 
