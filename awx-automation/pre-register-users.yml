@@ -47,7 +47,7 @@
 
     - name: debug ca token status PRINT
       debug:
-      msg: "{{ ca_token_status }}"
+        msg: "{{ ca_token_status }}"
 
     - name: Get CA credentials from secrets manager
       no_log: true
