@@ -39,53 +39,43 @@
         aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-kvs-vault  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r '.SecretString|fromjson'.password
       register: vault_user_token
 
-  #  - name: Check register-users action performed in the past
-  #    shell : |
-  #      export AWS_PROFILE=cicd-role
-  #      aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
-  #    register: ca_token_status
+    - name: Check register-users action performed in the past
+      shell : |
+        export AWS_PROFILE=cicd-role
+        aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
+      register: ca_token_status
 
-  #  - name: Check AWS command
-  #    shell: |
-  #      export AWS_PROFILE=cicd-role
-  #      aws secretsmanager list-secrets --region "{{ aws_region }}"
-  #    register: aws_result
+    - name: debug ca token status PRINT
+      debug:
+      msg: "{{ ca_token_status }}"
 
-  #  - name: Debug AWS command
-  #    debug:
-  #      msg: "{{ aws_result }}"
+   - name: Get CA credentials from secrets manager
+     no_log: true
+     shell: |
+        export AWS_PROFILE=cicd-role
+        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+     register: ca_user_password_aws_sm
+     when: ca_token_status.stdout != "null"
 
-  #  - name: debug ca token status PRINT
-  #    debug:
-  #      msg: "{{ ca_token_status }}"
+   - name: debug aws_sm stdout
+     debug:
+       msg: "{{ ca_user_password_aws_sm.stdout }}"
 
-  #  - name: Get CA credentials from secrets manager
-  #    no_log: true
-  #    shell: |
-  ##      export AWS_PROFILE=cicd-role
-  #      aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
-  #    register: ca_user_password_aws_sm
-  #    when: ca_token_status.stdout != "null"
+   - name: Setting ca-user-password to enroll-user only
+     no_log: true
+     set_fact:
+       ca_user_password: "{{ ca_user_password_aws_sm.stdout }}"
+     when: ca_token_status.stdout != "null"
 
-  #  - name: debug aws_sm stdout
-  #    debug:
-  #      msg: "{{ ca_user_password_aws_sm.stdout }}"
-
-  #  - name: Setting ca-user-password to enroll-user only
-  #    no_log: true
-  #    set_fact:
-  #      ca_user_password: "{{ ca_user_password_aws_sm.stdout }}"
-  #    when: ca_token_status.stdout != "null"
-
-  #  - name: debug ca user password
-  #    debug:
-  #      msg: "{{ ca_user_password }}"
+    - name: debug ca user password
+      debug:
+        msg: "{{ ca_user_password }}"
 
     - name: Setting ca-user-password to register and enroll-user
       no_log: true
       set_fact:
         ca_user_password: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
-   #   when: ca_token_status.stdout == "null"
+      when: ca_token_status.stdout == "null"
 
     - name: debug ca user password
       debug:
@@ -99,5 +89,5 @@
         vault_kvs_user_token: "{{ vault_user_token.stdout }}"
         ca_user_token: "{{ ca_user_password }}"
         aws_region: "{{ aws_region }}"
-        #ca_user_token_status: "{{ ca_token_status.stdout }}"
+        ca_user_token_status: "{{ ca_token_status.stdout }}"
         aws_account_number: "{{ aws_account_number }}"

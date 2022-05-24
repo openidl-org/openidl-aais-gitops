@@ -37,8 +37,10 @@ preRegisterUser() {
     read -r -a USERNAMES <<<"$USERNAMES"
     for user in ${USERNAMES[@]}; do
         # register user
+        {% if ca_user_token_status == "null" %}
         fabric-ca-client register --caname ${CA_NAME} --id.name ${user} --id.secret ${CA_USER_PASSWORD} --id.type client --id.attrs 'orgType=advisory:ecert' --tls.certfiles ${PWD}/organizations/fabric-ca/${ORG}/tls-cert.pem
-	# enroll user
+        {% endif %}
+	    # enroll user
         rm -rf ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}
         fabric-ca-client enroll -u https://${user}:${CA_USER_PASSWORD}@${CA_URL} --caname ${CA_NAME} -M ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}/msp --tls.certfiles ${PWD}/organizations/fabric-ca/${ORG}/tls-cert.pem
         # cp ${PWD}/organizations/peerOrganizations/${ORG}/msp/config.yaml ${FABRIC_CA_CLIENT_HOME}/users/${user}@${ORG}/msp/config.yaml
