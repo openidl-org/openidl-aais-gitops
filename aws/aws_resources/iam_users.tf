@@ -269,7 +269,8 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
                 "iam:GetGroupPolicy",
                 "eks:ListClusters",
                 "eks:DescribeAddonVersions",
-                "eks:ListIdentityProviderConfigs"
+                "eks:ListIdentityProviderConfigs",
+                "secretsmanager:ListSecrets"
             ],
             "Resource": "*"
         },
