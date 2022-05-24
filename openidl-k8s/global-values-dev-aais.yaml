@@ -8,8 +8,8 @@ global:
         targetport: 8080
         servicename: data-call-app-service
         ingressenabled: false
-        ingresshostname: data-call-app-service.dev.openidl.internal.aaisdirect.com
-        publicingresshostname: data-call-app-service.dev.openidl.aaisdirect.com
+        ingresshostname: data-call-app-service.dev.internal.thetech.digital
+        publicingresshostname: data-call-app-service.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-data-call-app
             pullPolicy: IfNotPresent
@@ -20,8 +20,8 @@ global:
         targetport: 8080
         servicename: utilities-service
         ingressenabled: false
-        ingresshostname: utilities-service.dev.openidl.internal.aaisdirect.com
-        publicingresshostname: utilities-service.dev.openidl.aaisdirect.com
+        ingresshostname: utilities-service.dev.internal.thetech.digital
+        publicingresshostname: utilities-service.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-utilities
             pullPolicy: IfNotPresent
@@ -32,7 +32,7 @@ global:
         port: 8080
         targetport: 8080
         ingressenabled: false
-        ingresshostname: openidl.dev.openidl.aaisdirect.com
+        ingresshostname: openidl.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
@@ -43,7 +43,7 @@ global:
         targetport: 8080
         servicename: insurance-data-manager-service
         ingressenabled: false
-        ingresshostname: insurance-data-manager-service.dev.openidl.aaisdirect.com
+        ingresshostname: insurance-data-manager-service.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
