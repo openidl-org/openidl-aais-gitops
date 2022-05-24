@@ -29,7 +29,7 @@
     version: "{{ gitrepo_branch }}"
 
 - name: Prepare a pod
-  no_log: true
+  #no_log: true
   shell: |
     kubectl run deploy-secrets -n openidl --image=amazonlinux:latest --command sleep infinity
     sleep 60
