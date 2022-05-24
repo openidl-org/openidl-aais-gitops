@@ -57,15 +57,15 @@
       register: ca_user_password_aws_sm
       when: ca_token_status.stdout != "null"
 
-   - name: debug aws_sm stdout
-     debug:
-       msg: "{{ ca_user_password_aws_sm.stdout }}"
+    - name: debug aws_sm stdout
+      debug:
+        msg: "{{ ca_user_password_aws_sm.stdout }}"
 
-   - name: Setting ca-user-password to enroll-user only
-     no_log: true
-     set_fact:
-       ca_user_password: "{{ ca_user_password_aws_sm.stdout }}"
-     when: ca_token_status.stdout != "null"
+    - name: Setting ca-user-password to enroll-user only
+      no_log: true
+      set_fact:
+        ca_user_password: "{{ ca_user_password_aws_sm.stdout }}"
+      when: ca_token_status.stdout != "null"
 
     - name: debug ca user password
       debug:
