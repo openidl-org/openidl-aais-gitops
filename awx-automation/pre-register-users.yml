@@ -48,8 +48,13 @@
     - name: Check AWS command
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager list-secrets  
+        aws secretsmanager list-secrets --region "{{ aws_region }}"
+      register: aws_result
 
+    - name: Debug AWS command
+      debug:
+        msg: "{{ aws_result }}"
+        
     - name: debug ca token status PRINT
       debug:
         msg: "{{ ca_token_status }}"
