@@ -42,7 +42,6 @@
 - name: register temporary directory
   tempfile:
     state: directory
-    path: "/tmp/aws"
   register: tmp_directory
 
 - name: check aws cli
