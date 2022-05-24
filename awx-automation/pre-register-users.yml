@@ -45,15 +45,10 @@
         aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
       register: ca_token_status
 
-    - name: Check AwS command
-      shell: |
-        export AWS_PROFILE=cicd-role
-        aws secretsmanager list-secrets --region {{ aws_region }}
-
     - name: Check AWS command
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager list-secrets help 
+        aws secretsmanager list-secrets  
 
     - name: debug ca token status PRINT
       debug:
