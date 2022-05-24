@@ -139,9 +139,9 @@
     kubectl -n vault logs -f pre-register-user-script
   register: pod_logs
 
-- name: Pod logs
-  debug:
-    msg: '{{ pod_logs.stdout_lines }}'
+#- name: Pod logs
+#  debug:
+#    msg: '{{ pod_logs.stdout_lines }}'
 
 #- name: delete ca user token to aws secrets manager
 #  shell: |
@@ -160,7 +160,7 @@
   shell: |
     export AWS_PROFILE=cicd-role
     aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
-  #when: ca_user_token_status == "null"
+  when: ca_user_token_status == "null"
 
 - name: Delete user script pod
   community.kubernetes.k8s:
