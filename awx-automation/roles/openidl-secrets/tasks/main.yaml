@@ -20,7 +20,7 @@
     state: present
 
 - name: Download git repository content
-  no_log: true
+  #no_log: true
   git:
     repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
     dest: /tmp/openidl
