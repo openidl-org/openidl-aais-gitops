@@ -65,7 +65,7 @@
       no_log: true
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+        aws secretsmanager get-secret-value --secret-id aais-dev-kvs-vault  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
       register: ca_user_password_aws_sm
       when: ca_token_status.stdout != "null"
 
