@@ -12,18 +12,18 @@ network:
     - name: "carrier"
       domain: "carrier.thetech.digital"
   channels:
-  - name: "defaultchannel"
+  - name: defaultchannel
     chaincode:
-      name: "openidl-cc-default"
-      repo_url: "github.com/openidl-org/openidl-main.git"
-      repo_branch: "develop-nd"
-      repo_path: "openidl-chaincode/chaincode/openidl"
-  - name: "anal-aais"
+      name: openidl-cc-default
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: develop-nd
+      repo_path: openidl-chaincode/chaincode/openidl
+  - name: anal-aais
     chaincode:
-      name: "openidl-cc-aais-carriers"
-      repo_url: "github.com/openidl-org/openidl-main.git"
-      repo_branch: "develop-nd"
-      repo_path: "openidl-chaincode/chaincode/openidl"
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: develop-nd
+      repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
         - name: "anal_aais_pdc"
           policy: "OR('analyticsMSP.member', 'aaisMSP.member')"
