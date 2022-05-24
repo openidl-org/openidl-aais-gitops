@@ -154,13 +154,13 @@
   shell: |
     export AWS_PROFILE=cicd-role
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-ca-app-user-token --description "Ca App User token" --secret-string {{ ca_user_token }} --region {{ aws_region }}
-  when: ca_user_token_status == "null"
+  #when: ca_user_token_status == "null"
 
 - name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-ca-app-user-token
   shell: |
     export AWS_PROFILE=cicd-role
     aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token --resource-policy file://aws_resource_policy.json --block-public-policy --region {{ aws_region }}
-  when: ca_user_token_status == "null"
+  #when: ca_user_token_status == "null"
 
 - name: Delete user script pod
   community.kubernetes.k8s:

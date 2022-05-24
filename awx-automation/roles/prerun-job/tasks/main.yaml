@@ -77,10 +77,6 @@
   shell: export AWS_PROFILE=cicd-role; aws sts get-caller-identity
   register: aws_caller_identity
 
-- name: AWS Identity
-  debug:
-    msg: "{{ aws_caller_identity.stdout }}"
-
 - name: Checking kubectl exists
   stat:
     path: /usr/local/bin/kubectl
