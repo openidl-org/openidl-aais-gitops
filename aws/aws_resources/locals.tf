@@ -43,7 +43,7 @@ locals {
   client_callback_urls         = var.aws_env == "prod" ? ["https://openidl.${local.public_domain}/callback", "https://openidl.${local.public_domain}/redirect"] : ["https://openidl.${var.aws_env}.${local.public_domain}/callback", "https://openidl.${var.aws_env}.${local.public_domain}/redirect"]
   client_default_redirect_url  = var.aws_env == "prod" ? "https://openidl.${local.public_domain}/redirect" : "https://openidl.${var.aws_env}.${local.public_domain}/redirect" #redirect url
   client_logout_urls           = var.aws_env == "prod" ? ["https://openidl.${local.public_domain}/signout"] : ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
-  cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain}"
+  cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain}[0]"
 
   def_sg_ingress = [{
     cidr_blocks = var.create_vpc ? var.vpc_cidr : data.aws_vpc.vpc[0].cidr_block
