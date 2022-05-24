@@ -57,9 +57,9 @@
         aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
       register: ca_token_status
 
-    - name: debug ca token status
+    - name: debug ca token status PRINT
       debug:
-        msg: "{{ ca_token_status.stdout }}"
+        msg: "{{ ca_token_status }}"
 
     - name: Get CA credentials from secrets manager
       no_log: true
