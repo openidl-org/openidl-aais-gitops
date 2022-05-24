@@ -45,10 +45,6 @@
         aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
       register: ca_token_status
 
-    - name: debug ca token status PRINT
-      debug:
-        msg: "{{ ca_token_status }}"
-
     - name: Get CA credentials from secrets manager
       no_log: true
       shell: |
@@ -57,29 +53,17 @@
       register: ca_user_password_aws_sm
       when: ca_token_status.stdout != "null"
 
-    - name: debug aws_sm stdout
-      debug:
-        msg: "{{ ca_user_password_aws_sm.stdout }}"
-
     - name: Setting ca-user-password to enroll-user only
       no_log: true
       set_fact:
         ca_user_password: "{{ ca_user_password_aws_sm.stdout }}"
       when: ca_token_status.stdout != "null"
 
-    - name: debug ca user password
-      debug:
-        msg: "{{ ca_user_password }}"
-
     - name: Setting ca-user-password to register and enroll-user
       no_log: true
       set_fact:
         ca_user_password: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
       when: ca_token_status.stdout == "null"
-
-    - name: debug ca user password
-      debug:
-        msg: "{{ ca_user_password }}"
 
     - include_role:
         name: "baf/pre-register-users"
