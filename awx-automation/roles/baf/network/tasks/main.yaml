@@ -119,6 +119,7 @@
           args: 
           - |-
             #!/bin/bash -e
+            set -x
             export LOCAL_PATH=/home/gitrepo
             git clone https://{{ gitops_repo_user|urlencode() }}:${PAT}@{{ gitops_repo_url|urlencode() }} -b {{ gitops_repo_branch }} $LOCAL_PATH
             mkdir /home/blockchain-automation-framework/build
@@ -154,7 +155,7 @@
             elif [ $ACTION = "reset" ]; then
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/reset-network.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true" $EXTRA_VARS
             elif [ $ACTION = "new_org_prereq" ]; then
-              ansible-playbook blockchain-automation-framework/platforms/shared/configuration/kubernetes-env-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=true" $EXTRA_VARS
+              ansible-playbook blockchain-automation-framework/platforms/shared/configuration/kubernetes-env-setup.yaml -e "@/home/config/network-setup.yml" -e "no_ansible_log=false" $EXTRA_VARS
             elif [ $ACTION = "new_org" ]; then
               cat /home/credentials/org.creds > /home/blockchain-automation-framework/build/orderer1.crt
               cat /home/credentials/org.creds > /home/blockchain-automation-framework/build/orderer2.crt
