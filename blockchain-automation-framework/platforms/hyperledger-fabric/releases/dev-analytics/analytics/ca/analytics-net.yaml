@@ -1,0 +1,45 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: analytics-net-ca
+  namespace: analytics-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: analytics-net-ca
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-haproxy
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
+  values:
+    metadata:
+      namespace: analytics-net
+      images:
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        ca: hyperledger/fabric-ca:1.4.8
+       
+    server:
+      name: ca
+      tlsstatus: true
+      admin: analytics-admin
+    storage:
+      storageclassname: analyticssc
+      storagesize: 20Gi
+    vault:
+      role: vault-role
+      address: http://vault.dev.analytics.internal.thetech.digital
+      authpath: devanalytics-net-auth
+      secretcert: analytics/crypto/peerOrganizations/analytics-net/ca?ca.analytics-net-cert.pem
+      secretkey: analytics/crypto/peerOrganizations/analytics-net/ca?analytics-net-CA.key
+      secretadminpass: analytics/credentials/analytics-net/ca/analytics?user
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+    service:
+      servicetype: ClusterIP
+      ports:
+        tcp:
+          port: 7054
+    proxy:
+      provider: haproxy
+      type: peer
+      external_url_suffix: analytics.dev.analytics.thetech.digital
