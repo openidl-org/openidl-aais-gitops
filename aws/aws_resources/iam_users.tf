@@ -329,13 +329,13 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
             ],
             "Effect": "Allow",
             "Resource": [
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-vault-unseal-key-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-config-vault-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-kvs-vault-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-ca-app-user-token-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-mongodb-user-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-mongodb-user-token-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-mongodb-root-token-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-vault-unseal-key-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-config-vault-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-kvs-vault-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-ca-app-user-token-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-mongodb-user-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-mongodb-user-token-??????",
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-mongodb-root-token-??????",
               "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.aws_env}-orderer-tls-??????",
               "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.aws_env}-analytics-msp-??????",
               "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.aws_env}-*-msp-??????"
@@ -489,7 +489,7 @@ resource "aws_iam_policy" "openidl_apps_user_role_policy" {
             "secretsmanager:GetSecretValue",
             "secretsmanager:DescribeSecret",
           ],
-          "Resource": ["arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-kvs-vault-??????"]
+          "Resource": ["arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-kvs-vault-??????"]
         }
     ]
   }) : jsonencode({
@@ -549,7 +549,7 @@ resource "aws_iam_policy" "openidl_apps_user_role_policy" {
             "secretsmanager:GetSecretValue",
             "secretsmanager:DescribeSecret",
           ],
-          "Resource": ["arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.org_name}-${var.aws_env}-kvs-vault-??????"]
+          "Resource": ["arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-kvs-vault-??????"]
         }
     ]
   })
