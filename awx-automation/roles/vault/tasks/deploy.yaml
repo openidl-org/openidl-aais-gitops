@@ -59,6 +59,7 @@
   register: unsealkey
 
 - name: upload Vault unseal keys to aws secrets manager
+  no_log: true
   shell: |
     export AWS_PROFILE=cicd-role
     aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-vault-unseal-key --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }} --region {{ aws_region }}
