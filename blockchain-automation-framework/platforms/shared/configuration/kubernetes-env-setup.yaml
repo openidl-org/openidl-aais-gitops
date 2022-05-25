@@ -34,24 +34,24 @@
     loop_control:
       loop_var: organizationItem
     when: organizationItem.services.stewards is defined and network['type'] == 'indy'
-  - include_role:
-      name: setup/ambassador
-    vars:
-      kubeconfig_path: "{{ item.k8s.config_file }}"
-      kubecontext: "{{ item.k8s.context }}"
-      aws: "{{ item.aws }}"
-    with_items: "{{ network.organizations }}"
-    when: network.env.proxy == 'ambassador'
-  - include_role:
-      name: setup/haproxy-ingress
-    vars:
-      kubeconfig_path: "{{ item.k8s.config_file }}"
-      kubecontext: "{{ item.k8s.context }}"
-      aws: "{{ item.aws }}"
-    with_items: "{{ network.organizations }}"
-    when: network.env.proxy == 'haproxy'
-  vars: #These variables can be overriden from the command line
-    privilege_escalate: false           #Default to NOT escalate to root privledges
-    install_os: "linux"                 #Default to linux OS
-    install_arch:  "amd64"              #Default to amd64 architecture
-    bin_install_dir:  "~/bin"           #Default to ~/bin install directory for binaries
+  #- include_role:
+  #    name: setup/ambassador
+  #  vars:
+  #    kubeconfig_path: "{{ item.k8s.config_file }}"
+  #    kubecontext: "{{ item.k8s.context }}"
+  #    aws: "{{ item.aws }}"
+  #  with_items: "{{ network.organizations }}"
+  #  when: network.env.proxy == 'ambassador'
+  #- include_role:
+  #    name: setup/haproxy-ingress
+  #  vars:
+  #    kubeconfig_path: "{{ item.k8s.config_file }}"
+  #    kubecontext: "{{ item.k8s.context }}"
+  #    aws: "{{ item.aws }}"
+  #  with_items: "{{ network.organizations }}"
+  #  when: network.env.proxy == 'haproxy'
+  #vars: #These variables can be overriden from the command line
+  #  privilege_escalate: false           #Default to NOT escalate to root privledges
+  #  install_os: "linux"                 #Default to linux OS
+  #  install_arch:  "amd64"              #Default to amd64 architecture
+  #  bin_install_dir:  "~/bin"           #Default to ~/bin install directory for binaries
