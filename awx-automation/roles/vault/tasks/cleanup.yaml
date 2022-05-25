@@ -2,9 +2,9 @@
 - name: delete vault secrets from aws secret manager
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --force-delete-without-recovery
-    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-config-vault --force-delete-without-recovery
-    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-kvs-vault --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-vault-unseal-key --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-config-vault --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-kvs-vault --force-delete-without-recovery
   register: output
   ignore_errors: yes
     

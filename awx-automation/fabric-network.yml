@@ -22,7 +22,7 @@
       no_log: true
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+        aws secretsmanager get-secret-value --secret-id {{ network.org_name[:4] }}-{{ env }}-vault-unseal-key --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
       register: vault
 
     - name: Export Orderer TLS Cert
