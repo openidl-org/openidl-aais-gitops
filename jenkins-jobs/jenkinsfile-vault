@@ -15,7 +15,7 @@ pipeline {
             steps {
                 script {
                     buildType = "${params.deploy_action}"
-                    org = params.org_name.substring(0,4)
+                    org = params.org_name[4]
                     vault(buildType)
 
                 }
