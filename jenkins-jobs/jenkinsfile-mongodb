@@ -15,7 +15,11 @@ pipeline {
             steps {
                 script {
                     buildType = "${params.deploy_action}"
+                    if( length <= 4) {
+                        org = params.org_name.substring(0,length)
+                    } else {
                     org = params.org_name.substring(0,4)
+                    }
                     mongoDB(buildType)
                 }
             }
