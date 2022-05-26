@@ -1,9 +1,9 @@
 ordererorg_domain: "thetech.digital"
-domain: "analytics.thetech.digital"
-internal_domain: "analytics.internal.thetech.digital"
-node_type: "analytics"
+domain: "thetech.digital"
+internal_domain: "ndc.internal.thetech.digita"
+node_type: "carrier"
 network:
-  org_name: "analytics"
+  org_name: "ndc"
   ordererorg: "false"
   ordererorg_name: "ordererorg"
   organizations:
@@ -30,7 +30,7 @@ network:
   - name: anal-ndc
     chaincode:
       name: openidl-cc-aais-carriers
-      repo_url: github.com/openidl-org/openidl-main.git
+      repo_url: github.com/rajeshsanjeevi/openidl-main.git
       repo_branch: develop-nd
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
