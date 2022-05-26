@@ -18,6 +18,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
+                    length = params.org_name.length()
                     if( length <= 4) {
                         org = params.org_name.substring(0,length)
                     } else {
