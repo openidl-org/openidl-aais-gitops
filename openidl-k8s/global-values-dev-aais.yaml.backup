@@ -11,9 +11,9 @@ global:
         ingresshostname: data-call-app-service.dev.internal.thetech.digital
         publicingresshostname: data-call-app-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-app
+            repository: ghcr.io/openidl-org/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 10-develop-jenkins-ac909cd-052720221742
+            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
     utilities:
         install: true
         port: 8080
@@ -23,9 +23,9 @@ global:
         ingresshostname: utilities-service.dev.internal.thetech.digital
         publicingresshostname: utilities-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
+            repository: ghcr.io/openidl-org/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 4-develop-jenkins-ac909cd-052720221742
+            tag: 17-cognito-fabric-node14-helm-f84a367-093020211950
     ui:
         install: true
         servicename: ui-service
@@ -34,9 +34,9 @@ global:
         ingressenabled: false
         ingresshostname: openidl.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-org/openidl-ui
+            repository: ghcr.io/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 13-develop-jenkins-ac909cd-052720221742
+            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
     insurancedatamanager:
         install: true
         port: 8080
@@ -45,18 +45,18 @@ global:
         ingressenabled: false
         ingresshostname: insurance-data-manager-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-insurance-data-manager
+            repository: ghcr.io/openidl-org/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 6-develop-jenkins-ac909cd-052720221742
+            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
     datacallprocessor:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-processor-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
+            repository: ghcr.io/openidl-org/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 5-develop-jenkins-ac909cd-052720221742
+            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
     upload:
         install: false
         port: 80
@@ -72,18 +72,18 @@ global:
         targetport: 8080
         servicename: data-call-mood-listener-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-mood-listener
+            repository: ghcr.io/openidl-org/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 13-develop-jenkins-ac909cd-052720221742
+            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
     transactionaldataeventlistener:
         install: false
         port: 8080
         targetport: 8080
         servicename: transactional-data-event-listener-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
+            repository: ghcr.io/openidl-org/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 4-develop-jenkins-ac909cd-052720221742
+            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
     carrierui:
         install: false
         servicename: carrier-ui-service
@@ -92,8 +92,8 @@ global:
         ingressenabled: false
         ingresshostname: openidl.dev.aais.openidl.aaisdirect.com
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-carrier-ui
+            repository: ghcr.io/openidl-org/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 13-develop-jenkins-ac909cd-052720221742
+            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
     secrets:
         install: true
