@@ -35,4 +35,4 @@ network:
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
         - name: "anal_ndc_pdc"
-          policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
+          policy: "OR('analyticsMSP.member', 'ndcMSP.member')"

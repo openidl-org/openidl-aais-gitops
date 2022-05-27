@@ -30,9 +30,9 @@ network:
   - name: anal-ndc
     chaincode:
       name: openidl-cc-aais-carriers
-      repo_url: github.com/rajeshsanjeevi/openidl-main.git
+      repo_url: github.com/openidl-org/openidl-main.git
       repo_branch: develop-nd
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
         - name: "anal_ndc_pdc"
-          policy: "OR('analyticsMSP.member', 'carrierMSP.member')"
+          policy: "OR('analyticsMSP.member', 'ndcMSP.member')"
