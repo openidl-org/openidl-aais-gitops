@@ -9,7 +9,7 @@ network:
   organizations:
     - name: "analytics"
       domain: "analytics.thetech.digital"
-    - name: "ndc1"
+    - name: "ndc"
       domain: "ndc.thetech.digital"
   channels:
   - name: defaultchannel
