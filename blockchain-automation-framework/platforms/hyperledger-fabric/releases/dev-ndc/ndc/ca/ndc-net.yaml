@@ -1,0 +1,45 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ndc-net-ca
+  namespace: ndc-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: ndc-net-ca
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-haproxy
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
+  values:
+    metadata:
+      namespace: ndc-net
+      images:
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        ca: hyperledger/fabric-ca:1.4.8
+       
+    server:
+      name: ca
+      tlsstatus: true
+      admin: ndc-admin
+    storage:
+      storageclassname: ndcsc
+      storagesize: 20Gi
+    vault:
+      role: vault-role
+      address: http://vault.dev.ndc.internal.thetech.digital
+      authpath: devndc-net-auth
+      secretcert: ndc/crypto/peerOrganizations/ndc-net/ca?ca.ndc-net-cert.pem
+      secretkey: ndc/crypto/peerOrganizations/ndc-net/ca?ndc-net-CA.key
+      secretadminpass: ndc/credentials/ndc-net/ca/ndc?user
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+    service:
+      servicetype: ClusterIP
+      ports:
+        tcp:
+          port: 7054
+    proxy:
+      provider: haproxy
+      type: peer
+      external_url_suffix: ndc.dev.thetech.digital
