@@ -161,7 +161,7 @@
               cat /home/credentials/org.creds > /home/blockchain-automation-framework/build/orderer3.crt
               cat /home/credentials/org.creds > /home/blockchain-automation-framework/build/orderer4.crt
               cat /home/credentials/org.creds > /home/blockchain-automation-framework/build/orderer5.crt
-              ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/launch-new-organization.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=true" $EXTRA_VARS
+              ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/launch-new-organization.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=false" $EXTRA_VARS
             elif [ $ACTION = "add_new_org" ]; then
               cat /home/credentials/org.creds > $LOCAL_PATH/blockchain-automation-framework/platforms/hyperledger-fabric/configuration/build/channel-artifacts/${CHANNEL_NAME}.json
               ansible-playbook blockchain-automation-framework/platforms/hyperledger-fabric/configuration/syschannel-add-org.yaml -e "@/home/config/network-setup.yml" -e "add_new_org=true" -e "no_ansible_log=true" $EXTRA_VARS
