@@ -1,5 +1,5 @@
 ordererorg_domain: "thetech.digital"
-domain: "thetech.digital"
+domain: "ndc.thetech.digital"
 internal_domain: "ndc.internal.thetech.digital"
 node_type: "carrier"
 network:
