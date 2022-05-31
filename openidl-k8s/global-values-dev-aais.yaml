@@ -23,9 +23,9 @@ global:
         ingresshostname: utilities-service.dev.internal.thetech.digital
         publicingresshostname: utilities-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
+            repository: ghcr.io/openidl-org/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 5-develop-jenkins-0edbace-053120221949
+            tag: 17-cognito-fabric-node14-helm-f84a367-093020211950
     ui:
         install: true
         servicename: ui-service
