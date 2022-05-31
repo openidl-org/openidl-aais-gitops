@@ -13,7 +13,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 10-develop-jenkins-ac909cd-052720221742
+            tag: 14-develop-jenkins-c4cf397-053120221932
     utilities:
         install: true
         port: 8080
