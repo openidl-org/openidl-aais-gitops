@@ -1,5 +1,5 @@
 global:
-    clusterurl: aaisanalyticsdemo.com
+    clusterurl: analyticsdemo.com
     appsecret: apps-secret
     configpath: config-local-analytics
     datacallapp:
@@ -8,73 +8,73 @@ global:
         targetport: 8080
         servicename: data-call-app-service
         ingressenabled: false
-        ingresshostname: data-call-app-service.dev.analytics.internal.aaisdirect.com
-        publicingresshostname: data-call-app-service.dev.analytics.openidl.aaisdirect.com
+        ingresshostname: data-call-app-service.dev.analytics.internal.thetech.digital
+        publicingresshostname: data-call-app-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-data-call-app
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-ap
             pullPolicy: IfNotPresent
-            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-c4cf397-053120221932
     utilities:
         install: true
         port: 8080
         targetport: 8080
         servicename: utilities-service
         ingressenabled: false
-        ingresshostname: utilities-service.dev.analytics.internal.aaisdirect.com
-        publicingresshostname: utilities-service.dev.analytics.openidl.aaisdirect.com
+        ingresshostname: utilities-service.dev.analytics.internal.thetech.digital
+        publicingresshostname: utilities-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-utilities
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 17-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 5-develop-jenkins-0edbace-053120221949
     ui:
         install: true
         servicename: ui-service
         port: 8080
         targetport: 8080
         ingressenabled: false
-        ingresshostname: openidl.dev.analytics.openidl.aaisdirect.com
+        ingresshostname: openidl.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-ui
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 1-git-actions-helm-3b27ace-091420211922
+            tag: 14-develop-jenkins-0edbace-053120221949
     datacallmoodlistener:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-mood-listener-service
         image:
-            repository: ghcr.io/openidl-org/openidl-data-call-mood-listener
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-0edbace-053120221949
     transactionaldataeventlistener:
         install: true
         port: 8080
         targetport: 8080
         servicename: transactional-data-event-listener-service
         image:
-            repository: ghcr.io/openidl-org/openidl-transactional-data-event-listener
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 5-develop-jenkins-0edbace-053120221949
     datacallprocessor:
         install: false
         port: 8080
         targetport: 8080
         servicename: data-call-processor-service
         image:
-            repository: ghcr.io/openidl-org/openidl-data-call-processor
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 6-develop-jenkins-0edbace-053120221949
     insurancedatamanager:
         install: false
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
         ingressenabled: false
-        ingresshostname: insurance-data-manager-service.dev.analytics.openidl.aaisdirect.com
+        ingresshostname: insurance-data-manager-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-insurance-data-manager
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 7-develop-jenkins-0edbace-053120221949
     upload:
         install: false
         port: 80
@@ -90,10 +90,10 @@ global:
         port: 8080
         targetport: 8080
         ingressenabled: false
-        ingresshostname: openidl.dev.analytics.openidl.aaisdirect.com
+        ingresshostname: openidl.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-carrier-ui
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-0edbace-053120221949
     secrets:
         install: true
