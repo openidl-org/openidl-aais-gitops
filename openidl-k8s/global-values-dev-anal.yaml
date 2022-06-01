@@ -11,7 +11,7 @@ global:
         ingresshostname: data-call-app-service.dev.analytics.internal.thetech.digital
         publicingresshostname: data-call-app-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-ap
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
             tag: 14-develop-jenkins-c4cf397-053120221932
     utilities:
