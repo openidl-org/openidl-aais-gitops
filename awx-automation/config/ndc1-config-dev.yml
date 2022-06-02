@@ -1,6 +1,6 @@
 ordererorg_domain: "thetech.digital"
-domain: "ndc.thetech.digital"
-internal_domain: "ndc.internal.thetech.digital"
+domain: "ndc1.thetech.digital"
+internal_domain: "ndc1.internal.thetech.digital"
 node_type: "carrier"
 network:
   org_name: "ndc1"
@@ -10,7 +10,7 @@ network:
     - name: "analytics"
       domain: "analytics.thetech.digital"
     - name: "ndc1"
-      domain: "ndc.thetech.digital"
+      domain: "ndc1.thetech.digital"
   channels:
   - name: defaultchannel
     chaincode:

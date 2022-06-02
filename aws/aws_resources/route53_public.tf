@@ -14,7 +14,7 @@ resource "aws_route53_zone" "public_zones" {
 resource "aws_route53_record" "nlb_bastion_r53_record" {
   count   = var.domain_info.r53_public_hosted_zone_required == "yes" && var.create_bastion_host ? 1 : 0
   zone_id = aws_route53_zone.public_zones[0].id
-  name    = var.aws_env != "prod" ? "bastion.${var.aws_env}.${local.public_domain}" : "bastion.${local.public_domain}"
+  name    = "bastion.${var.aws_env}.${local.public_domain}"
   type    = "A"
   ttl     = "300"
   records = [aws_eip.bastion_host_eip[0].public_ip]

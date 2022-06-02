@@ -99,7 +99,7 @@ s3_bucket_name_logos = "openidl-public-logos"
 s3_bucket_name_access_logs = "openidl-access-logs"
 
 #--------------------------------------------------------------------------------------------------------------------
-#KMS Key arn to be used when create_kms_keys is set to false
+#KMS Key arn to be set when create_kms_keys is set to false
 create_kms_keys = "true"
 s3_kms_key_arn = ""
 eks_kms_key_arn = ""
