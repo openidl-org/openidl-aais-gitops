@@ -1,5 +1,0 @@
-{
-    "persistentStore": "mongo",
-    "mongodb": "openidl-offchain-db",
-    "simpleURI": "mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@${AAIS_ORGNAME}-mongodb-0.${AAIS_ORGNAME}-mongodb-headless.database.svc.cluster.local:27017,${AAIS_ORGNAME}-mongodb-1.${AAIS_ORGNAME}-mongodb-headless.database.svc.cluster.local:27017,${AAIS_ORGNAME}-mongodb-2.${AAIS_ORGNAME}-mongodb-headless.database.svc.cluster.local:27017/openidl-offchain-db?authSource=openidl-offchain-db"
-}

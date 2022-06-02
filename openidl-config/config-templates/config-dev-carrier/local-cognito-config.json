@@ -1,6 +1,0 @@
-{
-  "idpType": "cognito",
-  "userPoolId": "${AWS_COGNITO_USERPOOLID}",
-  "clientId": "${AWS_COGNITO_CLIENTID}",
-  "region": "${AWS_COGNITO_REGION}"
-}
