@@ -1,9 +1,9 @@
 #Route53 private entries
 output "private_data_call_service_fqdn" {
-  value = aws_route53_record.private_record_services["data-call-app-service"].fqdn
+  value = aws_route53_record.private_record_services_internal["data-call-app-service"].fqdn
 }
 output "private_insurance_manager_service_fqdn" {
-  value = aws_route53_record.private_record_services["insurance-data-manager-service"].fqdn
+  value = aws_route53_record.private_record_services_internal["insurance-data-manager-service"].fqdn
 }
 output "private_vault_fqdn" {
   value = aws_route53_record.private_record_vault.fqdn
