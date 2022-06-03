@@ -97,7 +97,10 @@ spec:
           validateVaultResponse "secret (${vault_secret_key})" "${LOOKUP_SECRET_RESPONSE}" "LOOKUPSECRETRESPONSE"
 
           TLS_CA_CERT=$(echo ${LOOKUP_SECRET_RESPONSE} | jq -r '.data["ca.crt"]')
-
+          
+          echo "TLS CA certificate"
+          echo "${TLS_CA_CERT}" #remove this
+          
           mkdir -p ${OUTPUT_PATH}
           echo "${TLS_CA_CERT}" >> ${OUTPUT_PATH}/ca.crt
 
@@ -125,6 +128,14 @@ spec:
           echo "${KEYSTORE}" >> ${OUTPUT_PATH}/keystore/server.key
           echo "${SIGNCERTS}" >> ${OUTPUT_PATH}/signcerts/server.crt
           echo "${TLSCACERTS}" >> ${OUTPUT_PATH}/tlscacerts/tlsca.crt
+          
+          echo "MSP certificates"
+          echo "${ADMINCERT}" 
+          echo "${CACERTS}" 
+          echo "${KEYSTORE}" 
+          echo "${SIGNCERTS}" 
+          echo "${TLSCACERTS}"
+          
         volumeMounts:
         {{ if .Values.vault.tls  }}
         - name: vaultca
