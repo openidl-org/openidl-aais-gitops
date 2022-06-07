@@ -164,6 +164,7 @@ spec:
           fi
           CHANNEL_JOIN=$(peer channel list 2>/dev/null)
           echo $CHANNEL_JOIN | grep -q ${CHANNEL_NAME}
+          sleep 3000
           if [ $? = 1 ]
           then
           peer channel join -b ${CHANNEL_NAME}.block
