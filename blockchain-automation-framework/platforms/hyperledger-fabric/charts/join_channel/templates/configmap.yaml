@@ -20,3 +20,5 @@ data:
   ORDERER_CA: /opt/gopath/src/github.com/hyperledger/fabric/crypto/orderer/tls/ca.crt
   ORDERER_URL: {{ $.Values.orderer.address }}
   CORE_PEER_MSPCONFIGPATH: /opt/gopath/src/github.com/hyperledger/fabric/crypto/admin/msp
+  GRPC_TRACE: all
+  GRPC_VERBOSITY: DEBUG
