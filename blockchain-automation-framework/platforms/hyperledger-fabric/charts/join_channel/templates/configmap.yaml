@@ -11,7 +11,7 @@ metadata:
     {{- include "labels.custom" . | nindent 2 }}
 data:
   CHANNEL_NAME: {{ $.Values.channel.name }}
-  FABRIC_LOGGING_SPEC: {{ $.Values.peer.loglevel }}
+  FABRIC_LOGGING_SPEC: {{ $.Values.peer.loglevel }}:grpc=debug
   CORE_PEER_ID: {{ $.Values.peer.name }}.{{ $.Values.metadata.namespace }}
   CORE_PEER_ADDRESS: {{ $.Values.peer.address }}
   CORE_PEER_LOCALMSPID: {{ $.Values.peer.localmspid }}
