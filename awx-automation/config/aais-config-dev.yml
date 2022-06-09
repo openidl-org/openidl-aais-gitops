@@ -1,6 +1,6 @@
 ordererorg_domain: "thetech.digital"
-domain: "thetech.digital"
-internal_domain: "internal.thetech.digital"
+domain: "aais.thetech.digital"
+internal_domain: "aais.internal.thetech.digital"
 node_type: "carrier"
 network:
   org_name: "aais"
