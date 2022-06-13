@@ -1,0 +1,63 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: analytics-peer0
+  namespace: analytics-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: analytics-peer0
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-haproxy
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/peernode    
+  values:
+    metadata:
+      namespace: analytics-net
+      images:
+        couchdb: couchdb:3.1
+        peer: hyperledger/fabric-peer:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        
+    peer:
+      name: peer0
+      gossippeeraddress: peer0.analytics-net.analytics.dev.analytics.thetech.digital:8443
+      gossipexternalendpoint: peer0.analytics-net.analytics.dev.analytics.thetech.digital:8443
+      localmspid: analyticsMSP
+      loglevel: info
+      tlsstatus: true
+      builder: hyperledger/fabric-ccenv:2.2.3
+      couchdb:
+        username: analytics-user
+
+    storage:
+      peer:
+        storageclassname: analyticssc
+        storagesize: 50Gi
+      couchdb:
+        storageclassname: analyticssc
+        storagesize: 50Gi
+
+    vault:
+      role: vault-role
+      address: http://vault.dev.analytics.internal.thetech.digital
+      authpath: devanalytics-net-auth
+      secretprefix: analytics/crypto/peerOrganizations/analytics-net/peers/peer0.analytics-net
+      secretambassador: analytics/crypto/peerOrganizations/analytics-net/ambassador
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      secretcouchdbpass: analytics/credentials/analytics-net/couchdb/analytics?user
+
+    service:
+      servicetype: ClusterIP
+      ports:
+        grpc:
+          clusteripport: 7051
+        events:
+          clusteripport: 7053
+        couchdb:
+          clusteripport: 5984
+          
+    proxy:
+      provider: "haproxy"
+      external_url_suffix: analytics.dev.analytics.thetech.digital
