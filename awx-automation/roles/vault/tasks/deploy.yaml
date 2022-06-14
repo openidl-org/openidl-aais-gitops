@@ -35,7 +35,7 @@
     --set tlsDisable=false \
     --set server.ingress.enabled=true \
     --set server.ingress.hosts[0].host=vault.{{ env }}.{{ internal_domain }} \
-    --set server.ingress.annotations."kubernetes\.io/ingress\.class"=nginx \
+    --set server.ingress.annotations."kubernetes\.io/ingress\.class"=nginx-internal \
     --set server.dataStorage.storageClass=openidl-sc \
     --version="0.16.1"
   tags:
