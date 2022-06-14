@@ -308,7 +308,7 @@
 - name: Delete vault values file
   file:
     state: absent
-    path: ./vault-values.yaml
+    path: ./vault-values-external.yaml
 
 - name: Delete aws resource policy file
   file:

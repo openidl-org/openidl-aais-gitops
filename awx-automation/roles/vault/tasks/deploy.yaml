@@ -2,7 +2,7 @@
 - name: generate vault values template from vault.j2 file
   template:
     src: templates/vault.j2
-    dest: "./vault-values-external.yaml"
+    dest: "./vault-values.yaml"
     mode: 0755
 
 - name: generate aws resource policy from template aws_resource_policy.json.j2
