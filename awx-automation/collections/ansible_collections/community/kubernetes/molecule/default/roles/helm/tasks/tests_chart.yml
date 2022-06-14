@@ -295,7 +295,7 @@
         chart_version: "{{ chart_source_version | default(omit) }}"
         namespace: "{{ helm_namespace }}"
         values_files:
-          - "{{ role_path }}/files/values.yaml"
+          - "{{ role_path }}/files/values-external.yaml"
       register: install
 
     - name: "Assert that {{ chart_test }} chart has var from {{ source }}"
@@ -314,7 +314,7 @@
         chart_version: "{{ chart_source_version | default(omit) }}"
         namespace: "{{ helm_namespace }}"
         values_files:
-          - "{{ role_path }}/files/values.yaml"
+          - "{{ role_path }}/files/values-external.yaml"
       register: install
 
     - name: "Assert the result is consistent"
@@ -329,7 +329,7 @@
         chart_version: "{{ chart_source_version | default(omit) }}"
         output_dir: "{{ temp_dir }}"
         values_files:
-          - "{{ role_path }}/files/values.yaml"
+          - "{{ role_path }}/files/values-external.yaml"
       register: result
 
     - assert:

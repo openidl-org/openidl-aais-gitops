@@ -10,7 +10,7 @@ resource "helm_release" "app_haproxy" {
   force_update = true
   wait = true
   wait_for_jobs = true
-  values = ["${file("resources/haproxy-app-cluster/values.yaml")}"]
+  values = ["${file("resources/haproxy-app-cluster/values-external.yaml")}"]
 }
 #Setting up ha proxy in blk cluster
 resource "helm_release" "blk_haproxy" {
@@ -23,6 +23,6 @@ resource "helm_release" "blk_haproxy" {
   force_update = true
   wait = true
   wait_for_jobs = true
-  values = ["${file("resources/haproxy-blk-cluster/values.yaml")}"]
+  values = ["${file("resources/haproxy-blk-cluster/values-external.yaml")}"]
 }
 */

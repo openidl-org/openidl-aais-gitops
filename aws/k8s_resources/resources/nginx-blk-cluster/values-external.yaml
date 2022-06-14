@@ -10,16 +10,16 @@
 ## Labels to apply to all resources
 ##
 commonLabels:
-  cluster: app-cluster
+  cluster: blk-cluster
   component: nginx-ingress-controller
 
 controller:
-  name: nginx
+  name: nginx-external
   image:
     registry: k8s.gcr.io
     image: ingress-nginx/controller
     ## for backwards compatibility consider setting the full image url via the repository value below
-    ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
+    ## use *either* current default registry/image or repository format or installing chart by providing the values-external.yaml will fail
     ## repository:
     tag: "v1.1.2"
     digest: sha256:28b11ce69e57843de44e3db6413e98d09de0f6688e33d4bd384002a44f78405c
@@ -103,7 +103,7 @@ controller:
   ## IngressClass resources are supported since k8s >= 1.18 and required since k8s >= 1.19
   ingressClassResource:
     # -- Name of the ingressClass
-    name: nginx
+    name: nginx-external
     # -- Is this ingressClass enabled or not
     enabled: true
     # -- Is this the default ingressClass for the cluster
@@ -118,7 +118,7 @@ controller:
 
   # -- For backwards compatibility with ingress.class annotation, use ingressClass.
   # Algorithm is as follows, first ingressClassName is considered, if not present, controller looks for ingress.class annotation
-  ingressClass: nginx
+  ingressClass: nginx-external
 
   # -- Labels to add to the pod container metadata
   podLabels: {}
@@ -499,7 +499,7 @@ controller:
 
     ports:
       http: 80
-      https: 443
+      https: 8443
 
     targetPorts:
       http: http
@@ -531,7 +531,7 @@ controller:
 
     internal:
       # -- Enables an additional internal load balancer (besides the external one).
-      enabled: true
+      enabled: false
       # -- Annotations are mandatory for the load balancer to come up. Varies with the cloud service.
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
@@ -647,7 +647,7 @@ controller:
         registry: k8s.gcr.io
         image: ingress-nginx/kube-webhook-certgen
         ## for backwards compatibility consider setting the full image url via the repository value below
-        ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
+        ## use *either* current default registry/image or repository format or installing chart by providing the values-external.yaml will fail
         ## repository:
         tag: v1.1.1
         digest: sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
@@ -774,7 +774,7 @@ defaultBackend:
     registry: k8s.gcr.io
     image: defaultbackend-amd64
     ## for backwards compatibility consider setting the full image url via the repository value below
-    ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
+    ## use *either* current default registry/image or repository format or installing chart by providing the values-external.yaml will fail
     ## repository:
     tag: "1.5"
     pullPolicy: IfNotPresent

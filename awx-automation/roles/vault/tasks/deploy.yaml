@@ -2,7 +2,7 @@
 - name: generate vault values template from vault.j2 file
   template:
     src: templates/vault.j2
-    dest: "./vault-values.yaml"
+    dest: "./vault-values-external.yaml"
     mode: 0755
 
 - name: generate aws resource policy from template aws_resource_policy.json.j2
@@ -300,7 +300,7 @@
 - name: Delete vault values file
   file:
     state: absent
-    path: ./vault-values.yaml
+    path: ./vault-values-external.yaml
 
 - name: Delete aws resource policy file
   file:

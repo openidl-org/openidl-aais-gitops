@@ -178,7 +178,7 @@ EXAMPLES = r'''
     chart_ref: stable/grafana
     release_namespace: monitoring
     values_files:
-      - /path/to/values.yaml
+      - /path/to/values-external.yaml
 
 - name: Remove test release and waiting suppression ending
   community.kubernetes.helm:
