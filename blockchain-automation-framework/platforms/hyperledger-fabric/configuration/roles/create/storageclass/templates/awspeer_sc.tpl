@@ -13,3 +13,4 @@ allowedTopologies:
     values:
     - "{{ kubernetes.region }}a"
     - "{{ kubernetes.region }}b"
+    - "{{ kubernetes.region }}c"
