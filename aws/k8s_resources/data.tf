@@ -31,6 +31,7 @@ data aws_alb "app_nlb_external" {
   }
   depends_on = [helm_release.app_nginx_external]
 }
+/*
 data aws_alb "app_nlb_internal" {
   tags = {
     "kubernetes.io/cluster/${local.app_cluster_name}" = "owned",
@@ -38,7 +39,7 @@ data aws_alb "app_nlb_internal" {
     #"kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-internal"
   }
   depends_on = [helm_release.app_nginx_internal]
-}
+}*/
 #Reading NLB setup by ingress controller deployed in blk EKS
 data aws_alb "blk_nlb_external" {
   tags = {
@@ -48,6 +49,7 @@ data aws_alb "blk_nlb_external" {
   }
   depends_on = [helm_release.blk_nginx_external]
 }
+/*
 data aws_alb "blk_nlb_internal" {
   tags = {
     "kubernetes.io/cluster/${local.blk_cluster_name}" = "owned",
@@ -55,7 +57,7 @@ data aws_alb "blk_nlb_internal" {
     #"kubernetes.io/service-name" = "ingress-controller/haproxy-ingress-internal"
   }
   depends_on = [helm_release.blk_nginx_internal]
-}
+}*/
 #Reading application cluster info
 data "aws_eks_cluster" "app_eks_cluster" {
   name = data.terraform_remote_state.base_setup.outputs.app_cluster_name

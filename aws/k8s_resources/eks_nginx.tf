@@ -28,6 +28,7 @@ resource "helm_release" "blk_nginx_external" {
   wait_for_jobs = true
   values = ["${file("resources/nginx-blk-cluster/values-external.yaml")}"]
 }
+/*
 #Setting up ha proxy in app cluster
 resource "helm_release" "app_nginx_internal" {
   depends_on = [data.aws_eks_cluster.app_eks_cluster, data.aws_eks_cluster_auth.app_eks_cluster_auth, kubernetes_config_map.app_config_map]
@@ -58,3 +59,4 @@ resource "helm_release" "blk_nginx_internal" {
   wait_for_jobs = true
   values = ["${file("resources/nginx-blk-cluster/values-internal.yaml")}"]
 }
+*/
