@@ -83,6 +83,8 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: {{ $.Values.server.name }}
-          servicePort: {{ $.Values.service.ports.tcp.clusteripport }}    
+          service:
+            name: {{ $.Values.server.name }}
+            port:
+              number: {{ $.Values.service.ports.tcp.clusteripport }}
 {{- end }}
