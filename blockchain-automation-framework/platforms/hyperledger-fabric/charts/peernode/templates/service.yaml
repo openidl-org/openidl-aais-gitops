@@ -119,5 +119,6 @@ spec:
         backend:
           service:
             name: {{ $.Values.peer.name }}
-            port: {{ $.Values.service.ports.grpc.clusteripport }}
+            port: 
+              number: {{ $.Values.service.ports.grpc.clusteripport }}
 {{- end }}
