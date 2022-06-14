@@ -82,6 +82,7 @@ spec:
     http:
       paths:
       - path: /
+        pathType: ImplementationSpecific
         backend:
           service:
             name: {{ $.Values.server.name }}
