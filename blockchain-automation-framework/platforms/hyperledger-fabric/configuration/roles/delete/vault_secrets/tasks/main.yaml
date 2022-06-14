@@ -43,7 +43,7 @@
     kubeconfig: "{{ kubernetes.config_file }}"
     context: "{{ kubernetes.context }}"
     state: absent
-  when: network.env.proxy == 'haproxy'
+  when: network.env.proxy == 'nginx'
   ignore_errors: yes
   
 - name: Delete Ambassador creds
@@ -64,7 +64,7 @@
     kubeconfig: "{{ kubernetes.config_file }}"
     context: "{{ kubernetes.context }}"
     state: absent
-  when: network.env.proxy == 'haproxy'
+  when: network.env.proxy == 'nginx'
   ignore_errors: yes
 
 ############################################################################################

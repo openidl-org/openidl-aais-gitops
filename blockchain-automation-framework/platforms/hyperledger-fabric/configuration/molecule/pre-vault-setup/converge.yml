@@ -7,7 +7,7 @@
     network:
       env:
         type: test
-        proxy: haproxy
+        proxy: nginx
       orderers:
       - orderer:
           type: orderer

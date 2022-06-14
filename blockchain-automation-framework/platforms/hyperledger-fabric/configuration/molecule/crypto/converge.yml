@@ -6,7 +6,7 @@
     network:
       env:
         type: test
-        proxy: haproxy
+        proxy: nginx
       orderers:
       - orderer:
         type: orderer
@@ -225,7 +225,7 @@
         network:
           version: "1.4.4"
           env:
-            proxy: haproxy
+            proxy: nginx
             type: test
           organizations:
             - organization:
@@ -299,7 +299,7 @@
             org_status: new
         network:
           env:
-            proxy: haproxy
+            proxy: nginx
             type: test
           version: "1.4.4"
           organizations:
