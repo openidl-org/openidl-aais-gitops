@@ -103,7 +103,7 @@ metadata:
   name: {{ $.Values.peer.name }}
   namespace:  {{ $.Values.metadata.namespace }}
   annotations:
-    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
       nginx.ingress.kubernetes.io/rewrite-target: /
