@@ -1,19 +1,19 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: analytics-peer0
-  namespace: analytics-net
+  name: cnd-peer0
+  namespace: cnd-net
   annotations:
     fluxcd.io/automated: "false"
 spec:
-  releaseName: analytics-peer0
+  releaseName: cnd-peer0
   chart:
     git: https://github.com/openidl-org/openidl-aais-gitops.git
     ref: develop-haproxy
     path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/peernode    
   values:
     metadata:
-      namespace: analytics-net
+      namespace: cnd-net
       images:
         couchdb: couchdb:3.1
         peer: hyperledger/fabric-peer:2.2.3
@@ -21,32 +21,32 @@ spec:
         
     peer:
       name: peer0
-      gossippeeraddress: peer0.analytics-net.analytics.dev.analytics.thetech.digital:8443
-      gossipexternalendpoint: peer0.analytics-net.analytics.dev.analytics.thetech.digital:8443
-      localmspid: analyticsMSP
+      gossippeeraddress: peer0.cnd-net.cnd.dev.cnd.thetech.digital:8443
+      gossipexternalendpoint: peer0.cnd-net.cnd.dev.cnd.thetech.digital:8443
+      localmspid: cndMSP
       loglevel: info
       tlsstatus: true
       builder: hyperledger/fabric-ccenv:2.2.3
       couchdb:
-        username: analytics-user
+        username: cnd-user
 
     storage:
       peer:
-        storageclassname: analyticssc
+        storageclassname: cndsc
         storagesize: 50Gi
       couchdb:
-        storageclassname: analyticssc
+        storageclassname: cndsc
         storagesize: 50Gi
 
     vault:
       role: vault-role
-      address: http://vault.dev.analytics.internal.thetech.digital
-      authpath: devanalytics-net-auth
-      secretprefix: analytics/crypto/peerOrganizations/analytics-net/peers/peer0.analytics-net
-      secretambassador: analytics/crypto/peerOrganizations/analytics-net/ambassador
+      address: http://vault.dev.cnd.internal.thetech.digital
+      authpath: devcnd-net-auth
+      secretprefix: cnd/crypto/peerOrganizations/cnd-net/peers/peer0.cnd-net
+      secretambassador: cnd/crypto/peerOrganizations/cnd-net/ambassador
       serviceaccountname: vault-auth
       imagesecretname: regcred
-      secretcouchdbpass: analytics/credentials/analytics-net/couchdb/analytics?user
+      secretcouchdbpass: cnd/credentials/cnd-net/couchdb/cnd?user
 
     service:
       servicetype: ClusterIP
@@ -59,5 +59,10 @@ spec:
           clusteripport: 5984
           
     proxy:
+<<<<<<< HEAD:blockchain-automation-framework/platforms/hyperledger-fabric/releases/dev-analytics/analytics/analytics/values-peer0.yaml
       provider: "nginx"
       external_url_suffix: analytics.dev.analytics.thetech.digital
+=======
+      provider: "haproxy"
+      external_url_suffix: cnd.dev.cnd.thetech.digital
+>>>>>>> 869f9724202a654459868ebc5157330aecf85e6d:blockchain-automation-framework/platforms/hyperledger-fabric/releases/dev-cnd/cnd/cnd/values-peer0.yaml

@@ -1,19 +1,19 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: analytics-net-ca-tools
-  namespace: analytics-net
+  name: cnd-net-ca-tools
+  namespace: cnd-net
   annotations:
     fluxcd.io/automated: "false"
 spec:
-  releaseName: analytics-net-ca-tools
+  releaseName: cnd-net-ca-tools
   chart:
     git: https://github.com/openidl-org/openidl-aais-gitops.git
     ref: develop-haproxy
     path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/catools
   values:
     metadata:
-      namespace: analytics-net
+      namespace: cnd-net
       name: ca-tools
     replicaCount: 1
 
@@ -23,5 +23,5 @@ spec:
       pullPolicy: IfNotPresent
       
     storage:
-      storageclassname: analyticssc
+      storageclassname: cndsc
       storagesize: 10Gi

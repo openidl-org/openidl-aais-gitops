@@ -1,19 +1,19 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: analytics-net-ca
-  namespace: analytics-net
+  name: cnd-net-ca
+  namespace: cnd-net
   annotations:
     fluxcd.io/automated: "false"
 spec:
-  releaseName: analytics-net-ca
+  releaseName: cnd-net-ca
   chart:
     git: https://github.com/openidl-org/openidl-aais-gitops.git
     ref: develop-haproxy
     path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
   values:
     metadata:
-      namespace: analytics-net
+      namespace: cnd-net
       images:
         alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
         ca: hyperledger/fabric-ca:1.4.8
@@ -21,17 +21,17 @@ spec:
     server:
       name: ca
       tlsstatus: true
-      admin: analytics-admin
+      admin: cnd-admin
     storage:
-      storageclassname: analyticssc
+      storageclassname: cndsc
       storagesize: 20Gi
     vault:
       role: vault-role
-      address: http://vault.dev.analytics.internal.thetech.digital
-      authpath: devanalytics-net-auth
-      secretcert: analytics/crypto/peerOrganizations/analytics-net/ca?ca.analytics-net-cert.pem
-      secretkey: analytics/crypto/peerOrganizations/analytics-net/ca?analytics-net-CA.key
-      secretadminpass: analytics/credentials/analytics-net/ca/analytics?user
+      address: http://vault.dev.cnd.internal.thetech.digital
+      authpath: devcnd-net-auth
+      secretcert: cnd/crypto/peerOrganizations/cnd-net/ca?ca.cnd-net-cert.pem
+      secretkey: cnd/crypto/peerOrganizations/cnd-net/ca?cnd-net-CA.key
+      secretadminpass: cnd/credentials/cnd-net/ca/cnd?user
       serviceaccountname: vault-auth
       imagesecretname: regcred
     service:
@@ -42,4 +42,4 @@ spec:
     proxy:
       provider: haproxy
       type: peer
-      external_url_suffix: analytics.dev.analytics.thetech.digital
+      external_url_suffix: cnd.dev.cnd.thetech.digital
