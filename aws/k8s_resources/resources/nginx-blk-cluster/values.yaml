@@ -520,11 +520,11 @@ controller:
       udp: {}
 
     nodePortsInternal:
-      http: "30700"
-      https: "30800"
+      http: "30100"
+      https: "30200"
     nodePortsExternal:
-      http: "30600"
-      https: "30900"
+      http: "30300"
+      https: "30400"
 
     external:
       enabled: true
