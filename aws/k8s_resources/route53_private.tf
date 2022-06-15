@@ -53,8 +53,8 @@ resource "aws_route53_record" "private_record_public_services" {
   zone_id = data.aws_route53_zone.private_zone.zone_id
   alias {
     evaluate_target_health = true
-    name = data.aws_alb.blk_nlb_external.dns_name
-    zone_id = data.aws_alb.blk_nlb_external.zone_id
+    name = data.aws_alb.app_nlb_external.dns_name
+    zone_id = data.aws_alb.app_nlb_external.zone_id
   }
 }
 #Setting up private dns entry for openidl application UI
@@ -64,8 +64,8 @@ resource "aws_route53_record" "private_record_openidl_ui" {
   zone_id = data.aws_route53_zone.private_zone.zone_id
   alias {
     evaluate_target_health = true
-    name = data.aws_alb.blk_nlb_external.dns_name
-    zone_id = data.aws_alb.blk_nlb_external.zone_id
+    name = data.aws_alb.app_nlb_external.dns_name
+    zone_id = data.aws_alb.app_nlb_external.zone_id
   }
 }
 
