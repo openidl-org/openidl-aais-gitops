@@ -64,9 +64,9 @@ spec:
     nodePort: {{ $.Values.service.ports.grpc.nodeport }}
     {{- end }}
     name: grpc
-  {{- if (eq $.Values.service.servicetype "ClusterIP") }}
-  clusterIP: None
-  {{- end }}
+  #{{- if (eq $.Values.service.servicetype "ClusterIP") }}
+  #clusterIP: None
+  #{{- end }}
   
 {{ if eq $.Values.proxy.provider "nginx" }}
 ---
@@ -78,7 +78,7 @@ metadata:
   annotations:
       nginx.ingress.kubernetes.io/ssl-passthrough: "true"
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
       nginx.ingress.kubernetes.io/rewrite-target: /
       nginx.ingress.kubernetes.io/backend-protocol: GRPCS
 spec:

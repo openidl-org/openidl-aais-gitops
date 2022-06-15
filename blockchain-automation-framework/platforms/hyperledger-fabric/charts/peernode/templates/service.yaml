@@ -88,9 +88,9 @@ spec:
     {{- if $.Values.service.ports.couchdb.nodeport }}
     nodePort: {{ $.Values.service.ports.couchdb.nodeport }}
     {{- end }}
-  {{- if (eq $.Values.service.servicetype "ClusterIP") }}
-  clusterIP: None
-  {{- end }}
+  #{{- if (eq $.Values.service.servicetype "ClusterIP") }}
+  #clusterIP: None
+  #{{- end }}
   {{- if $.Values.service.loadBalancerIP }}
   loadBalancerIP: {{ $.Values.service.loadBalancerIP }}
   {{- end }}
@@ -105,7 +105,7 @@ metadata:
   annotations:
       nginx.ingress.kubernetes.io/ssl-passthrough: "true"
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
       nginx.ingress.kubernetes.io/rewrite-target: /
       nginx.ingress.kubernetes.io/backend-protocol: GRPCS
 spec:
