@@ -1,0 +1,44 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ordererorg-net-ca
+  namespace: ordererorg-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: ordererorg-net-ca
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-haproxy
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
+  values:
+    metadata:
+      namespace: ordererorg-net
+      images:
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        ca: hyperledger/fabric-ca:1.4.8
+    server:
+      name: ca
+      tlsstatus: true
+      admin: ordererorg-admin
+    storage:
+      storageclassname: ordererorgsc
+      storagesize: 20Gi 
+    vault:
+      role: vault-role
+      address: http://vault.dev.internal.thetech.digital
+      authpath: devordererorg-net-auth
+      secretcert: ordererorg/crypto/ordererOrganizations/ordererorg-net/ca?ca.ordererorg-net-cert.pem
+      secretkey: ordererorg/crypto/ordererOrganizations/ordererorg-net/ca?ordererorg-net-CA.key
+      secretadminpass: ordererorg/credentials/ordererorg-net/ca/ordererorg?user
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+    service:
+      servicetype: ClusterIP
+      ports:
+        tcp:
+          port: 7054
+    proxy:
+      provider: nginx
+      type: orderer
+      external_url_suffix: ordererorg.dev.thetech.digital
