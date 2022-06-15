@@ -9,7 +9,7 @@ spec:
   releaseName: channel-aais-defaultchannel
   chart:
     git: https://github.com/openidl-org/openidl-aais-gitops.git
-    ref: develop-haproxy
+    ref: develop-nginx-v1
     path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/create_channel   
   values:
     metadata:
@@ -40,7 +40,7 @@ spec:
     orderer:
       address: orderer1.ordererorg.dev.thetech.digital:8443
     channeltx: |-
-      CqcDChwKGggCGgYInpWllQYiDmRlZmF1bHRjaGFubmVsEoYDCoMDCg5kZWZhdWx0Y2hhbm5lbBIu
+      CqcDChwKGggCGgYIycaolQYiDmRlZmF1bHRjaGFubmVsEoYDCoMDCg5kZWZhdWx0Y2hhbm5lbBIu
       EhwKC0FwcGxpY2F0aW9uEg0SCwoHYWFpc01TUBIAGg4KCkNvbnNvcnRpdW0SABrAAhKYAgoLQXBw
       bGljYXRpb24SiAIIARILCgdhYWlzTVNQEgAaJAoMQ2FwYWJpbGl0aWVzEhQSCgoICgRWMl8wEgAa
       BkFkbWlucyIzChRMaWZlY3ljbGVFbmRvcnNlbWVudBIbEhEIAxINCgtFbmRvcnNlbWVudBoGQWRt

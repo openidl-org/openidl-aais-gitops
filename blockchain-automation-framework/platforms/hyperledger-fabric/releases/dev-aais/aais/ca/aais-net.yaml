@@ -9,7 +9,7 @@ spec:
   releaseName: aais-net-ca
   chart:
     git: https://github.com/openidl-org/openidl-aais-gitops.git
-    ref: develop-haproxy
+    ref: develop-nginx-v1
     path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
   values:
     metadata:
