@@ -48,12 +48,19 @@ service:
 
 ingress:
     enabled: true
+    ingressClassName: nginx-external
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
     annotations:
         ingress.kubernetes.io/enable-cors: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: HTTP
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
 
 resources:
     {}
