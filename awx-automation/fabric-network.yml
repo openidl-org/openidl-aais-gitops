@@ -43,7 +43,7 @@
         orgjson: "{{ orderer_cert.stdout }}"
       when: deploy_action == "new_org"
 
-    -  set_fact:
+    - set_fact:
         orgjson: "{{ msp_cert.stdout }}"
       when: deploy_action == "add_new_org"
 
