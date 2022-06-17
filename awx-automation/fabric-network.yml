@@ -48,7 +48,7 @@
       when: deploy_action == "add_new_org"
 
     - debug:
-        msg: {{ orgjson }}
+        msg: "{{ orgjson }}"
 
     - include_role:
         name: "baf/network"

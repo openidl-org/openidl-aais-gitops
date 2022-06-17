@@ -21,7 +21,7 @@
     state: present
 
 - debug:
-    msg: {{ org_json }}
+    msg: "{{ org_json }}"
 
 - name: Create secret for network details
   no_log: true
