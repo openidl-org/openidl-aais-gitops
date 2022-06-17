@@ -26,7 +26,6 @@
       register: vault
 
     - name: Export Orderer TLS Cert
-      no_log: true
       shell: |
         export AWS_PROFILE=cicd-role
         aws secretsmanager get-secret-value --secret-id {{ env }}-orderer-tls --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
@@ -34,22 +33,22 @@
       when: deploy_action == "new_org"
 
     - name: Export ORG_MSP
-      no_log: true
       shell: |
         export AWS_PROFILE=cicd-role
         aws secretsmanager get-secret-value --secret-id {{ env }}-{{ add_org_name }}-msp --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
       register: msp_cert
       when: deploy_action == "add_new_org"
 
-    - no_log: true
-      set_fact:
+    - set_fact:
         orgjson: "{{ orderer_cert.stdout }}"
       when: deploy_action == "new_org"
 
-    - no_log: true
-      set_fact:
+    -  set_fact:
         orgjson: "{{ msp_cert.stdout }}"
       when: deploy_action == "add_new_org"
+
+    - debug:
+        msg: {{ orgjson }}
 
     - include_role:
         name: "baf/network"
