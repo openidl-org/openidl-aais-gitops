@@ -42,6 +42,10 @@ variable "default_sg_rules" {
 variable "vpc_cidr" {
   description = "The VPC network CIDR Block to be created"
   default = ""
+  validation {
+    condition = var.vpc_cidr != "172.17.0.0/16"
+    error_message = "Docker runs in the 172.17.0.0/16 CIDR range in Amazon EKS clusters. We recommend that your cluster's VPC subnets do not overlap this range to avoid network traffic routing issues"
+  }
 }
 variable "availability_zones" {
   type        = list(string)
