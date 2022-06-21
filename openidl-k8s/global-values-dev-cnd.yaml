@@ -1,62 +1,62 @@
 global:
-    clusterurl: carrierdemo.com
+    clusterurl: cnddemo.com
     appsecret: apps-secret
-    configpath: config-local-carrier
+    configpath: config-local-cnd
     datacallapp:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-app-service
         ingressenabled: false
-        ingresshostname: data-call-app-service.dev.carrier.internal.hig1.aaisdirect.com
-        publicingresshostname: data-call-app-service.dev.carrier.hig1.aaisdirect.com
+        ingresshostname: data-call-app-service.dev.cnd.internal.thetech.digital
+        publicingresshostname: data-call-app-service.dev.cnd.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-data-call-app
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-c4cf397-053120221932
     utilities:
         install: true
         port: 8080
         targetport: 8080
         servicename: utilities-service
         ingressenabled: false
-        ingresshostname: utilities-service.dev.carrier.internal.hig1.aaisdirect.com
-        publicingresshostname: utilities-service.dev.carrier.hig1.aaisdirect.com
+        ingresshostname: utilities-service.dev.cnd.internal.thetech.digital
+        publicingresshostname: utilities-service.dev.cnd.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-utilities
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 17-cognito-fabric-node14-helm-f84a367-093020211950
-    carrierui:
+            tag: 5-develop-jenkins-0edbace-053120221949
+    cndui:
         install: true
-        servicename: carrier-ui-service
+        servicename: cnd-ui-service
         port: 8080
         targetport: 8080
         ingressenabled: false
-        ingresshostname: openidl.dev.carrier.hig1.aaisdirect.com
+        ingresshostname: openidl.dev.cnd.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-carrier-ui
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-0edbace-053120221949
     insurancedatamanager:
         install: true
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
         ingressenabled: false
-        ingresshostname: insurance-data-manager-service.dev.carrier.hig1.aaisdirect.com
+        ingresshostname: insurance-data-manager-service.dev.cnd.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-insurance-data-manager
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 7-develop-jenkins-0edbace-053120221949
     datacallprocessor:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-processor-service
         image:
-            repository: ghcr.io/openidl-org/openidl-data-call-processor
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 6-develop-jenkins-0edbace-053120221949
     upload:
         install: true
         port: 80
@@ -72,28 +72,28 @@ global:
         targetport: 8080
         servicename: data-call-mood-listener-service
         image:
-            repository: ghcr.io/openidl-org/openidl-data-call-mood-listener
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-0edbace-053120221949
     transactionaldataeventlistener:
         install: false
         port: 8080
         targetport: 8080
         servicename: transactional-data-event-listener-service
         image:
-            repository: ghcr.io/openidl-org/openidl-transactional-data-event-listener
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 5-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 5-develop-jenkins-0edbace-053120221949
     ui:
         install: false
         servicename: ui-service
         port: 8080
         targetport: 8080
         ingressenabled: false
-        ingresshostname: openidl.dev.carrier.hig1.aaisdirect.com
+        ingresshostname: openidl.dev.cnd.thetech.digital
         image:
-            repository: ghcr.io/openidl-org/openidl-ui
+            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 9-cognito-fabric-node14-helm-f84a367-093020211950
+            tag: 14-develop-jenkins-0edbace-053120221949
     secrets:
         install: true
