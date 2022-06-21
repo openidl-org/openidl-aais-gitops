@@ -26,7 +26,7 @@ global:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
             tag: 5-develop-jenkins-0edbace-053120221949
-    cndui:
+    carrierui:
         install: true
         servicename: cnd-ui-service
         port: 8080
