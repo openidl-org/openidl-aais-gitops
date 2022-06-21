@@ -1,0 +1,40 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: join-anal-cnd-cnd-peer0
+  namespace: cnd-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: join-anal-cnd-cnd-peer0
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-nginx-v1
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/join_channel
+  values:
+    metadata:
+      namespace: cnd-net
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+
+    peer:
+      name: peer0
+      address: peer0.cnd-net.cnd.dev.cnd.thetech.digital:8443
+      localmspid: cndMSP
+      loglevel: debug
+      tlsstatus: true
+
+    vault:
+      role: vault-role
+      address: http://vault.dev.cnd.internal.thetech.digital
+      authpath: devcnd-net-auth
+      adminsecretprefix: cnd/crypto/peerOrganizations/cnd-net/users/admin
+      orderersecretprefix: cnd/crypto/peerOrganizations/cnd-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+
+    channel:
+      name: anal-cnd      
+    orderer:
+      address: orderer1.ordererorg.dev.thetech.digital:8443
