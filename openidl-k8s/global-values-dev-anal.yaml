@@ -36,7 +36,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-0edbace-053120221949
+            tag: 15-develop-jenkins-4a24bcc-062220222113
     datacallmoodlistener:
         install: true
         port: 8080
@@ -94,6 +94,6 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-0edbace-053120221949
+            tag: 15-develop-jenkins-4a24bcc-062220222113
     secrets:
         install: true
