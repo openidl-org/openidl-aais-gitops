@@ -1,5 +1,6 @@
 ---
 - name: Update kubeconfig and set context to openidl {{ app_cluster_name }}
+  no_log: false
   shell: |
     export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
