@@ -56,7 +56,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 6-develop-jenkins-0edbace-053120221949
+            tag: 7-develop-jenkins-64fa284-062920221336
     upload:
         install: false
         port: 80
@@ -83,7 +83,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 5-develop-jenkins-0edbace-053120221949
+            tag: 6-develop-jenkins-64fa284-062920221336
     carrierui:
         install: false
         servicename: carrier-ui-service
