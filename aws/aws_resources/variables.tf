@@ -44,7 +44,7 @@ variable "vpc_cidr" {
   default = ""
   validation {
     condition = var.vpc_cidr != "172.17.0.0/16"
-    error_message = "Docker runs in the 172.17.0.0/16 CIDR range in Amazon EKS clusters. We recommend that your cluster's VPC subnets do not overlap this range to avoid network traffic routing issues"
+    error_message = "Docker runs in the 172.17.0.0/16 CIDR range in Amazon EKS clusters. We recommend that your cluster's VPC subnets do not overlap this range to avoid network traffic routing issues."
   }
 }
 variable "availability_zones" {
