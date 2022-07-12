@@ -54,7 +54,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 7-develop-jenkins-20cd82b-071220221824
+            tag: 8-develop-jenkins-1ae8a90-071220221929
     datacallprocessor:
         install: false
         port: 8080
