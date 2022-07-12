@@ -1,0 +1,51 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: commit-defaultchannel-openidl-cc-default-vv2-1
+  namespace: aais-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: commit-defaultchannel-openidl-cc-default-vv2-1
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-nginx-v1
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/commit_chaincode
+  values:
+    metadata:
+      namespace: aais-net
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+    peer:
+      name: peer0
+      address: peer0.aais-net:7051
+      localmspid: aaisMSP
+      loglevel: debug
+      tlsstatus: true
+    vault:
+      role: vault-role
+      address: http://vault.dev.internal.thetech.digital
+      authpath: devaais-net-auth
+      adminsecretprefix: aais/crypto/peerOrganizations/aais-net/users/admin
+      secretpath: aais
+      orderersecretprefix: aais/crypto/peerOrganizations/aais-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      tls: false
+    orderer:
+      address: orderer1.ordererorg.dev.thetech.digital:8443
+    chaincode:
+      builder: hyperledger/fabric-ccenv:2.2.3
+      name: openidl-cc-default
+      version: vv2
+      sequence: 1
+      commitarguments: ''
+      endorsementpolicies:  ''
+      usecollectionconfig: false
+    channel:
+      name: defaultchannel
+    endorsers:
+      creator: aais-net
+      name:  aais  
+      corepeeraddress:  peer0.aais-net.aais.dev.thetech.digital:8443 
