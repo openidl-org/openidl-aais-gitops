@@ -83,7 +83,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 6-develop-jenkins-64fa284-062920221336
+            tag: 7-develop-jenkins-20cd82b-071220221824
     ui:
         install: false
         servicename: ui-service
