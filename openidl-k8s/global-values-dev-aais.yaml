@@ -83,7 +83,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 7-develop-jenkins-20cd82b-071220221824
+            tag: 10-develop-jenkins-5e5ec5c-071320222002
     carrierui:
         install: false
         servicename: carrier-ui-service
