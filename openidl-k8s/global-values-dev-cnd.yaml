@@ -56,7 +56,7 @@ global:
         image:
             repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 7-develop-jenkins-64fa284-062920221336
+            tag: 8-develop-jenkins-24f6b1e-071520222006
     upload:
         install: true
         port: 80
