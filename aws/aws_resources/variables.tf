@@ -613,6 +613,11 @@ variable "s3_bucket_name_access_logs" {
   description = "The name of s3 bucket used to access logs of s3 buckets"
   default = ""
 }
+variable "s3_bucket_names_etl" {
+  type = map(any)
+  description = "The name of s3 bucket used to access logs of s3 buckets"
+  default = {idm-loader: "", intake: "", failure: ""}
+}
 #-------------------------------------------------------------------------------------------------------------------
 #Resource choice related
 variable "create_bastion_host" {
