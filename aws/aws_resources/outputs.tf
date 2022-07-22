@@ -119,3 +119,13 @@ output "secrets_kms_key_arn" {
 output "secrets_kms_key_alias_name" {
   value = var.create_kms_keys ? aws_kms_alias.sm_kms_key_alias[0].name : ""
 }
+#DynamoDB table
+output "dynamodb_connection" {
+  value = aws_dynamodb_table.etl_dynamodb.connection
+}
+output "dynamodb_id" {
+  value = aws_dynamodb_table.etl_dynamodb.id
+}
+output "dynamodb_arn" {
+  value = aws_dynamodb_table.etl_dynamodb.arn
+}

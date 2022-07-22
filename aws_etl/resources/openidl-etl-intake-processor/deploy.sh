@@ -1,0 +1,2 @@
+zip -r intake-processor.zip . -x "intake-processor.zip";
+aws lambda update-function-code --function-name aais-dev-openidl-etl-intake-processor --zip-file fileb://./intake-processor.zip --publish --profile nd

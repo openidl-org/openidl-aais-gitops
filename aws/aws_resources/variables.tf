@@ -615,7 +615,7 @@ variable "s3_bucket_name_access_logs" {
 }
 variable "s3_bucket_names_etl" {
   type = map(any)
-  description = "The name of s3 bucket used to access logs of s3 buckets"
+  description = "The name of s3 buckets used for IDM-ETL functions"
   default = {idm-loader: "", intake: "", failure: ""}
 }
 #-------------------------------------------------------------------------------------------------------------------
@@ -676,6 +676,11 @@ variable "secrets_manager_kms_key_arn" {
   type = string
   default = ""
   description = "KMS Key arn to be used for VPC flow logs related cloudwatch logs group"
+}
+variable "dynamodb_kms_key_arn" {
+  type = string
+  default = ""
+  description = "KMS key arnt o be used to encrypt DynamoDB table related to ETL function"
 }
 #-------------------------------------------------------------------------------------------------------------------
 #Existing VPC related 
