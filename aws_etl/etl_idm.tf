@@ -75,12 +75,12 @@ resource "aws_s3_bucket_public_access_block" "etl" {
   depends_on = [aws_s3_bucket.etl]
 }
 resource "aws_s3_bucket_notification" "etl_idm_loader" {
-  depends_on = [aws_s3_bucket.etl]
+  depends_on = [aws_s3_bucket.etl, aws_sns_topic.etl]
   bucket = aws_s3_bucket.etl["idm-loader"].id
-  #lambda_function {
-  #  lambda_function_arn = aws_lambda_function.etl_idm_loader.arn
-  #  events = ["s3:ObjectCreated:*"]
-  #}
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.etl_success_processor.arn
+    events = ["s3:ObjectCreated:*"]
+  }
 }
 resource "aws_s3_bucket_notification" "etl_intake" {
   #depends_on = [aws_s3_bucket.etl, aws_lambda_permission.etl_allow_bucket_intake_processor]
@@ -101,7 +101,7 @@ resource "aws_s3_bucket_policy" "etl" {
             "Sid": "AllowGetAndPutObjects",
             "Effect": "Allow",
             "Principal": {
-                "AWS": [var.aws_user_arn]
+                "AWS": "${var.aws_user_arn}"
             },
             "Action": [
                 "s3:GetObject",
@@ -145,7 +145,8 @@ resource "aws_s3_bucket_policy" "etl" {
             "Sid": "AllowLambda",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::${var.aws_account_number}:role:/${aws_iam_role.etl_lambda.name}"
+                "AWS": "${aws_iam_role.etl_lambda.arn}"
+
             },
             "Action": [
                 "s3:GetObject",
@@ -159,7 +160,7 @@ resource "aws_s3_bucket_policy" "etl" {
                 "arn:aws:s3:::${local.std_name}-${each.key}",
                 "arn:aws:s3:::${local.std_name}-${each.key}/*"
             ]
-          }
+          },
           /*{
 			"Sid": "DenyOthers",
 			"Effect": "Deny",
@@ -170,21 +171,41 @@ resource "aws_s3_bucket_policy" "etl" {
                 "arn:aws:s3:::${local.std_name}-${each.key}/*"
             ],
 			"Condition": {
-                "StringNotLike": {
-                    "aws:UserAgent": "${aws_iam_role.etl_lambda.name}",
-					"aws:userid": [
+              "StringNotLike": {
+ 					"aws:userid": [
                         #"${aws_iam_role.openidl_apps_iam_role.unique_id}:*",
                         #"${aws_iam_user.openidl_apps_user.unique_id}",
-                        "${aws_iam_role.etl_lambda.unique_id}",
                         "${data.aws_iam_role.terraform_role.unique_id}:*",
 						"${var.aws_account_number}",
                         "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
                         #"arn:aws:sts:::${var.aws_account_number}:assumed-role/${aws_iam_role.openidl_apps_iam_role.name}/openidl"
-
 					]
 				}
 			}
-		  }*/
+		  },
+        {
+          "Sid" : "DenyAllLambdaWithException",
+          "Effect" : "Deny",
+          "Principal" : "*",
+          "Action" : "*",
+          "Resource" : "arn:aws:s3:::${local.std_name}-${each.key}/*",
+          "Condition" : {
+            "ArnNotEqualsIfExists" : {
+              "lambda:SourceFunctionArn" : "arn:aws:lambda:*:${var.aws_account_number}:function:${aws_lambda_function.etl_success_processor.function_name}",
+              "lambda:SourceFunctionArn" : "arn:aws:lambda:*:${var.aws_account_number}:function:${aws_lambda_function.etl_intake_processor.function_name}"
+            },
+            "StringNotLike": {
+ 					"aws:userid": [
+                        #"${aws_iam_role.openidl_apps_iam_role.unique_id}:*",
+                        #"${aws_iam_user.openidl_apps_user.unique_id}",
+                        "${data.aws_iam_role.terraform_role.unique_id}:*",
+						"${var.aws_account_number}",
+                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
+                        #"arn:aws:sts:::${var.aws_account_number}:assumed-role/${aws_iam_role.openidl_apps_iam_role.name}/openidl"
+					]
+            }
+          }
+        }*/
       ]
   })
 }
@@ -205,14 +226,6 @@ resource "aws_dynamodb_table" "etl" {
     name = "SubmissionFileName"
     type = "S"
   }
-  #attribute {
-  #  name = "IDMLoaderStatus"
-  #  type = "S"
-  #}
-  #attribute {
-  #  name = "IntakeStatus"
-  #  type = "S"
-  #}
   point_in_time_recovery {
     enabled = false
   }
@@ -351,13 +364,14 @@ resource "aws_iam_role" "etl_lambda" {
       }
     ]
   })
-  tags = merge(local.tags, { "name" = "${local.std_name}-openidl-etl-lambda"})
+  tags = merge(local.tags, { "name" = "${local.std_name}-openidl-etl-intake-lambda"})
 }
 resource "aws_lambda_function" "etl_intake_processor" {
   function_name = "${local.std_name}-openidl-etl-intake-processor"
   role              = aws_iam_role.etl_lambda.arn
   architectures     = ["x86_64"]
   description       = "ETL-IDM intake processor"
+  environment {}
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"
@@ -371,6 +385,7 @@ resource "aws_lambda_function" "etl_success_processor" {
   role              = aws_iam_role.etl_lambda.arn
   architectures     = ["x86_64"]
   description       = "ETL-IDM loader processor"
+  environment {}
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"
@@ -394,29 +409,35 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
     "Version": "2012-10-17",
     "Statement": [
         {
-          "Sid": "AllowCloudWatchLogGroups"
-          "Effect": "Allow",
+            "Sid": "AllowCloudWatchLogGroups",
+            "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
             "Resource": "arn:aws:logs:${var.aws_region}:650795358261:*"
         },
         {
-            "Sid": "AllowCWLogStream"
+            "Sid": "AllowCWLogStream",
             "Effect": "Allow",
             "Action": [
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
             "Resource": [
-                "arn:aws:logs:${var.aws_region}:${var.aws_account_number}:log-group:/aws/lambda/${local.std_name}-openidl-intake-processor:*"
-            ]
+				"arn:aws:logs:${var.aws_region}:${var.aws_account_number}:log-group:/aws/lambda/${local.std_name}-openidl-intake-processor:*",
+				"arn:aws:logs:${var.aws_region}:${var.aws_account_number}:log-group:/aws/lambda/${local.std_name}-openidl-etl-idm-loader:*"
+			]
         },
         {
-            "Sid": "AllowS3PutObject",
+            "Sid": "AllowS3",
             "Effect": "Allow",
-            "Action": "s3:PutObject",
+            "Action": [
+				"s3:PutObject",
+				"s3:GetObject",
+				"s3-object-lambda:*"
+			],
             "Resource": [
                 "arn:aws:s3:::${local.std_name}-${var.s3_bucket_names_etl.idm-loader}/*",
-                "arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.failure}/*"
+                "arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.failure}/*",
+				"arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.intake}/*"
             ]
         },
         {
@@ -430,12 +451,6 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
             "Resource": "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_number}:table/${local.std_name}-openidl-etl-control-table"
         },
         {
-            "Sid": "AllowS3GetObject",
-            "Effect": "Allow",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_names_etl.intake}/*"
-        },
-        {
             "Sid": "AllowSNS",
             "Effect": "Allow",
             "Action": "sns:Publish",
@@ -447,8 +462,7 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
     ]
   })
   tags = merge(local.tags, {
-    name = "${local.std_name}-etl-lambda-role-policy",
-  })
+    name = "${local.std_name}-etl-lambda-role-policy"})
 }
 resource "aws_lambda_permission" "etl_allow_bucket_intake_processor" {
   statement_id  = "AllowExecutionFromS3Bucket"
@@ -457,4 +471,10 @@ resource "aws_lambda_permission" "etl_allow_bucket_intake_processor" {
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.etl["intake"].arn
 }
-
+resource "aws_lambda_permission" "etl_allow_bucket_success_processor" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.etl_success_processor.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.etl["idm-loader"].arn
+}

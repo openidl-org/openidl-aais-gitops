@@ -20,8 +20,15 @@ locals {
       apiUsername = "${local.std_name}-etl-user",
       apiPassword = "Passw0rd123",
       carrierId = "1234",
-      utilitiesAPIUrl = "https://utilties-service.dev.thetech.digital",
-      idmAPIUrl = "https://insurance-data-manager-service.dev.thetech.digital"
+      utilitiesAPIUrl = "https://utilties-service.thetech.digital",
+      idmAPIUrl = "https://insurance-data-manager-service.thetech.digital"
+      #utilitiesAPIUrl = "https://utilities-service.${local.public_domain}",
+      #idmAPIUrl = "https://insurance-data-manager-service.${local.public_domain}"
     })
 }
+#update local.public domain to aws_resources section if required
+
+
+
+
 

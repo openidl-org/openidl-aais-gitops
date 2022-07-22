@@ -55,3 +55,20 @@ variable "sns_subscription_email_ids" {
   description = "The list of emailds to subscribe for SNS notifications related to ETL-IDM"
   default = []
 }
+variable "api_username" {
+  type = string
+  description = "The OpenIDL API username that will be used by lambda function to run ETL-IDM"
+}
+variable "api_username_password" {
+  type = string
+  description = "The OpenIDL API user password that will be used by lambda function to run ETL-IDM"
+}
+variable "carrier_id" {
+  type = string
+  description = "The Carrier ID of the node"
+}
+variable "state" {
+  type = string
+  description = "The state that this node belongs to"
+}
+
