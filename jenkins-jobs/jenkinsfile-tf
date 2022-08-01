@@ -20,9 +20,13 @@ node('openidl') {
 def checkout() {
     stage('Checkout Code') {
         git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
+        sh '''
+            pwd
+            ls -lrt
+        '''
         git credentialsId: 'openidl-aais-gitops', branch: "develop", url: "https://github.com/openidl-org/openidl-etl.git"
         sh '''
-            pwd 
+            pwd
             ls -lrt
             echo "Packing ETL lambda code with terraform codebase"
             cp -r openidl-etl-intake-processor aws/aws_resources/resources/
