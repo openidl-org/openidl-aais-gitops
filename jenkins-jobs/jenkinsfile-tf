@@ -23,7 +23,7 @@ def checkout() {
         git credentialsId: 'openidl-aais-gitops', branch: "develop", url: "https://github.com/openidl-org/openidl-etl.git"
         sh '''
             cp -r openidl-etl-intake-processor ../openidl-aais-gitops/aws/aws_resources/resources/
-            cp -r opnenidl-etl-success-processor ../openidl-aais-gitops/aws/aws_resources/resources/
+            cp -r openidl-etl-success-processor ../openidl-aais-gitops/aws/aws_resources/resources/
             tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
             echo "Successfully prepared the AWS resources code bundle"
             tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
