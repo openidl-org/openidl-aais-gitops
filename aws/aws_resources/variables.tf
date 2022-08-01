@@ -696,3 +696,26 @@ variable "custom_tags" {
   default = {}
   description ="List of custom tags to include"
 }
+#-------------------------------------------------------------------------------------------------------------------
+#SNS notification subscription - email list
+variable "sns_subscription_email_ids" {
+  type=list
+  description = "The list of email ids to subscribe for SNS notifications related to ETL-IDM"
+  default = []
+}
+variable "api_username" {
+  type = string
+  description = "The OpenIDL API username that will be used by lambda function to run ETL-IDM"
+}
+variable "api_user_password" {
+  type = string
+  description = "The OpenIDL API user password that will be used by lambda function to run ETL-IDM"
+}
+variable "carrier_id" {
+  type = string
+  description = "The Carrier ID of the node"
+}
+variable "state" {
+  type = string
+  description = "The state that this node belongs to"
+}

@@ -145,8 +145,9 @@ resource "aws_s3_bucket_policy" "etl" {
             "Sid": "AllowLambda",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "${aws_iam_role.etl_lambda.arn}"
-
+                "AWS": [
+                  "${aws_iam_role.etl_lambda.arn}",
+                ]
             },
             "Action": [
                 "s3:GetObject",
@@ -161,53 +162,8 @@ resource "aws_s3_bucket_policy" "etl" {
                 "arn:aws:s3:::${local.std_name}-${each.key}/*"
             ]
           },
-          /*{
-			"Sid": "DenyOthers",
-			"Effect": "Deny",
-			"Principal": "*",
-            "Action": "*",
-			"Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
-            ],
-			"Condition": {
-              "StringNotLike": {
- 					"aws:userid": [
-                        #"${aws_iam_role.openidl_apps_iam_role.unique_id}:*",
-                        #"${aws_iam_user.openidl_apps_user.unique_id}",
-                        "${data.aws_iam_role.terraform_role.unique_id}:*",
-						"${var.aws_account_number}",
-                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
-                        #"arn:aws:sts:::${var.aws_account_number}:assumed-role/${aws_iam_role.openidl_apps_iam_role.name}/openidl"
-					]
-				}
-			}
-		  },
-        {
-          "Sid" : "DenyAllLambdaWithException",
-          "Effect" : "Deny",
-          "Principal" : "*",
-          "Action" : "*",
-          "Resource" : "arn:aws:s3:::${local.std_name}-${each.key}/*",
-          "Condition" : {
-            "ArnNotEqualsIfExists" : {
-              "lambda:SourceFunctionArn" : "arn:aws:lambda:*:${var.aws_account_number}:function:${aws_lambda_function.etl_success_processor.function_name}",
-              "lambda:SourceFunctionArn" : "arn:aws:lambda:*:${var.aws_account_number}:function:${aws_lambda_function.etl_intake_processor.function_name}"
-            },
-            "StringNotLike": {
- 					"aws:userid": [
-                        #"${aws_iam_role.openidl_apps_iam_role.unique_id}:*",
-                        #"${aws_iam_user.openidl_apps_user.unique_id}",
-                        "${data.aws_iam_role.terraform_role.unique_id}:*",
-						"${var.aws_account_number}",
-                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
-                        #"arn:aws:sts:::${var.aws_account_number}:assumed-role/${aws_iam_role.openidl_apps_iam_role.name}/openidl"
-					]
-            }
-          }
-        }*/
       ]
-  })
+    })
 }
 #DyanmoDB table specifics for ETL-IDM Extraction Patterns
 resource "aws_dynamodb_table" "etl" {
@@ -371,7 +327,7 @@ resource "aws_lambda_function" "etl_intake_processor" {
   role              = aws_iam_role.etl_lambda.arn
   architectures     = ["x86_64"]
   description       = "ETL-IDM intake processor"
-  environment {}
+  #environment {}
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"
@@ -385,7 +341,7 @@ resource "aws_lambda_function" "etl_success_processor" {
   role              = aws_iam_role.etl_lambda.arn
   architectures     = ["x86_64"]
   description       = "ETL-IDM loader processor"
-  environment {}
+  #environment {}
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"

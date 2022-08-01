@@ -49,17 +49,17 @@ variable "s3_bucket_names_etl" {
   default = {idm-loader: "", intake: "", failure: ""}
 }
 #-------------------------------------------------------------------------------------------------------------------
-#SNS notfication subscription - email list
+#SNS notification subscription - email list
 variable "sns_subscription_email_ids" {
   type=list
-  description = "The list of emailds to subscribe for SNS notifications related to ETL-IDM"
+  description = "The list of email ids to subscribe for SNS notifications related to ETL-IDM"
   default = []
 }
 variable "api_username" {
   type = string
   description = "The OpenIDL API username that will be used by lambda function to run ETL-IDM"
 }
-variable "api_username_password" {
+variable "api_user_password" {
   type = string
   description = "The OpenIDL API user password that will be used by lambda function to run ETL-IDM"
 }

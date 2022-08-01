@@ -45,6 +45,30 @@ locals {
   client_logout_urls           = var.aws_env == "prod" ? ["https://openidl.${local.public_domain}/signout"] : ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
   cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain[0]}"
 
+  #Lambda function related
+  config-intake = templatefile("resources/config-intake.tftpl",
+    {
+      successBucket = "${aws_s3_bucket.etl["idm-loader"].arn}",
+      failureBucket = "${aws_s3_bucket.etl["failure"].arn}",
+      dynamoDB = "${aws_dynamodb_table.etl.name}",
+      successTopicARN = "${aws_sns_topic.etl["success"].arn}",
+      failureTopicARN = "${aws_sns_topic.etl["failure"].arn}",
+      state = "${var.state}"
+    })
+  config-success = templatefile("resources/config-success.tftpl",
+    {
+      dynamoDB = "${aws_dynamodb_table.etl.name}",
+      successTopicARN = "${aws_sns_topic.etl["success"].arn}",
+      failureTopicARN = "${aws_sns_topic.etl["failure"].arn}",
+      apiUsername = "${var.api_username}",
+      apiPassword = "${var.api_user_password}",
+      carrierId = "${var.carrier_id}",
+      #utilitiesAPIUrl = "https://utilties-service.thetech.digital",
+      #idmAPIUrl = "https://insurance-data-manager-service.thetech.digital"
+      utilitiesAPIUrl = "https://utilities-service.${local.public_domain}",
+      idmAPIUrl = "https://insurance-data-manager-service.${local.public_domain}"
+    })
+
   def_sg_ingress = [{
     cidr_blocks = var.create_vpc ? var.vpc_cidr : data.aws_vpc.vpc[0].cidr_block
     description = "Inbound SSH traffic"
