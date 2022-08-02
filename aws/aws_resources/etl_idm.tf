@@ -101,7 +101,7 @@ resource "aws_s3_bucket_policy" "etl" {
             "Sid": "AllowGetAndPutObjects",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "${var.aws_user_arn}"
+                "AWS": "${aws_iam_role.openidl_apps_iam_role.arn}"
             },
             "Action": [
                 "s3:GetObject",
