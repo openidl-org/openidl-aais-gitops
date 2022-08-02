@@ -21,16 +21,15 @@ def checkout() {
     stage('Checkout Code') {
         git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
         sh '''
-            #rm -rf lambda
-            #git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
-            #cp -r lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
-            #cp -r lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
-            #ls -lrt aws/aws_resources/resources/
+            rm -rf lambda
+            git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
+            cp -r lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
+            cp -r lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
+            ls -lrt aws/aws_resources/resources/
             tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
             echo "Successfully prepared the AWS resources code bundle"
             tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
             echo "Successfully prepared the K8s resources code bundle"
-            #rm -rf lambda
         '''
     }
 }
