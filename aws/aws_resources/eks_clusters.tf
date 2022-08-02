@@ -75,7 +75,7 @@ module "app_eks_cluster" {
       root_encrypted                = var.eks_wg_root_vol_encrypted
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_key_name
+      key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_name
       subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[0]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]])
       #target_group_arns            = module.app_eks_nlb.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
@@ -102,7 +102,7 @@ module "app_eks_cluster" {
       root_encrypted                = var.eks_wg_root_vol_encrypted
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_key_name
+      key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_name
       subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[1]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]])
       #target_group_arns            = module.app_eks_nlb.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
@@ -209,7 +209,7 @@ module "blk_eks_cluster" {
       root_encrypted                = var.eks_wg_root_vol_encrypted
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
+      key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_name
       subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[0]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]])
       #target_group_arns            = module.blk_eks_nlb_public.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
@@ -236,7 +236,7 @@ module "blk_eks_cluster" {
       root_encrypted                = var.eks_wg_root_vol_encrypted
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
+      key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_name
       subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[1]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]])
       #target_group_arns            = module.blk_eks_nlb_public.target_group_arns
       health_check_type             = var.eks_wg_health_check_type
@@ -263,7 +263,7 @@ module "blk_eks_cluster" {
       root_encrypted                = var.eks_wg_root_vol_encrypted
       root_volume_size              = var.eks_wg_root_volume_size
       root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_key_name
+      key_name                      = module.blk_eks_worker_nodes_key_pair_external.key_pair_name
       subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[2]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[2]])
       #target_group_arns            = module.blk_eks_nlb_public.target_group_arns
       health_check_type             = var.eks_wg_health_check_type

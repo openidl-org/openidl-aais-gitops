@@ -105,7 +105,7 @@ module "bastion_host_asg" {
   iam_instance_profile_arn = aws_iam_instance_profile.bastion_host_instance_profile[0].arn
   ebs_optimized                        = false
   enable_monitoring                    = false
-  key_name                             = module.bastion_host_key_pair_external[0].key_pair_key_name
+  key_name                             = module.bastion_host_key_pair_external[0].key_pair_name
   security_groups                      = [module.bastion_sg[0].security_group_id]
   instance_initiated_shutdown_behavior = "stop"
   disable_api_termination              = false
