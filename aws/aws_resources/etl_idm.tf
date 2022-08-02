@@ -349,7 +349,7 @@ resource "aws_lambda_function" "etl_success_processor" {
   handler = "index.handler"
   filename = "./resources/openidl-etl-success-processor.zip"
   timeout = "3"
-  source_code_hash = base64sha256({data.archive_file.etl_success_processor_zip})
+  source_code_hash = base64sha256(data.archive_file.etl_success_processor_zip)
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-etl-idm-loader"})
   depends_on = [data.archive_file.etl_success_processor_zip]
 }
