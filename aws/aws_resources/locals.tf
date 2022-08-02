@@ -44,7 +44,7 @@ locals {
   client_default_redirect_url  = var.aws_env == "prod" ? "https://openidl.${local.public_domain}/redirect" : "https://openidl.${var.aws_env}.${local.public_domain}/redirect" #redirect url
   client_logout_urls           = var.aws_env == "prod" ? ["https://openidl.${local.public_domain}/signout"] : ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
   cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain[0]}"
-
+/*
   #Lambda function related
   config-intake = templatefile("resources/config-intake.tftpl",
     {
@@ -68,7 +68,7 @@ locals {
       utilitiesAPIUrl = "https://utilities-service.${local.public_domain}",
       idmAPIUrl = "https://insurance-data-manager-service.${local.public_domain}"
     })
-
+*/
   def_sg_ingress = [{
     cidr_blocks = var.create_vpc ? var.vpc_cidr : data.aws_vpc.vpc[0].cidr_block
     description = "Inbound SSH traffic"

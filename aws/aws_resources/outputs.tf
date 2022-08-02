@@ -119,6 +119,7 @@ output "secrets_kms_key_arn" {
 output "secrets_kms_key_alias_name" {
   value = var.create_kms_keys ? aws_kms_alias.sm_kms_key_alias[0].name : ""
 }
+/*
 output "dynamodb_arn" {
   value = aws_dynamodb_table.etl.arn
 }
@@ -137,4 +138,4 @@ output "lambda-idm-loader" {
 }
 output "lambda-intake-processor" {
   value = aws_lambda_function.etl_intake_processor.arn
-}
+}*/
