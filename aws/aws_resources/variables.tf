@@ -698,6 +698,7 @@ variable "custom_tags" {
 }
 #-------------------------------------------------------------------------------------------------------------------
 #SNS notification subscription - email list
+/*
 variable "sns_subscription_email_ids" {
   type=list
   description = "The list of email ids to subscribe for SNS notifications related to ETL-IDM"
@@ -718,4 +719,4 @@ variable "carrier_id" {
 variable "state" {
   type = string
   description = "The state that this node belongs to"
-}
+}*/
