@@ -267,6 +267,26 @@ resource "aws_s3_bucket_policy" "s3_bucket_logos_policy" {
                 "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_logos}/*",
             ]
         },
+        {
+            "Sid": "AllowIAMAPPAccess",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${aws_iam_user.openidl_apps_user.arn}"]
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:AbortMultipartUpload",
+                "s3:RestoreObject",
+                "s3:DeleteObject",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_logos}",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_logos}/*",
+            ]
+        },
       {
         "Sid":  "HTTPRestrict",
         "Effect": "Deny",
