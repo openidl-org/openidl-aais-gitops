@@ -51,7 +51,7 @@ resource "aws_s3_bucket_logging" "etl" {
   for_each = var.s3_bucket_names_etl
     bucket = aws_s3_bucket.etl[each.key].id
     target_prefix = "logs-${each.value}"
-    target_bucket = ""
+    target_bucket = aws_s3_bucket.s3_bucket_access_logs.id
   depends_on = [aws_s3_bucket.etl]
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "etl" {
@@ -75,7 +75,7 @@ resource "aws_s3_bucket_public_access_block" "etl" {
   depends_on = [aws_s3_bucket.etl]
 }
 resource "aws_s3_bucket_notification" "etl_idm_loader" {
-  depends_on = [aws_s3_bucket.etl, aws_sns_topic.etl]
+  depends_on = [aws_s3_bucket.etl, aws_sns_topic.etl, aws_lambda_permission.etl_allow_bucket_success_processor]
   bucket = aws_s3_bucket.etl["idm-loader"].id
   lambda_function {
     lambda_function_arn = aws_lambda_function.etl_success_processor.arn
@@ -83,7 +83,7 @@ resource "aws_s3_bucket_notification" "etl_idm_loader" {
   }
 }
 resource "aws_s3_bucket_notification" "etl_intake" {
-  #depends_on = [aws_s3_bucket.etl, aws_lambda_permission.etl_allow_bucket_intake_processor]
+  depends_on = [aws_s3_bucket.etl, aws_lambda_permission.etl_allow_bucket_intake_processor, aws_sns_topic.etl]
   bucket = aws_s3_bucket.etl["intake"].id
   lambda_function {
     lambda_function_arn = aws_lambda_function.etl_intake_processor.arn
