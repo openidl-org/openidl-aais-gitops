@@ -377,10 +377,7 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
-            "Resource": [
-				"arn:aws:logs:${var.aws_region}:${var.aws_account_number}:log-group:/aws/lambda/${local.std_name}-openidl-intake-processor:*",
-				"arn:aws:logs:${var.aws_region}:${var.aws_account_number}:log-group:/aws/lambda/${local.std_name}-openidl-etl-idm-loader:*"
-			]
+            "Resource": "*",
         },
         {
             "Sid": "AllowS3",
