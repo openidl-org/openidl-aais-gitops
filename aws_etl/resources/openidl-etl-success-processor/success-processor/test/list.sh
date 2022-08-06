@@ -1,1 +1,0 @@
-aws s3 ls s3://aais-dev-openidl-etl-idm-loader-bucket --profile nd
