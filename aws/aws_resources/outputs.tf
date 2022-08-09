@@ -140,6 +140,7 @@ output "lambda-intake-processor" {
 }
 output "config-file-intake" {
   value = local_file.config_intake.content
+  sensitive = "true"
 }
 output "config-file-success" {
   value = local_file.config_intake.content
