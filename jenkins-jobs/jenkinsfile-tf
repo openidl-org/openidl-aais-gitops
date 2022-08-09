@@ -13,25 +13,32 @@ import groovy.json.JsonSlurper
 node('openidl') {
     withCredentials([string(credentialsId: 'TF_BEARER_TOKEN', variable: 'TF_BEARER_TOKEN')])
     {
-        checkout()
+		checkout()
         buildInfra()
     }
 }
 def checkout() {
     stage('Checkout Code') {
-        git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
-        sh '''
-            echo "Packing ETL code for lambda functions"
-            rm -rf lambda
-            git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
-            cp -r lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
-            cp -r lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
-            echo "Successfully packed ETL code part of IaC terraform code"
-            tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
-            echo "Successfully prepared the AWS resources code bundle"
-            tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
-            echo "Successfully prepared the K8s resources code bundle"
-        '''
+		tool name: 'nodejs', type: 'nodejs'
+        nodejs(cacheLocationStrategy: workspace(), nodeJSInstallationName: 'nodejs') {
+		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
+			sh '''
+				echo "Preparing ETL code for lambda functions"
+				rm -rf lambda
+				git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
+				cd ./lambda/openidl-etl-intake-processor/ && npm install
+				cd ../openidl-etl-success-processor/ && npm install
+				cd ../../
+				cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
+				cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
+				ls -lrt aws/aws_resources/resources/openidl-etl-intake-processor/
+				ls -lrt aws/aws_resources/resources/openidl-etl-success-processor/
+				tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
+				echo "Successfully prepared the AWS resources code bundle"
+				tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
+				echo "Successfully prepared the K8s resources code bundle"
+			'''
+		}
     }
 }
 def buildInfra() {
