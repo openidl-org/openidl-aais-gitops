@@ -138,3 +138,9 @@ output "lambda-idm-loader" {
 output "lambda-intake-processor" {
   value = aws_lambda_function.etl_intake_processor.arn
 }
+output "config-file-intake" {
+  value = local_file.config_intake.content
+}
+output "config-file-success" {
+  value = local_file.config_intake.content
+}

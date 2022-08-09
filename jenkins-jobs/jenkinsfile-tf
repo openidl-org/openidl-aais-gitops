@@ -31,8 +31,6 @@ def checkout() {
 				cd ../../
 				cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
 				cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
-				cat ./aws/aws_resources/resources/openidl-etl-intake-processor/config/config.json
-				cat ./aws/aws_resources/resources/openidl-etl-success-processor/config/config.json
 				tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
 				echo "Successfully prepared the AWS resources code bundle"
 				tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
