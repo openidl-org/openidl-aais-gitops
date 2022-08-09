@@ -48,10 +48,10 @@ locals {
   #Lambda function related
   config-intake = templatefile("resources/config-intake.tftpl",
     {
-      #successBucket = "arn:aws:s3:${var.aws_region}::cnd-dev-idm-loader"
-      #failureBucket = "arn:aws:s3:${var.aws_region}::cnd-dev-failure"
-      successBucket = "${aws_s3_bucket.etl["idm-loader"].arn}",
-      failureBucket = "${aws_s3_bucket.etl["failure"].arn}",
+      successBucket = "arn:aws:s3:${var.aws_region}:${var.aws_account_number}:cnd-dev-idm-loader"
+      failureBucket = "arn:aws:s3:${var.aws_region}:${var.aws_account_number}:cnd-dev-failure"
+      #successBucket = "${aws_s3_bucket.etl["idm-loader"].arn}",
+      #failureBucket = "${aws_s3_bucket.etl["failure"].arn}",
       dynamoDB = "${aws_dynamodb_table.etl.name}",
       successTopicARN = "${aws_sns_topic.etl["success"].arn}",
       failureTopicARN = "${aws_sns_topic.etl["failure"].arn}",
