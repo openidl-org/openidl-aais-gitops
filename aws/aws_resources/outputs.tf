@@ -144,4 +144,5 @@ output "config-file-intake" {
 }
 output "config-file-success" {
   value = local_file.config_intake.content
+  sensitive = "true"
 }
