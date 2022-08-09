@@ -368,7 +368,7 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
             "Sid": "AllowCloudWatchLogGroups",
             "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
-            "Resource": "arn:aws:logs:${var.aws_region}:650795358261:*"
+            "Resource": "arn:aws:logs:${var.aws_region}:${var.aws_account_number}:*"
         },
         {
             "Sid": "AllowCWLogStream",
@@ -392,6 +392,16 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
                 "arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.failure}/*",
 				"arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.intake}/*"
             ]
+        },
+        {
+            "Sid": "AllowKMS",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:DescribeKey"
+            ],
+            "Resource": "*"
         },
         {
             "Sid": "AllowDynamoDB",
