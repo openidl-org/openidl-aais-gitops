@@ -90,6 +90,16 @@ resource "aws_s3_bucket_notification" "etl_intake" {
     events = ["s3:ObjectCreated:*"]
   }
 }
+resource "aws_s3_bucket_cors_configuration" "etl_intake" {
+  depends_on = [aws_s3_bucket.etl]
+  bucket = aws_s3_bucket.etl["intake"].id
+  cors_rule {
+    allowed_headers = []
+    allowed_methods = ["GET", "HEAD", "POST"]
+    allowed_origins = ["*"]
+    expose_headers = []
+  }
+}
 resource "aws_s3_bucket_policy" "etl" {
   depends_on = [aws_s3_bucket.etl]
   for_each = var.s3_bucket_names_etl

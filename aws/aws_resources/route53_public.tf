@@ -24,3 +24,11 @@ resource "aws_route53_record" "nlb_bastion_r53_record" {
   #  evaluate_target_health = true
   #}
 }
+resource "aws_route53_record" "upload_ui" {
+  count   = var.domain_info.r53_public_hosted_zone_required == "yes" ? 1 : 0
+  name = "upload.${var.aws_env}.${local.public_domain}"
+  type = "CNAME"
+  records = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
+  zone_id = aws_route53_zone.public_zones[0].id
+  ttl = "300"
+}

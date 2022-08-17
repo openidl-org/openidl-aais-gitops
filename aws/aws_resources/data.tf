@@ -11,6 +11,11 @@ data "archive_file" "etl_success_processor_zip" {
   output_path = "./resources/openidl-etl-success-processor.zip"
   depends_on = [local_file.config_success]
 }
+data "archive_file" "upload_zip" {
+  type = "zip"
+  source_dir = "./resources/openidl-upload-ui/"
+  output_path = "./resources/openidl-upload.zip"
+}
 #Reading IAM identities required
 data "aws_iam_user" "terraform_user" {
   user_name = local.terraform_user_name[1]
