@@ -13,8 +13,8 @@ data "archive_file" "etl_success_processor_zip" {
 }
 data "archive_file" "upload_zip" {
   type = "zip"
-  source_dir = "./resources/openidl-upload-ui/"
-  output_path = "./resources/openidl-upload.zip"
+  source_dir = "./resources/openidl-upload-lambda/"
+  output_path = "./resources/openidl-upload-lambda.zip"
 }
 #Reading IAM identities required
 data "aws_iam_user" "terraform_user" {

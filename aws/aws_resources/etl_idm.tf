@@ -157,6 +157,7 @@ resource "aws_s3_bucket_policy" "etl" {
             "Principal": {
                 "AWS": [
                   "${aws_iam_role.etl_lambda.arn}",
+                  "${aws_iam_role.upload.arn}"
                 ]
             },
             "Action": [

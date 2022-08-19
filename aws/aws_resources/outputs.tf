@@ -139,5 +139,15 @@ output "lambda-intake-processor" {
   value = aws_lambda_function.etl_intake_processor.arn
 }
 output "upload_ui_s3_website_endpoint" {
-  value = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
+  value = aws_s3_bucket.upload_ui.website_endpoint
 }
+output "s3_static_website_bucket" {
+  value = aws_s3_bucket.upload_ui.arn
+}
+output "api_gateway_endpoint" {
+  value = aws_api_gateway_deployment.upload_v1.invoke_url
+}
+
+
+
+

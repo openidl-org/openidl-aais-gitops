@@ -25,10 +25,9 @@ resource "aws_route53_record" "nlb_bastion_r53_record" {
   #}
 }
 resource "aws_route53_record" "upload_ui" {
-  count   = var.domain_info.r53_public_hosted_zone_required == "yes" ? 1 : 0
-  name = "upload.${var.aws_env}.${local.public_domain}"
+  name = "upload.dev.thetech.digital"
+  zone_id = aws_route53_zone.public_zones.zone_id
   type = "CNAME"
-  records = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
-  zone_id = aws_route53_zone.public_zones[0].id
   ttl = "300"
+  records = [aws_s3_bucket.upload_ui.website_endpoint]
 }

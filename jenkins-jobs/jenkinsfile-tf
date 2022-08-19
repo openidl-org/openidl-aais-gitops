@@ -28,9 +28,11 @@ def checkout() {
 				git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
 				cd ./lambda/openidl-etl-intake-processor/ && npm install
 				cd ../openidl-etl-success-processor/ && npm install
+				cd ../openidl-upload-ui/infra/ && npm install
 				cd ../../
 				cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
 				cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
+				cp -r ./lambda/openidl-upload-ui/infra/ aws/aws_resources/resources/
 				tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
 				echo "Successfully prepared the AWS resources code bundle"
 				tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
