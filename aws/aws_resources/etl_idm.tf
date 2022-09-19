@@ -1,7 +1,7 @@
 #S3 specifics for ETL-IDM Extraction Patterns
 resource "aws_s3_bucket" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = "${local.std_name}-${each.key}"
+    bucket = "${local.std_name}-${each.value}"
     force_destroy = true
     tags = merge(local.tags, {"name" = "${local.std_name}-${each.value}"})
   depends_on = [aws_sns_topic.etl]
