@@ -8,13 +8,13 @@ resource "aws_s3_bucket" "etl" {
 }
 resource "aws_s3_bucket_acl" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = aws_s3_bucket.etl[each.key].id
+    bucket = aws_s3_bucket.etl[each.value].id
     acl = "private"
   depends_on = [aws_s3_bucket.etl]
 }
 resource "aws_s3_bucket_lifecycle_configuration" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = aws_s3_bucket.etl[each.key].id
+    bucket = aws_s3_bucket.etl[each.value].id
     rule {
       id = "log"
       status = "Disabled"
@@ -41,7 +41,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "etl" {
 }
 resource "aws_s3_bucket_versioning" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = aws_s3_bucket.etl[each.key].id
+    bucket = aws_s3_bucket.etl[each.value].id
     versioning_configuration {
       status = "Enabled"
     }
@@ -49,14 +49,14 @@ resource "aws_s3_bucket_versioning" "etl" {
 }
 resource "aws_s3_bucket_logging" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = aws_s3_bucket.etl[each.key].id
+    bucket = aws_s3_bucket.etl[each.value].id
     target_prefix = "logs-${each.value}"
     target_bucket = aws_s3_bucket.s3_bucket_access_logs.id
   depends_on = [aws_s3_bucket.etl]
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = aws_s3_bucket.etl[each.key].id
+    bucket = aws_s3_bucket.etl[each.value].id
     rule {
       apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -71,12 +71,12 @@ resource "aws_s3_bucket_public_access_block" "etl" {
     block_public_policy     = true
     ignore_public_acls      = true
     restrict_public_buckets = true
-    bucket                  = aws_s3_bucket.etl[each.key].id
+    bucket                  = aws_s3_bucket.etl[each.value].id
   depends_on = [aws_s3_bucket.etl]
 }
 resource "aws_s3_bucket_notification" "etl_idm_loader" {
   depends_on = [aws_s3_bucket.etl, aws_sns_topic.etl, aws_lambda_permission.etl_allow_bucket_success_processor]
-  bucket = aws_s3_bucket.etl["idm-loader"].id
+  bucket = aws_s3_bucket.etl["${var.s3_bucket_names_etl.idm-loader}"].id
   lambda_function {
     lambda_function_arn = aws_lambda_function.etl_success_processor.arn
     events = ["s3:ObjectCreated:*"]
@@ -84,7 +84,7 @@ resource "aws_s3_bucket_notification" "etl_idm_loader" {
 }
 resource "aws_s3_bucket_notification" "etl_intake" {
   depends_on = [aws_s3_bucket.etl, aws_lambda_permission.etl_allow_bucket_intake_processor, aws_sns_topic.etl]
-  bucket = aws_s3_bucket.etl["intake"].id
+  bucket = aws_s3_bucket.etl["${var.s3_bucket_names_etl.intake}"].id
   lambda_function {
     lambda_function_arn = aws_lambda_function.etl_intake_processor.arn
     events = ["s3:ObjectCreated:*"]
@@ -93,7 +93,7 @@ resource "aws_s3_bucket_notification" "etl_intake" {
 resource "aws_s3_bucket_policy" "etl" {
   depends_on = [aws_s3_bucket.etl]
   for_each = var.s3_bucket_names_etl
-    bucket     = "${local.std_name}-${each.key}"
+    bucket     = "${local.std_name}-${each.value}"
     policy = jsonencode({
       "Version": "2012-10-17",
       "Statement": [
@@ -113,8 +113,8 @@ resource "aws_s3_bucket_policy" "etl" {
                 "s3:ListBucket"
             ],
             "Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
+                "arn:aws:s3:::${local.std_name}-${each.value}",
+                "arn:aws:s3:::${local.std_name}-${each.value}/*"
             ]
           },
           {
@@ -125,8 +125,8 @@ resource "aws_s3_bucket_policy" "etl" {
             },
             "Action": "*",
             "Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
+                "arn:aws:s3:::${local.std_name}-${each.value}",
+                "arn:aws:s3:::${local.std_name}-${each.value}/*"
             ]
           },
           {
@@ -134,7 +134,7 @@ resource "aws_s3_bucket_policy" "etl" {
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:*",
-            "Resource": ["arn:aws:s3:::${local.std_name}-${each.key}/*", "arn:aws:s3:::${local.std_name}-${each.key}" ],
+            "Resource": ["arn:aws:s3:::${local.std_name}-${each.value}/*", "arn:aws:s3:::${local.std_name}-${each.value}" ],
             "Condition": {
                 "Bool": {
                     "aws:SecureTransport" = "false"
@@ -158,8 +158,8 @@ resource "aws_s3_bucket_policy" "etl" {
                 "s3:ListBucket"
             ],
             "Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
+                "arn:aws:s3:::${local.std_name}-${each.value}",
+                "arn:aws:s3:::${local.std_name}-${each.value}/*"
             ]
           },
       ]
