@@ -35,7 +35,7 @@ bastion_sg_egress =   [{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
 domain_info = {
   r53_public_hosted_zone_required = "yes", #Options: yes | no - This allows to chose whether to setup public hosted zone in Route53
   domain_name = "aaisdirect.com", #Primary domain registered
-  sub_domain_name = "aais", #Sub domain if applicable. Otherwise it can be empty quotes
+  sub_domain_name = "reporting", #Sub domain if applicable. Otherwise it can be empty quotes
   comments = "aais-dev node domain"
 }
 
