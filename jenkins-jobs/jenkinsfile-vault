@@ -8,6 +8,7 @@ pipeline {
     parameters {
         string description: 'Organization name of the node', name: 'org_name', trim: true
         string description: 'Environment (dev | test | prod)', name: 'env', trim: true
+        string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
         choice choices: ['vault-deploy', 'vault-cleanup'], description: 'Choose setup/clean vault instance', name: 'deploy_action'
         }
     stages {
@@ -43,7 +44,7 @@ def vault(thestage){
                 towerServer: 'AWX',
                 towerCredentialsId: 'AWX',
                 templateType: 'job',
-                jobTemplate: "${org}-${params.env}-openidl-vault",
+                jobTemplate: "${params.jobPrefix}${org}-${params.env}-openidl-vault",
                 jobType: "run",
                 towerLogLevel: 'full',
                 removeColor: false,
