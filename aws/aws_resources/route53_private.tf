@@ -14,7 +14,8 @@ resource "aws_route53_zone" "private_zones_internal" {
 }
 #Creating private hosted zones for internal vpc dns resolution - others
 resource "aws_route53_zone" "private_zones" {
-  name    = var.aws_env == "prod" ? local.private_domain : "${var.aws_env}.${local.private_domain}"
+  # name    = var.aws_env == "prod" ? local.private_domain : "${var.aws_env}.${local.private_domain}"
+  name = "${var.aws_env}.${local.private_domain}"
   comment = "Private hosted zones for ${local.std_name}"
   vpc {
     vpc_id = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
