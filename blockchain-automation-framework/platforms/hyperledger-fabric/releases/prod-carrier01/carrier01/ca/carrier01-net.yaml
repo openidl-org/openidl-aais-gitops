@@ -1,0 +1,45 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: carrier01-net-ca
+  namespace: carrier01-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: carrier01-net-ca
+  chart:
+    git: https://github.com/suryalanka-cy/openidl-aais-gitops
+    ref: carr01-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
+  values:
+    metadata:
+      namespace: carrier01-net
+      images:
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        ca: hyperledger/fabric-ca:1.4.8
+       
+    server:
+      name: ca
+      tlsstatus: true
+      admin: carrier01-admin
+    storage:
+      storageclassname: carrier01sc
+      storagesize: 20Gi
+    vault:
+      role: vault-role
+      address: http://vault.prod.carrier01.internal.uim.openidl.org
+      authpath: prodcarrier01-net-auth
+      secretcert: carrier01/crypto/peerOrganizations/carrier01-net/ca?ca.carrier01-net-cert.pem
+      secretkey: carrier01/crypto/peerOrganizations/carrier01-net/ca?carrier01-net-CA.key
+      secretadminpass: carrier01/credentials/carrier01-net/ca/carrier01?user
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+    service:
+      servicetype: ClusterIP
+      ports:
+        tcp:
+          port: 7054
+    proxy:
+      provider: nginx
+      type: peer
+      external_url_suffix: carrier01.prod.carrier01.uim.openidl.org
