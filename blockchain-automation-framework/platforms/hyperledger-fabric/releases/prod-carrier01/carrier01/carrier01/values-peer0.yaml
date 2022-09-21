@@ -1,0 +1,63 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: carrier01-peer0
+  namespace: carrier01-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: carrier01-peer0
+  chart:
+    git: https://github.com/suryalanka-cy/openidl-aais-gitops
+    ref: carr01-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/peernode    
+  values:
+    metadata:
+      namespace: carrier01-net
+      images:
+        couchdb: couchdb:3.1
+        peer: hyperledger/fabric-peer:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        
+    peer:
+      name: peer0
+      gossippeeraddress: peer0.carrier01-net.carrier01.prod.carrier01.uim.openidl.org:8443
+      gossipexternalendpoint: peer0.carrier01-net.carrier01.prod.carrier01.uim.openidl.org:8443
+      localmspid: carrier01MSP
+      loglevel: info
+      tlsstatus: true
+      builder: hyperledger/fabric-ccenv:2.2.3
+      couchdb:
+        username: carrier01-user
+
+    storage:
+      peer:
+        storageclassname: carrier01sc
+        storagesize: 50Gi
+      couchdb:
+        storageclassname: carrier01sc
+        storagesize: 50Gi
+
+    vault:
+      role: vault-role
+      address: http://vault.prod.carrier01.internal.uim.openidl.org
+      authpath: prodcarrier01-net-auth
+      secretprefix: carrier01/crypto/peerOrganizations/carrier01-net/peers/peer0.carrier01-net
+      secretambassador: carrier01/crypto/peerOrganizations/carrier01-net/ambassador
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      secretcouchdbpass: carrier01/credentials/carrier01-net/couchdb/carrier01?user
+
+    service:
+      servicetype: ClusterIP
+      ports:
+        grpc:
+          clusteripport: 7051
+        events:
+          clusteripport: 7053
+        couchdb:
+          clusteripport: 5984
+          
+    proxy:
+      provider: "nginx"
+      external_url_suffix: carrier01.prod.carrier01.uim.openidl.org
