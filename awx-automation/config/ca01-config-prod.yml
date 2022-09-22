@@ -1,9 +1,9 @@
 ordererorg_domain: "aais.uim.openidl.org"
-domain: "carrier01.uim.openidl.org"
-internal_domain: "carrier01.internal.uim.openidl.org"
+domain: "ca01.uim.openidl.org"
+internal_domain: "ca01.internal.uim.openidl.org"
 node_type: "carrier"
 network:
-  org_name: "carrier01"
+  org_name: "ca01"
   ordererorg: "false"
   ordererorg_name: "ordererorg"
   organizations:
@@ -16,12 +16,12 @@ network:
       repo_url: github.com/openidl-org/openidl-main.git
       repo_branch: openidl-nd-poc-main
       repo_path: openidl-chaincode/chaincode/openidl
-  - name: anal-carr01
+  - name: anal-ca01
     chaincode:
       name: openidl-cc-aais-carriers
       repo_url: github.com/openidl-org/openidl-main.git
       repo_branch: openidl-nd-poc-main
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
-        - name: "anal_carr01_pdc"
-          policy: "OR('analyticsMSP.member', 'carrier01MSP.member')"
+        - name: "anal_ca01_pdc"
+          policy: "OR('analyticsMSP.member', 'ca01MSP.member')"
