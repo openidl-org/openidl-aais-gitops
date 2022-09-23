@@ -49,16 +49,16 @@
   set_fact:
     commit_chaincode: "{{ result }}"
 
-# - name: "Write all endorsing orgs certificates to vault"
-#   include_tasks: write.yaml
-#   vars:
-#     namespace: "{{ org.name |lower }}-net"
-#     vault: "{{ org.vault }}"
-#     peers: "{{ organization.services.peers | first }}"
-#   loop: "{{ network.organizations }}"
-#   loop_control:
-#     loop_var: organization
-#   when: organization.type == 'peer'
+- name: "Write all endorsing orgs certificates to vault"
+  include_tasks: write.yaml
+  vars:
+    namespace: "{{ org.name |lower }}-net"
+    vault: "{{ org.vault }}"
+    peers: "{{ organization.services.peers | first }}"
+  loop: "{{ network.organizations }}"
+  loop_control:
+    loop_var: organization
+  when: organization.type == 'peer'
 
 # Nested task for chaincode commit
 - name: "Create value file for chaincode commit"

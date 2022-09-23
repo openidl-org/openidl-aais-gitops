@@ -74,16 +74,16 @@
     invoke_chaincode: "{{ result }}"
 
   
-# - name: "Write all endorsing orgs certificates to vault"
-#   include_tasks: write.yaml
-#   vars:
-#     namespace: "{{ org.name |lower }}-net"
-#     vault: "{{ org.vault }}"
-#     peers: "{{ organization.services.peers | first }}"
-#   loop: "{{ network.organizations }}"
-#   loop_control:
-#     loop_var: organization
-#   when: organization.type == 'peer' and '2.' in network.version
+- name: "Write all endorsing orgs certificates to vault"
+  include_tasks: write.yaml
+  vars:
+    namespace: "{{ org.name |lower }}-net"
+    vault: "{{ org.vault }}"
+    peers: "{{ organization.services.peers | first }}"
+  loop: "{{ network.organizations }}"
+  loop_control:
+    loop_var: organization
+  when: organization.type == 'peer' and '2.' in network.version
 
 # Nested task for chanincode invocation
 - name: "Create value file for chaincode invocation"
