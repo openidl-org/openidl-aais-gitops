@@ -1,0 +1,99 @@
+global:
+    clusterurl: aais.reporting.aaisdirect.com
+    appsecret: apps-secret
+    configpath: config-aais
+    datacallapp:
+        install: true
+        port: 8080
+        targetport: 8080
+        servicename: data-call-app-service
+        ingressenabled: true
+        ingresshostname: data-call-app-service.prod.aais.internal.reporting.aaisdirect.com
+        publicingresshostname: data-call-app-service.prod.aais.reporting.aaisdirect.com
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
+            pullPolicy: IfNotPresent
+            tag: 13-develop-eb422b7-091520221424
+    utilities:
+        install: true
+        port: 8080
+        targetport: 8080
+        servicename: utilities-service
+        ingressenabled: true
+        ingresshostname: utilities-service.prod.aais.internal.reporting.aaisdirect.com
+        publicingresshostname: utilities-service.prod.aais.reporting.aaisdirect.com
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
+            pullPolicy: IfNotPresent
+            tag: 19-develop-eb422b7-091520221424
+    ui:
+        install: true
+        servicename: ui-service
+        port: 8080
+        targetport: 8080
+        ingressenabled: true
+        ingresshostname: openidl.prod.aais.reporting.aaisdirect.com
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
+            pullPolicy: IfNotPresent
+            tag: 14-develop-845aac5-091620222054
+    insurancedatamanager:
+        install: true
+        port: 8080
+        targetport: 8080
+        servicename: insurance-data-manager-service
+        ingressenabled: true
+        ingresshostname: insurance-data-manager-service.prod.aais.reporting.aaisdirect.com
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
+            pullPolicy: IfNotPresent
+            tag: 10-develop-eb422b7-091520221424
+    datacallprocessor:
+        install: true
+        port: 8080
+        targetport: 8080
+        servicename: data-call-processor-service
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-processor
+            pullPolicy: IfNotPresent
+            tag: 7-develop-eb422b7-091520221424
+    upload:
+        install: false
+        port: 80
+        targetport: 80
+        servicename: upload-service
+        image:
+            repository: ghcr.io/openidl-org/openidl-upload
+            pullPolicy: IfNotPresent
+            tag: latest
+    datacallmoodlistener:
+        install: false
+        port: 8080
+        targetport: 8080
+        servicename: data-call-mood-listener-service
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-mood-listener
+            pullPolicy: IfNotPresent
+            tag: 14-prodelop-jenkins-0edbace-053120221949
+    transactionaldataeventlistener:
+        install: false
+        port: 8080
+        targetport: 8080
+        servicename: transactional-data-event-listener-service
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
+            pullPolicy: IfNotPresent
+            tag: 10-prodelop-jenkins-5e5ec5c-071320222002
+    carrierui:
+        install: false
+        servicename: carrier-ui-service
+        port: 8080
+        targetport: 8080
+        ingressenabled: false
+        ingresshostname: openidl.prod.aais.openidl.aaisdirect.com
+        image:
+            repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
+            pullPolicy: IfNotPresent
+            tag: 17-prodelop-jenkins-58b8788-062820221410
+    secrets:
+        install: true
