@@ -29,7 +29,7 @@ def checkout() {
 				cd ./lambda/openidl-etl-intake-processor/ && npm install
 				cd ../openidl-etl-success-processor/ && npm install
 				cd ../openidl-upload-ui/infra/ && npm install
-				cd ../../
+				cd ../../../
 				cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
 				cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
 				cp -r ./lambda/openidl-upload-ui/infra/ aws/aws_resources/resources/

@@ -82,7 +82,7 @@ locals {
     }
   )
 
-  config-reporting-datacall = templatefile("resources/config-reporting-s3Bucket.tftpl",
+  config-reporting-s3 = templatefile("resources/config-reporting-s3Bucket.tftpl",
     {
       region = "${var.aws_region}",
       reportBucket = "${var.s3_bucket_name_reporting}",
