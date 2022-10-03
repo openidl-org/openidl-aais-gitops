@@ -16,3 +16,6 @@ provider "aws" {
     external_id  = var.aws_external_id
   }
 }
+provider "zipper" {
+  skip_ssl_validation = false
+}

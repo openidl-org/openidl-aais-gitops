@@ -50,8 +50,6 @@ locals {
     {
       successBucket = "${aws_s3_bucket.etl["idm-loader"].id}"
       failureBucket = "${aws_s3_bucket.etl["failure"].id}"
-      #successBucket = "${aws_s3_bucket.etl["idm-loader"].arn}",
-      #failureBucket = "${aws_s3_bucket.etl["failure"].arn}",
       dynamoDB = "${aws_dynamodb_table.etl.name}",
       successTopicARN = "${aws_sns_topic.etl["success"].arn}",
       failureTopicARN = "${aws_sns_topic.etl["failure"].arn}",
@@ -66,23 +64,22 @@ locals {
       apiUsername = "${var.api_username}",
       apiPassword = "${var.api_user_password}",
       carrierId = "${var.carrier_id}",
-      #utilitiesAPIUrl = "https://utilties-service.thetech.digital",
-      #idmAPIUrl = "https://insurance-data-manager-service.thetech.digital"
-      utilitiesAPIUrl = "https://utilities-service.${var.aws_env}.${local.public_domain}",
-      idmAPIUrl = "https://insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
+      region = "${var.aws_region}"
+      utilitiesAPIUrl = "utilities-service.${var.aws_env}.${local.public_domain}",
+      idmAPIUrl = "insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
     })
 
-  config-reporting-datacall = templatefile("resources/config-reporting-datacall.tftpl",
+  config-reporting-processor-datacall = templatefile("resources/config-reporting-datacall.tftpl",
     {
       apiUsername = "${var.api_username}",
       apiPassword = "${var.api_user_password}",
-      utilitiesAPIUrl = "https://utilities-service.${var.aws_env}.${local.public_domain}",
-      datacallURL = "https://data-call-app-service.${var.aws_env}.${local.public_domain}",
-      idmAPIUrl = "https://insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
+      utilitiesAPIURL = "http://utilities-service.${var.aws_env}.${local.public_domain}",
+      datacallURL = "http://data-call-app-service.${var.aws_env}.${local.public_domain}",
+      idmAPIURL = "http://insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
     }
   )
 
-  config-reporting-s3 = templatefile("resources/config-reporting-s3Bucket.tftpl",
+  config-reporting-processor-s3 = templatefile("resources/config-reporting-s3Bucket.tftpl",
     {
       region = "${var.aws_region}",
       reportBucket = "${var.s3_bucket_name_reporting}",
