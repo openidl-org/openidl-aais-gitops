@@ -33,6 +33,10 @@ def checkout() {
 				cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
 				cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
 				cp -r ./lambda/openidl-upload-ui/infra/ aws/aws_resources/resources/
+                git clone https://github.com/openidl-org/openidl-main.git -b report-generation lambda-reporting-processor
+                cd ./lambda-reporting-processor/lambdas/ReportProcessorLambda/ && npm install
+                cd ../../../
+                cp -r ./lambda-reporting-processor/lambdas/ReportProcessorLambda aws/aws_resources/resources/openidl-reporting-processor
 				tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
 				echo "Successfully prepared the AWS resources code bundle"
 				tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
