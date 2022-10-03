@@ -1,4 +1,3 @@
-
 data "archive_file" "etl_intake_processor_zip" {
   type = "zip"
   source_dir = "./resources/openidl-etl-intake-processor/"
@@ -15,6 +14,12 @@ data "archive_file" "upload_zip" {
   type = "zip"
   source_dir = "./resources/openidl-upload-lambda/"
   output_path = "./resources/openidl-upload-lambda.zip"
+}
+data "archive_file" "reporting_processor_zip" {
+  type = "zip"
+  source_dir = "./resources/openidl-reporting-processor/"
+  output_path = "./resources/openidl-reporting-processor.zip"
+  depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall]
 }
 #Reading IAM identities required
 data "aws_iam_user" "terraform_user" {
