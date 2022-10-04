@@ -3,6 +3,11 @@
   shell: |
     export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
+- name: Dispose temporary git repository content
+  file:
+    path: /tmp/openidl/
+    state: absent
+
 - name: Delete deploy-secrets pod
   community.kubernetes.k8s:
     name: deploy-secrets
@@ -21,6 +26,8 @@
 
 - name: Download git repository content
   no_log: true
+  # shell: |
+  #   git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl
   git:
     repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
     dest: /tmp/openidl
