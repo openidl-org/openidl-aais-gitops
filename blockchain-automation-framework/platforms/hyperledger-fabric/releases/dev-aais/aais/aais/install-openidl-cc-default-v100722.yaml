@@ -17,7 +17,7 @@ spec:
       network:
         version: 2.2.3
       images:
-        fabrictools: hyperledger/fabric-tools:2.2.3
+        fabrictools: hyperledger/fabric-tools:2.2.8
         alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
     peer:
       name: peer0
