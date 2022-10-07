@@ -1,7 +1,7 @@
 #S3 specifics for ETL-IDM Extraction Patterns
 resource "aws_s3_bucket" "etl" {
   for_each = var.s3_bucket_names_etl
-    bucket = "${local.std_name}-${each.key}"
+    bucket = "${local.std_name}-${each.value}"
     force_destroy = true
     tags = merge(local.tags, {"name" = "${local.std_name}-${each.value}"})
   depends_on = [aws_sns_topic.etl]
@@ -93,7 +93,7 @@ resource "aws_s3_bucket_notification" "etl_intake" {
 resource "aws_s3_bucket_policy" "etl" {
   depends_on = [aws_s3_bucket.etl]
   for_each = var.s3_bucket_names_etl
-    bucket     = "${local.std_name}-${each.key}"
+    bucket     = "${local.std_name}-${each.value}"
     policy = jsonencode({
       "Version": "2012-10-17",
       "Statement": [
@@ -113,8 +113,8 @@ resource "aws_s3_bucket_policy" "etl" {
                 "s3:ListBucket"
             ],
             "Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
+                "arn:aws:s3:::${local.std_name}-${each.value}",
+                "arn:aws:s3:::${local.std_name}-${each.value}/*"
             ]
           },
           {
@@ -125,8 +125,8 @@ resource "aws_s3_bucket_policy" "etl" {
             },
             "Action": "*",
             "Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
+                "arn:aws:s3:::${local.std_name}-${each.value}",
+                "arn:aws:s3:::${local.std_name}-${each.value}/*"
             ]
           },
           {
@@ -134,7 +134,7 @@ resource "aws_s3_bucket_policy" "etl" {
             "Effect": "Deny",
             "Principal": "*",
             "Action": "s3:*",
-            "Resource": ["arn:aws:s3:::${local.std_name}-${each.key}/*", "arn:aws:s3:::${local.std_name}-${each.key}" ],
+            "Resource": ["arn:aws:s3:::${local.std_name}-${each.value}/*", "arn:aws:s3:::${local.std_name}-${each.value}" ],
             "Condition": {
                 "Bool": {
                     "aws:SecureTransport" = "false"
@@ -158,8 +158,8 @@ resource "aws_s3_bucket_policy" "etl" {
                 "s3:ListBucket"
             ],
             "Resource": [
-                "arn:aws:s3:::${local.std_name}-${each.key}",
-                "arn:aws:s3:::${local.std_name}-${each.key}/*"
+                "arn:aws:s3:::${local.std_name}-${each.value}",
+                "arn:aws:s3:::${local.std_name}-${each.value}/*"
             ]
           },
       ]
