@@ -15,14 +15,14 @@ network:
   - name: defaultchannel
     chaincode:
       name: openidl-cc-default
-      repo_url: github.com/rajeshsanjeevi/openidl-main.git
-      repo_branch: develop-jenkins-result-combinator
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: openidl-nd-poc-main
       repo_path: openidl-chaincode/chaincode/openidl
   - name: anal-aais
     chaincode:
       name: openidl-cc-aais-carriers
-      repo_url: github.com/rajeshsanjeevi/openidl-main.git
-      repo_branch: develop-jenkins-result-combinator
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: openidl-nd-poc-main
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
         - name: "anal_aais_pdc"
@@ -30,8 +30,8 @@ network:
   - name: anal-cnd
     chaincode:
       name: openidl-cc-aais-carriers
-      repo_url: github.com/rajeshsanjeevi/openidl-main.git
-      repo_branch: develop-jenkins-result-combinator
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: openidl-nd-poc-main
       repo_path: openidl-chaincode/chaincode/openidl
       collectionconfig:
         - name: "anal_cnd_pdc"
