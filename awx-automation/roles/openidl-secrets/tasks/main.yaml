@@ -22,6 +22,7 @@
 - name: Download git repository content
   no_log: true
   shell: |
+    rm -rf /tmp/openidl
     git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl
   # git:
   #   repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
