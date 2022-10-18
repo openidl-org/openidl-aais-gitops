@@ -352,7 +352,7 @@ resource "aws_lambda_function" "etl_intake_processor" {
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"
-  source_code_hash = "${zipper_file.openidl-etl-intake-processor.output_sha}"
+  source_code_hash = "${zipper_file.etl_intake_processor_zip.output_sha}"
   filename = "./resources/openidl-etl-intake-processor.zip"
   timeout = "3"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-etl-intake-processor"})

@@ -1,20 +1,20 @@
 
 #S3 specifics for Reporting
 resource "aws_s3_bucket" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   bucket = "${local.std_name}-${var.s3_bucket_name_reporting}"
   force_destroy = true
   tags = merge(local.tags, {"name" = "${local.std_name}-${var.s3_bucket_name_reporting}"})
 }
 resource "aws_s3_bucket_acl" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
-  bucket = aws_s3_bucket.reporting.id
+  count = local.org_name == "anal" ? 1 : 0
+  bucket = aws_s3_bucket.reporting[count.index].id
   acl = "private"
   depends_on = [aws_s3_bucket.reporting]
 }
 resource "aws_s3_bucket_lifecycle_configuration" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
-  bucket = aws_s3_bucket.reporting.id
+  count = local.org_name == "anal" ? 1 : 0
+  bucket = aws_s3_bucket.reporting[count.index].id
   rule {
     id = "log"
     status = "Disabled"
@@ -40,16 +40,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "reporting" {
   depends_on = [aws_s3_bucket.reporting]
 }
 resource "aws_s3_bucket_versioning" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
-  bucket = aws_s3_bucket.reporting.id
+  count = local.org_name == "anal" ? 1 : 0
+  bucket = aws_s3_bucket.reporting[count.index].id
   versioning_configuration {
     status = "Enabled"
   }
   depends_on = [aws_s3_bucket.reporting]
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
-  bucket = aws_s3_bucket.reporting.id
+  count = local.org_name == "anal" ? 1 : 0
+  bucket = aws_s3_bucket.reporting[count.index].id
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
@@ -59,18 +59,18 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "reporting" {
   depends_on = [aws_s3_bucket.reporting]
 }
 resource "aws_s3_bucket_public_access_block" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-  bucket                  = aws_s3_bucket.reporting.id
+  bucket                  = aws_s3_bucket.reporting[count.index].id
   depends_on = [aws_s3_bucket.reporting]
 }
 resource "aws_s3_bucket_cors_configuration" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   depends_on = [aws_s3_bucket.reporting]
-  bucket = aws_s3_bucket.reporting.id
+  bucket = aws_s3_bucket.reporting[count.index].id
   cors_rule {
     allowed_headers = []
     allowed_methods = ["GET", "HEAD", "POST"]
@@ -79,7 +79,7 @@ resource "aws_s3_bucket_cors_configuration" "reporting" {
   }
 }
 resource "aws_s3_bucket_policy" "reporting" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   depends_on = [aws_s3_bucket.reporting]
   bucket     = "${local.std_name}-${var.s3_bucket_name_reporting}"
   policy = jsonencode({
@@ -134,7 +134,7 @@ resource "aws_s3_bucket_policy" "reporting" {
           "Effect": "Allow",
           "Principal": {
               "AWS": [
-                "${aws_iam_role.reporting_lambda.arn}"
+                "${aws_iam_role.reporting_lambda[count.index].arn}"
               ]
           },
           "Action": [
@@ -155,9 +155,9 @@ resource "aws_s3_bucket_policy" "reporting" {
 }
 #Lambda specifics
 resource "aws_iam_role" "reporting_lambda" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   name = "${local.std_name}-openidl-reporting-lambda"
-  managed_policy_arns = [aws_iam_policy.reporting_lambda_role_policy.arn]
+  managed_policy_arns = [aws_iam_policy.reporting_lambda_role_policy[count.index].arn]
   assume_role_policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -174,7 +174,7 @@ resource "aws_iam_role" "reporting_lambda" {
   tags = merge(local.tags, { "name" = "${local.std_name}-openidl-reporting-lambda"})
 }
 resource "aws_iam_policy" "reporting_lambda_role_policy" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   name = "${local.std_name}-reporting-lambda-role-policy"
   policy = jsonencode(
     {
@@ -224,31 +224,35 @@ resource "aws_iam_policy" "reporting_lambda_role_policy" {
   })
 }
 resource "local_file" "config_reporting_datacall" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   content = local.config-reporting-processor-datacall
   filename = "./resources/openidl-reporting-processor/config/datacall-config.json"
 }
 resource "local_file" "config_reporting_s3" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   content = local.config-reporting-processor-s3
   filename = "./resources/openidl-reporting-processor/config/s3-bucket-config.json"
   depends_on = [aws_s3_bucket.reporting]
 }
 resource "zipper_file" "reporting_processor_zip" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   source      = "./resources/openidl-reporting-processor/"
   output_path = "./resources/openidl-reporting-processor.zip"
   depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall]
 }
 resource "aws_lambda_function" "reporting-processor" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   function_name = "${local.std_name}-openidl-reporting-processor"
-  role              = aws_iam_role.reporting_lambda.arn
+  role              = aws_iam_role.reporting_lambda[count.index].arn
   architectures     = ["x86_64"]
   description       = "Openidl Reporting Processor"
-  #environment {}
+  environment {
+    variables = {
+      REGION = "${var.aws_region}"
+    }
+  }
   package_type = "Zip"
-  source_code_hash = "${zipper_file.reporting_processor_zip.output_sha}"
+  source_code_hash = "${zipper_file.reporting_processor_zip[count.index].output_sha}"
   runtime = "nodejs16.x"
   handler = "index.handler"
   filename = "./resources/openidl-reporting-processor.zip"
@@ -258,21 +262,21 @@ resource "aws_lambda_function" "reporting-processor" {
   depends_on = [zipper_file.reporting_processor_zip]
 }
 resource "aws_s3_bucket_notification" "reporting-processor" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   depends_on = [data.aws_s3_bucket.s3_bucket_hds_data, aws_lambda_permission.allow_bucket_reporting_processor]
   bucket = data.aws_s3_bucket.s3_bucket_hds_data[0].id
   lambda_function {
-    lambda_function_arn = aws_lambda_function.reporting-processor.arn
+    lambda_function_arn = aws_lambda_function.reporting-processor[count.index].arn
     events = ["s3:ObjectCreated:*"]
     filter_prefix = "result-"
   }
 }
 resource "aws_lambda_permission" "allow_bucket_reporting_processor" {
-  count = var.org_name == "anal" ? 1 : 0
+  count = local.org_name == "anal" ? 1 : 0
   depends_on = [data.aws_s3_bucket.s3_bucket_hds_data]
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.reporting-processor.arn
+  function_name = aws_lambda_function.reporting-processor[count.index].arn
   principal     = "s3.amazonaws.com"
   source_arn    = data.aws_s3_bucket.s3_bucket_hds_data[0].arn
 }
