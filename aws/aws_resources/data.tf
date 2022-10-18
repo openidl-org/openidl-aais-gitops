@@ -1,21 +1,26 @@
-
-data "archive_file" "etl_intake_processor_zip" {
-  type = "zip"
-  source_dir = "./resources/openidl-etl-intake-processor/"
-  output_path = "./resources/openidl-etl-intake-processor.zip"
-  depends_on = [local_file.config_intake]
-}
-data "archive_file" "etl_success_processor_zip" {
-  type = "zip"
-  source_dir = "./resources/openidl-etl-success-processor/"
-  output_path = "./resources/openidl-etl-success-processor.zip"
-  depends_on = [local_file.config_success]
-}
-data "archive_file" "upload_zip" {
-  type = "zip"
-  source_dir = "./resources/openidl-upload-lambda/"
-  output_path = "./resources/openidl-upload-lambda.zip"
-}
+#data "archive_file" "etl_intake_processor_zip" {
+#  type = "zip"
+#  source_dir = "./resources/openidl-etl-intake-processor/"
+#  output_path = "./resources/openidl-etl-intake-processor.zip"
+#  depends_on = [local_file.config_intake]
+#}
+#data "archive_file" "etl_success_processor_zip" {
+#  type = "zip"
+#  source_dir = "./resources/openidl-etl-success-processor/"
+#  output_path = "./resources/openidl-etl-success-processor.zip"
+#  depends_on = [local_file.config_success]
+#}
+#data "archive_file" "upload_zip" {
+#  type = "zip"
+#  source_dir = "./resources/openidl-upload-lambda/"
+#  output_path = "./resources/openidl-upload-lambda.zip"
+#}
+#data "archive_file" "reporting_processor_zip" {
+#  type = "zip"
+#  source_dir = "./resources/openidl-reporting-processor"
+#  output_path = "./resources/openidl-reporting-processor.zip"
+#  depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall]
+#}
 #Reading IAM identities required
 data "aws_iam_user" "terraform_user" {
   user_name = local.terraform_user_name[1]
@@ -271,3 +276,17 @@ data "aws_iam_policy_document" "cloudtrail_kms_policy_doc" {
     resources = ["*"]
   }
 }
+data "aws_s3_bucket" "s3_bucket_hds_data" {
+  depends_on = [aws_s3_bucket.s3_bucket_hds]
+  count = var.org_name == "aais" ? 1 : 1 #update to 0 : 1
+  bucket = "${local.std_name}-${var.s3_bucket_name_hds_analytics}"
+}
+data "aws_cognito_user_pools" "user_pool" {
+  depends_on = [aws_cognito_user_pool.user_pool]
+  name = "${local.std_name}-${var.userpool_name}"
+}
+#data "aws_route53_zone" "public_zone" {
+#  depends_on = [aws_route53_zone.public_zones]
+#  count   = var.domain_info.r53_public_hosted_zone_required == "yes" ? 1 : 0
+#  name    = lookup(var.domain_info, "domain_name")
+#}

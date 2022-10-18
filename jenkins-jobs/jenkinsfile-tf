@@ -23,20 +23,24 @@ def checkout() {
         nodejs(cacheLocationStrategy: workspace(), nodeJSInstallationName: 'nodejs') {
 		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
 			sh '''
-				echo "Preparing ETL code for lambda functions"
-				rm -rf lambda
-				git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
-				cd ./lambda/openidl-etl-intake-processor/ && npm install
-				cd ../openidl-etl-success-processor/ && npm install
-				cd ../openidl-upload-ui/infra/ && npm install
-				cd ../../
-				cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
-				cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
-				cp -r ./lambda/openidl-upload-ui/infra/ aws/aws_resources/resources/
-				tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
-				echo "Successfully prepared the AWS resources code bundle"
-				tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
-				echo "Successfully prepared the K8s resources code bundle"
+                    echo "Preparing ETL code for lambda functions"
+                    rm -rf lambda lambda-reporting-processor
+                    git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
+                    cd ./lambda/openidl-etl-intake-processor/ && npm install
+                    cd ../openidl-etl-success-processor/ && npm install
+                    cd ../openidl-upload-ui/infra/ && npm install
+                    cd ../../../
+                    cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
+                    cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
+                    cp -r ./lambda/openidl-upload-ui/infra aws/aws_resources/resources/openidl-upload-lambda
+                    git clone https://github.com/openidl-org/openidl-main.git -b openidl-nd-poc-main lambda-reporting-processor
+                    cd ./lambda-reporting-processor/lambdas/ReportProcessorLambda/ && npm install
+                    cd ../../../
+                    cp -r ./lambda-reporting-processor/lambdas/ReportProcessorLambda aws/aws_resources/resources/openidl-reporting-processor
+                    tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
+                    echo "Successfully prepared the AWS resources code bundle"
+                    tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
+                    echo "Successfully prepared the K8s resources code bundle"
 			'''
 		}
     }
