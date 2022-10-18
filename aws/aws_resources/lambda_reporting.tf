@@ -264,7 +264,7 @@ resource "aws_s3_bucket_notification" "reporting-processor" {
   lambda_function {
     lambda_function_arn = aws_lambda_function.reporting-processor.arn
     events = ["s3:ObjectCreated:*"]
-    filter_prefix = "results-"
+    filter_prefix = "result-"
   }
 }
 resource "aws_lambda_permission" "allow_bucket_reporting_processor" {
