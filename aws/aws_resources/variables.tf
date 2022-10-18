@@ -723,3 +723,16 @@ variable "s3_bucket_name_upload_ui" {
   type = string
   description = "S3 bucket name to be used to host openidl UI static web content"
 }
+#-----------------------------------------------------------------------------------
+variable "s3_bucket_name_reporting" {
+  type = string
+  description = "S3 bucket name to be used for reporting"
+}
+variable "apps_user_access_id" {
+  type = string
+  description = "App User Access ID"
+}
+variable "apps_user_secret_key" {
+  type = string
+  description = "App User Secret Key"
+}
