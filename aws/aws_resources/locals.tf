@@ -40,9 +40,9 @@ locals {
 
   #cognito specifics
   client_app_name              = "${local.std_name}-${var.userpool_name}-app-client" #name of the application client
-  client_callback_urls         = var.aws_env == "prod" ? ["https://openidl.${local.public_domain}/callback", "https://openidl.${local.public_domain}/redirect"] : ["https://openidl.${var.aws_env}.${local.public_domain}/callback", "https://openidl.${var.aws_env}.${local.public_domain}/redirect"]
-  client_default_redirect_url  = var.aws_env == "prod" ? "https://openidl.${local.public_domain}/redirect" : "https://openidl.${var.aws_env}.${local.public_domain}/redirect" #redirect url
-  client_logout_urls           = var.aws_env == "prod" ? ["https://openidl.${local.public_domain}/signout"] : ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
+  client_callback_urls         = ["https://openidl.${var.aws_env}.${local.public_domain}/callback", "https://openidl.${var.aws_env}.${local.public_domain}/redirect"]
+  client_default_redirect_url  = "https://openidl.${var.aws_env}.${local.public_domain}/redirect" #redirect url
+  client_logout_urls           = ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
   cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain[0]}"
 
   #Lambda function related
@@ -50,8 +50,6 @@ locals {
     {
       successBucket = "${aws_s3_bucket.etl["idm-loader"].id}"
       failureBucket = "${aws_s3_bucket.etl["failure"].id}"
-      #successBucket = "${aws_s3_bucket.etl["idm-loader"].arn}",
-      #failureBucket = "${aws_s3_bucket.etl["failure"].arn}",
       dynamoDB = "${aws_dynamodb_table.etl.name}",
       successTopicARN = "${aws_sns_topic.etl["success"].arn}",
       failureTopicARN = "${aws_sns_topic.etl["failure"].arn}",
@@ -66,12 +64,33 @@ locals {
       apiUsername = "${var.api_username}",
       apiPassword = "${var.api_user_password}",
       carrierId = "${var.carrier_id}",
-      #utilitiesAPIUrl = "https://utilties-service.thetech.digital",
-      #idmAPIUrl = "https://insurance-data-manager-service.thetech.digital"
-      utilitiesAPIUrl = "https://utilities-service.${local.public_domain}",
-      idmAPIUrl = "https://insurance-data-manager-service.${local.public_domain}"
+      region = "${var.aws_region}"
+      utilitiesAPIUrl = "utilities-service.${var.aws_env}.${local.public_domain}",
+      idmAPIUrl = "insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
     })
 
+  config-reporting-processor-datacall = templatefile("resources/config-reporting-datacall.tftpl",
+    {
+      apiUsername = "${var.api_username}",
+      apiPassword = "${var.api_user_password}",
+      utilitiesAPIURL = "http://utilities-service.${var.aws_env}.${local.public_domain}",
+      datacallURL = "http://data-call-app-service.${var.aws_env}.${local.public_domain}",
+      idmAPIURL = "http://insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
+    }
+  )
+
+  config-reporting-processor-s3 = templatefile("resources/config-reporting-s3Bucket.tftpl",
+    {
+      region = "${var.aws_region}",
+      reportBucket = "${var.s3_bucket_name_reporting}",
+      externalId = "apps-user",
+      roleArn = "arn:aws:iam::${var.aws_account_number}:role/${local.std_name}-openidl-apps",
+      roleSessionName = "openidl",
+      accessKeyId = "${var.apps_user_access_id}",
+      secretAccessKey = "${var.apps_user_secret_key}"
+    }
+  )
+  
   def_sg_ingress = [{
     cidr_blocks = var.create_vpc ? var.vpc_cidr : data.aws_vpc.vpc[0].cidr_block
     description = "Inbound SSH traffic"
@@ -123,10 +142,12 @@ locals {
 
   dns_entries_list_non_prod = var.create_bastion_host ? {
     "app-bastion.${var.aws_env}.${local.public_domain}" = aws_eip.bastion_host_eip[0].public_ip #module.bastion_nlb[0].lb_dns_name
+    "upload.${var.aws_env}.${local.public_domain}" = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
     } : {}
 
   dns_entries_list_prod = var.create_bastion_host ? {
     "app-bastion.${local.public_domain}" = aws_eip.bastion_host_eip[0].public_ip #module.bastion_nlb[0].lb_dns_name
+    "upload.${local.public_domain}" = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
     } : {}
 
   app_eks_control_plane_sg_computed_ingress = var.create_bastion_host ? [

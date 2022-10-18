@@ -90,6 +90,16 @@ resource "aws_s3_bucket_notification" "etl_intake" {
     events = ["s3:ObjectCreated:*"]
   }
 }
+resource "aws_s3_bucket_cors_configuration" "etl_intake" {
+  depends_on = [aws_s3_bucket.etl]
+  bucket = aws_s3_bucket.etl["intake"].id
+  cors_rule {
+    allowed_headers = []
+    allowed_methods = ["GET", "HEAD", "POST"]
+    allowed_origins = ["*"]
+    expose_headers = []
+  }
+}
 resource "aws_s3_bucket_policy" "etl" {
   depends_on = [aws_s3_bucket.etl]
   for_each = var.s3_bucket_names_etl
@@ -147,6 +157,7 @@ resource "aws_s3_bucket_policy" "etl" {
             "Principal": {
                 "AWS": [
                   "${aws_iam_role.etl_lambda.arn}",
+                  "${aws_iam_role.upload.arn}"
                 ]
             },
             "Action": [
@@ -322,6 +333,16 @@ resource "aws_iam_role" "etl_lambda" {
   })
   tags = merge(local.tags, { "name" = "${local.std_name}-openidl-etl-intake-lambda"})
 }
+resource "zipper_file" "etl_intake_processor_zip" {
+  source      = "./resources/openidl-etl-intake-processor/"
+  output_path = "./resources/openidl-etl-intake-processor.zip"
+  depends_on = [local_file.config_intake]
+}
+resource "zipper_file" "etl_success_processor_zip" {
+  source      = "./resources/openidl-etl-success-processor/"
+  output_path = "./resources/openidl-etl-success-processor.zip"
+  depends_on = [local_file.config_success]
+}
 resource "aws_lambda_function" "etl_intake_processor" {
   function_name = "${local.std_name}-openidl-etl-intake-processor"
   role              = aws_iam_role.etl_lambda.arn
@@ -331,24 +352,30 @@ resource "aws_lambda_function" "etl_intake_processor" {
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"
+  source_code_hash = "${zipper_file.openidl-etl-intake-processor.output_sha}"
   filename = "./resources/openidl-etl-intake-processor.zip"
   timeout = "3"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-etl-intake-processor"})
-  depends_on = [data.archive_file.etl_intake_processor_zip]
+  depends_on = [zipper_file.etl_intake_processor_zip]
 }
 resource "aws_lambda_function" "etl_success_processor" {
   function_name = "${local.std_name}-openidl-etl-idm-loader"
   role              = aws_iam_role.etl_lambda.arn
   architectures     = ["x86_64"]
   description       = "ETL-IDM loader processor"
-  #environment {}
+  environment {
+    variables = {
+      REGION = "${var.aws_region}"
+    }
+  }
   package_type = "Zip"
   runtime = "nodejs16.x"
   handler = "index.handler"
+  source_code_hash = "${zipper_file.etl_success_processor_zip.output_sha}"
   filename = "./resources/openidl-etl-success-processor.zip"
   timeout = "3"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-etl-idm-loader"})
-  depends_on = [data.archive_file.etl_success_processor_zip]
+  depends_on = [zipper_file.etl_success_processor_zip]
 }
 resource "local_file" "config_intake" {
   content = local.config-intake
@@ -383,14 +410,14 @@ resource "aws_iam_policy" "etl_lambda_role_policy" {
             "Sid": "AllowS3",
             "Effect": "Allow",
             "Action": [
-				"s3:PutObject",
-				"s3:GetObject",
-				"s3-object-lambda:*"
+				      "s3:PutObject",
+				      "s3:GetObject",
+				      "s3-object-lambda:*"
 			],
             "Resource": [
                 "arn:aws:s3:::${local.std_name}-${var.s3_bucket_names_etl.idm-loader}/*",
                 "arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.failure}/*",
-				"arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.intake}/*"
+				        "arn:aws:s3:::${local.std_name}${var.s3_bucket_names_etl.intake}/*"
             ]
         },
         {

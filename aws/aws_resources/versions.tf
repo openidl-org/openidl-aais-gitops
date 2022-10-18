@@ -10,7 +10,9 @@ terraform {
       source  = "hashicorp/template"
       version = "2.2.0"
     }
+    zipper = {
+      source = "ArthurHlt/zipper"
+      version = "0.14.0"
+    }
   }
- }
-
-
+}
