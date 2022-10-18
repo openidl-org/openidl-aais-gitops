@@ -1,8 +1,13 @@
 #S3 bucket for static content - UI
 resource "aws_s3_bucket" "upload_ui" {
-    bucket = var.s3_bucket_name_upload_ui
+    bucket = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
     force_destroy = true
-    tags = merge( local.tags, {"name" = "${local.std_name}-${var.s3_bucket_name_upload_ui}"})
+    tags = merge( local.tags, {"name" = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"})
+
+    website {
+      index_document = "index.html"
+      error_document = "index.html"
+    }
 }
 resource "aws_s3_bucket_acl" "upload_ui" {
     bucket = aws_s3_bucket.upload_ui.id
@@ -68,8 +73,8 @@ resource "aws_s3_bucket_policy" "upload_ui" {
             "Principal": "*",
             "Action": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
             "Resource": [
-                "arn:aws:s3:::${var.s3_bucket_name_upload_ui}",
-                "arn:aws:s3:::${var.s3_bucket_name_upload_ui}/*",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
             ]
         },
       {
@@ -80,8 +85,8 @@ resource "aws_s3_bucket_policy" "upload_ui" {
             },
             "Action": "*",
             "Resource": [
-                "arn:aws:s3:::${var.s3_bucket_name_upload_ui}",
-                "arn:aws:s3:::${var.s3_bucket_name_upload_ui}/*",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
             ]
         },
         {
@@ -90,8 +95,8 @@ resource "aws_s3_bucket_policy" "upload_ui" {
         "Principal": "*",
         "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
         "Resource": [
-          "arn:aws:s3:::${var.s3_bucket_name_upload_ui}",
-          "arn:aws:s3:::${var.s3_bucket_name_upload_ui}/*",
+          "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+          "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
         ],
         "Condition": {
 		  "StringNotLike": {
@@ -136,23 +141,42 @@ resource "aws_iam_role" "upload" {
   })
   tags = merge(local.tags, { "name" = "${local.std_name}-openidl-upload"})
 }
+resource "zipper_file" "upload_zip" {
+  source      = "./resources/openidl-upload-lambda/"
+  output_path = "./resources/openidl-upload-lambda.zip"
+}
 resource "aws_lambda_function" "upload" {
   function_name = "${local.std_name}-openidl-upload"
   role              = aws_iam_role.upload.arn
   architectures     = ["x86_64"]
-  description       = "ETL-IDM intake processor"
+  description       = "Openidl Upload UI"
   environment {
     variables = {
       FILE_UPLOAD_BUCKET = aws_s3_bucket.etl["intake"].id
     }
   }
   package_type = "Zip"
-  runtime = "nodejs14.x"
+  runtime = "nodejs16.x"
+  source_code_hash = "${zipper_file.upload_zip.output_sha}"
   handler = "src/getSignedUrl.handler"
   filename = "./resources/openidl-upload-lambda.zip"
   timeout = "3"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-upload"})
-  depends_on = [data.archive_file.upload_zip]
+  depends_on = [zipper_file.upload_zip]
+}
+resource "aws_lambda_function" "upload-cors" {
+  function_name = "${local.std_name}-openidl-upload-cors"
+  role              = aws_iam_role.upload.arn
+  architectures     = ["x86_64"]
+  description       = "Openidl Upload UI Cors"
+  package_type = "Zip"
+  runtime = "nodejs16.x"
+  source_code_hash = "${zipper_file.upload_zip.output_sha}"
+  handler = "src/cors/options.handler"
+  filename = "./resources/openidl-upload-lambda.zip"
+  timeout = "3"
+  tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-upload-cors"})
+  depends_on = [zipper_file.upload_zip]
 }
 resource "aws_iam_policy" "upload" {
   name = "${local.std_name}-openidl-upload"
@@ -192,18 +216,7 @@ resource "aws_iam_policy" "upload" {
             "Sid": "AllowS3",
             "Effect": "Allow",
             "Action": [
-				"s3:GetObject",
-                "s3:GetObjectAcl",
-                "s3:GetObjectVersion",
-                "s3:PutObject",
-                "s3:PutObjectAcl",
-                "s3:DeleteObject",
-                "s3:DeleteObjectTagging",
-                "s3:DeleteObjectVersionTagging",
-                "s3:GetObjectTagging",
-                "s3:GetObjectVersionTagging",
-                "s3:PutObjectTagging",
-                "s3:PutObjectVersionTagging"
+                "s3:PutObject"
 			],
             "Resource": [
                 "arn:aws:s3:::${aws_s3_bucket.etl["intake"].id}/*",
@@ -214,9 +227,7 @@ resource "aws_iam_policy" "upload" {
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucket",
-                "s3:GetBucketLocation",
-                "s3:GetLifecycleConfiguration",
-                "s3:PutLifecycleConfiguration"
+                "s3:GetBucketLocation"
             ],
             "Resource": "arn:aws:s3:::${aws_s3_bucket.etl["intake"].id}"
         },
@@ -225,8 +236,7 @@ resource "aws_iam_policy" "upload" {
             "Effect": "Allow",
             "Action": [
                 "kms:Decrypt",
-                "kms:Encrypt",
-                "kms:DescribeKey"
+                "kms:GenerateDataKey"
             ],
             "Resource": "*"
         },
@@ -243,6 +253,14 @@ resource "aws_lambda_permission" "upload" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_number}:${aws_api_gateway_rest_api.upload_ui.id}/*/POST/getSignedUrl"
 }
+#update source_arn after API GW is defined
+resource "aws_lambda_permission" "upload-cors" {
+  statement_id  = "AllowExecutionFromAPIGW"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.upload-cors.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_number}:${aws_api_gateway_rest_api.upload_ui.id}/*/OPTIONS/getSignedUrl"
+}
 #create APIGW
 resource "aws_api_gateway_rest_api" "upload_ui" {
   name          = "${local.std_name}-upload-ui"
@@ -251,11 +269,12 @@ resource "aws_api_gateway_rest_api" "upload_ui" {
   }
 }
 resource "aws_api_gateway_authorizer" "upload" {
+  depends_on = [data.aws_cognito_user_pools.user_pool]
   name = "${local.std_name}-openidl-upload"
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
   authorizer_uri = aws_lambda_function.upload.invoke_arn
   type = "COGNITO_USER_POOLS"
-  provider_arns = aws_cognito_user_pool.user_pool.arn
+  provider_arns = data.aws_cognito_user_pools.user_pool.arns
 }
 resource "aws_api_gateway_documentation_part" "upload_method" {
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
@@ -300,20 +319,22 @@ resource "aws_api_gateway_method_response" "getSignedUrl_Options" {
   http_method = "OPTIONS"
   status_code = "200"
   response_parameters = {
-        "method.response.header.Access-Control-Allow-Headers" = true,
-        "method.response.header.Access-Control-Allow-Methods" = true,
-        "method.response.header.Access-Control-Allow-Origin" = true
-    }
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
   response_models = {
-        "application/json" = "Empty"
-    }
+    "application/json" = "Empty"
+  }
   depends_on = [aws_api_gateway_method.getSignedUrl_Options]
 }
 resource "aws_api_gateway_integration" "getSignedUrl_Options" {
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
   resource_id = aws_api_gateway_resource.getSignedUrl.id
   http_method = aws_api_gateway_method.getSignedUrl_Options.http_method
-  type        = "MOCK"
+  type        = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri = aws_lambda_function.upload-cors.invoke_arn
   depends_on = [aws_api_gateway_method.getSignedUrl_Options, aws_api_gateway_method_response.getSignedUrl_Options]
 }
 resource "aws_api_gateway_integration_response" "getSignedUrl_Options" {
@@ -321,14 +342,6 @@ resource "aws_api_gateway_integration_response" "getSignedUrl_Options" {
   resource_id = aws_api_gateway_resource.getSignedUrl.id
   http_method = aws_api_gateway_method.getSignedUrl_Options.http_method
   status_code = aws_api_gateway_method_response.getSignedUrl_Options.status_code
-  response_parameters = {
-        "method.response.header.Access-Control-Allow-Headers" = "'*'",
-        "method.response.header.Access-Control-Allow-Methods" = "'*'",
-        "method.response.header.Access-Control-Allow-Origin" = "'*'"
-    }
-    response_templates = {
-    "application/json" = "Empty"
-  }
   depends_on = [aws_api_gateway_integration.getSignedUrl_Options]
 }
 resource "aws_api_gateway_method" "getSignedUrl_Post" {
@@ -345,10 +358,10 @@ resource "aws_api_gateway_method_response" "getSignedUrl_Post" {
   http_method = aws_api_gateway_method.getSignedUrl_Post.http_method
   status_code = "200"
   response_parameters = {
-        "method.response.header.Access-Control-Allow-Headers" = true,
-        "method.response.header.Access-Control-Allow-Methods" = true,
-        "method.response.header.Access-Control-Allow-Origin" = true
-    }
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
   response_models = {
     "application/json" = "Empty"
   }
@@ -369,9 +382,9 @@ resource "aws_api_gateway_integration_response" "getSignedUrl_Post" {
   http_method         = aws_api_gateway_method.getSignedUrl_Post.http_method
   status_code         = aws_api_gateway_method_response.getSignedUrl_Post.status_code
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = "'*'",
-    "method.response.header.Access-Control-Allow-Methods" = "'*'",
-    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",
+    "method.response.header.Access-Control-Allow-Origin" = "'*.${var.aws_env}.${local.public_domain}'"
   }
   depends_on = [aws_api_gateway_integration.getSignedUrl_Post]
 }
@@ -403,5 +416,5 @@ resource "aws_api_gateway_deployment" "upload_v1" {
 resource "aws_api_gateway_stage" "stage" {
   deployment_id = aws_api_gateway_deployment.upload_v1.id
   rest_api_id   = aws_api_gateway_rest_api.upload_ui.id
-  stage_name    = "Stage"
+  stage_name    = "${var.aws_env}"
 }

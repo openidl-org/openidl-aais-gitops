@@ -8,6 +8,7 @@ pipeline {
     parameters {
         string description: 'Organization name of the node', name: 'org_name', trim: true
         string description: 'Environment (dev | test | prod)', name: 'env', trim: true
+        string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
         choice choices: ['deploy_network', 'reset', 'chaincode', 'new_org', 'add_new_channel', 'add_new_org', 'join_peer', 'register_users', 'health_check'], description: 'Choose blockchain network deployment action', name: 'deploy_action'
         string description: 'Channel name', name: 'channel_name', trim: true
         string description: 'Chaincode version', name: 'chaincode_version', trim: true
@@ -55,7 +56,7 @@ def neworgPrepare(){
                 towerServer: 'AWX',
                 towerCredentialsId: 'AWX',
                 templateType: 'job',
-                jobTemplate: "${org}-${params.env}-openidl-baf",
+                jobTemplate: "${params.jobPrefix}${org}-${params.env}-openidl-baf",
                 jobType: "run",
                 towerLogLevel: 'full',
                 removeColor: false,
@@ -81,7 +82,7 @@ def deployBAF(thestage){
                 towerServer: 'AWX',
                 towerCredentialsId: 'AWX',
                 templateType: 'job',
-                jobTemplate: "${org}-${params.env}-openidl-baf",
+                jobTemplate: "${params.jobPrefix}${org}-${params.env}-openidl-baf",
                 jobType: "run",
                 towerLogLevel: 'full',
                 removeColor: false,
@@ -107,7 +108,7 @@ def registerUsers(thestage){
                 towerServer: 'AWX',
                 towerCredentialsId: 'AWX',
                 templateType: 'job',
-                jobTemplate: "${org}-${params.env}-openidl-register-users",
+                jobTemplate: "${params.jobPrefix}${org}-${params.env}-openidl-register-users",
                 jobType: "run",
                 towerLogLevel: 'full',
                 removeColor: false,
