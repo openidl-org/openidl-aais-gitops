@@ -1,0 +1,13 @@
+{
+    "carrierid": [
+{% for org in organization_ids %}
+        "{{ org.id }}"{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ],
+    "host": "localhost",
+    "logLevel": "debug",
+    "maxBatchArraySize": 10000,
+    "port": "8080",
+    "send_grid_apikey": "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",
+    "targetDB": "insurance_trx_db"
+}
