@@ -93,12 +93,7 @@ resource "aws_s3_bucket_policy" "reporting" {
           },
           "Action": [
               "s3:GetObject",
-              "s3:PutObject",
-              "s3:AbortMultipartUpload",
-              "s3:RestoreObject",
-              "s3:DeleteObject",
-              "s3:ListMultipartUploadParts",
-              "s3:ListBucket"
+              "s3:PutObject"
           ],
           "Resource": [
               "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}",
@@ -130,6 +125,16 @@ resource "aws_s3_bucket_policy" "reporting" {
           }
         },
         {
+          "Sid":"Allow GET requests",
+          "Effect":"Allow",
+          "Principal":"*",
+          "Action":["s3:GetObject"],
+          "Resource":"arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}/*",
+          "Condition":{
+            "StringLike":{"aws:Referer":["https://openidl.${var.aws_env}.${local.public_domain}/*"]}
+          }
+        },
+        {
           "Sid": "AllowLambda",
           "Effect": "Allow",
           "Principal": {
@@ -138,12 +143,7 @@ resource "aws_s3_bucket_policy" "reporting" {
               ]
           },
           "Action": [
-              "s3:GetObject",
               "s3:PutObject",
-              "s3:RestoreObject",
-              "s3:DeleteObject",
-              "s3:ListMultipartUploadParts",
-              "s3:ListBucket"
           ],
           "Resource": [
               "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}",

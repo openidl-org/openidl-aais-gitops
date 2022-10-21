@@ -729,13 +729,3 @@ variable "s3_bucket_name_reporting" {
   default = ""
   description = "S3 bucket name to be used for reporting"
 }
-variable "apps_user_access_id" {
-  type = string
-  default = ""
-  description = "App User Access ID"
-}
-variable "apps_user_secret_key" {
-  type = string
-  default = ""
-  description = "App User Secret Key"
-}
