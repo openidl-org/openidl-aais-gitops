@@ -36,7 +36,7 @@ resource "aws_kms_key" "s3_kms_key" {
             "Sid": "Allow use of the key",
             "Effect": "Allow",
             "Principal": {
-                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}"]
+                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}", "${aws_iam_role.reporting_lambda[0].arn}"]
             },
             "Action": [
                 "kms:Encrypt",
@@ -145,7 +145,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
             "Sid": "AllowGetAndPutObjects",
             "Effect": "Allow",
             "Principal": {
-                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${aws_iam_user.openidl_apps_user.arn}"]
+                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${aws_iam_user.openidl_apps_user.arn}", "${aws_iam_role.reporting_lambda[0].arn}"]
             },
             "Action": [
                 "s3:GetObject",
@@ -184,30 +184,29 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
                     "aws:SecureTransport" = "false"
                 }
             }
-        },
-        {
-			"Sid": "DenyOthers",
-			"Effect": "Deny",
-			"Principal": "*",
-            "Action": "*",
-			"Resource": [
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}",
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}/*"
-            ],
-			"Condition": {
-				"StringNotLike": {
-					"aws:userid": [
-                        "${aws_iam_role.openidl_apps_iam_role.unique_id}:*",
-                        "${aws_iam_user.openidl_apps_user.unique_id}",
-                        "${data.aws_iam_role.terraform_role.unique_id}:*",
-						"${var.aws_account_number}",
-                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
-                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${aws_iam_role.openidl_apps_iam_role.name}/openidl"
-
-					]
-				}
-			}
-		}
+#        },
+#        {
+#			      "Sid": "DenyOthers",
+#			      "Effect": "Deny",
+#			      "Principal": "*",
+#            "Action": "*",
+#			      "Resource": [
+#                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}",
+#                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}/*"
+#            ],
+#			      "Condition": {
+#				      "StringNotLike": {
+#					      "aws:userid": [
+#                        "${aws_iam_role.openidl_apps_iam_role.unique_id}:*",
+#                        "${aws_iam_user.openidl_apps_user.unique_id}",
+#                        "${data.aws_iam_role.terraform_role.unique_id}:*",
+#						            "${var.aws_account_number}",
+#                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
+#                        "arn:aws:sts:::${var.aws_account_number}:assumed-role/${aws_iam_role.openidl_apps_iam_role.name}/openidl"
+#					      ]
+#				      }
+#			      }
+		    }
     ]
 })
 }

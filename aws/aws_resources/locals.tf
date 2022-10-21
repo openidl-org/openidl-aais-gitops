@@ -82,12 +82,7 @@ locals {
   config-reporting-processor-s3 = templatefile("resources/config-reporting-s3Bucket.tftpl",
     {
       region = "${var.aws_region}",
-      reportBucket = "${var.s3_bucket_name_reporting}",
-      externalId = "apps-user",
-      roleArn = "arn:aws:iam::${var.aws_account_number}:role/${local.std_name}-openidl-apps",
-      roleSessionName = "openidl",
-      accessKeyId = "${var.apps_user_access_id}",
-      secretAccessKey = "${var.apps_user_secret_key}"
+      reportBucket = "${var.s3_bucket_name_reporting}"
     }
   )
   

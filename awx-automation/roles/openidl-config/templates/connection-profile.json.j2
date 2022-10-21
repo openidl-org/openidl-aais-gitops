@@ -1,0 +1,59 @@
+{
+    {% set caURI = 'ca.' ~ network.org_name ~ '-net.' ~ network.org_name ~ '.' ~ env ~ '.' ~ domain -%}
+    {% set peerURI = 'peer0.' ~ network.org_name ~ '-net.' ~ network.org_name ~ '.' ~ env ~ '.' ~ domain -%}
+    "certificateAuthorities": {
+        "{{ caURI }}": {
+            "caName": "ca.{{ network.org_name }}-net",
+            "httpOptions": {
+                "verify": false
+            },
+            "tlsCACerts": {
+                "pem": [
+                    "{{ tlscert.stdout|replace("\n","\\n") }}"
+                ]
+            },
+            "url": "https://{{ caURI }}:8443"
+        }
+    },
+    "client": {
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                }
+            }
+        },
+        "organization": "{{ network.org_name }}"
+    },
+    "isLocal": true,
+    "name": "test-network-{{ network.org_name }}",
+    "organizations": {
+        "{{ network.org_name }}": {
+            "certificateAuthorities": [
+                "{{ caURI }}"
+            ],
+            "mspid": "{{ network.org_name }}MSP",
+            "peers": [
+                "{{ peerURI }}"
+            ]
+        }
+    },
+    "peers": {
+        "{{ peerURI }}": {
+            "grpcOptions": {
+                "grpc-wait-for-ready-timeout": 30000,
+                "grpc.http2.keepalive_time": 36000,
+                "grpc.http2.keepalive_timeout": 18000,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.keepalive_timeout_ms": 180000,
+                "hostnameOverride": "{{ peerURI }}",
+                "ssl-target-name-override": "{{ peerURI }}"
+            },
+            "tlsCACerts": {
+                "pem": "{{ tlscert.stdout|replace("\n","\\n") }}"
+            },
+            "url": "grpcs://{{ peerURI }}:8443"
+        }
+    },
+    "version": "1.0.0"
+}
