@@ -3,6 +3,15 @@
   shell: |
     export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
+- name: Delete vault-secrets pod
+  community.kubernetes.k8s:
+    name: vault-secrets
+    namespace: openidl
+    api_version: v1
+    kind: Pod
+    state: absent
+    wait: yes
+
 - name: Create org config directory
   file:
     path: ./{{ org_name }}-{{ env }}-config
@@ -89,7 +98,7 @@
   no_log: true
   shell: |
     export AWS_PROFILE=cicd-role
-    aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout_lines[0] }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ org_name }}-{{ env }}\")) | .ClientId"
+    aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ org_name }}-{{ env }}\")) | .ClientId"
   register: cognito_app_client_id
 
 - name: Get Organizations and IDs
@@ -110,7 +119,7 @@
   no_log: true
   shell: |
     kubectl run vault-secrets -n openidl -l app=secrets --image=amazonlinux:latest --command sleep infinity
-    kubectl -n openidl wait --for=condition=ready pod -l app=secrets --timeout=30s 
+    kubectl -n openidl wait --for=condition=ready pod -l app=secrets --timeout=90s 
     kubectl exec vault-secrets -n openidl -- sh -c "yum install jq curl which tar -y > /dev/null 2&>1"
 
 - name: Get tlscacert from vault
@@ -183,15 +192,28 @@
     - transactional-data-event-listener-metadata-config.json
     - transactional-data-event-listener-target-channel-config.json
   when: node_type == "analytics"
+- name: Download git repository content
+  no_log: true
+  git:
+    repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
+    dest: /tmp/openidl
+    force: yes
+    single_branch: yes
+    version: "{{ gitrepo_branch }}"
 
 - name: Copy config files to pod
   shell: |
     kubectl -n openidl cp ./{{ org_name }}-{{ env }}-config vault-secrets:/config
-    kubectl -n openidl cp ../vault-scripts/add-vault-config.sh vault-secrets:/
+    kubectl -n openidl cp /tmp/openidl/vault-scripts/add-vault-config.sh vault-secrets:/
     kubectl -n openidl exec vault-secrets -- sh -c "chmod +x /add-vault-config.sh"
     kubectl -n openidl exec vault-secrets -- sh -c "/add-vault-config.sh -V {{ vault_url.stdout }} -U {{ vault_username.stdout }} -P {{ vault_password.stdout }} -a {{ vault_vaultPath.stdout }} -o {{ vault_orgName.stdout }} -c /config"
 
 - name: Remove org config directory
   file:
     path: ./{{ org_name }}-{{ env }}-config
+    state: absent
+
+- name: Remove temp directory
+  file:
+    path: /tmp/openidl
     state: absent
