@@ -1,0 +1,10 @@
+{
+    "identifiers": [
+        {% for organizationId in organization_ids -%}
+        {
+            "carrierName": "{{ organizationId.name }}",
+            "uniqueIdentifier": "{{ organizationId.id }}"
+        }{% if loop.last %}{% else %},{% endif %}
+        {%- endfor %}
+    ]
+}

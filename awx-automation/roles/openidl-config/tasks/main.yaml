@@ -1,0 +1,197 @@
+---
+- name: Update kubeconfig and set context to openidl EKS cluster
+  shell: |
+    export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
+
+- name: Create org config directory
+  file:
+    path: ./{{ org_name }}-{{ env }}-config
+    state: directory
+
+- name: Get vault url config
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-config-vault --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .url
+  register: vault_url
+
+- name: Get vault username config
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-config-vault --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .username
+  register: vault_username
+
+- name: Get vault password config
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-config-vault --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .password
+  register: vault_password
+
+- name: Get vault org config
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-config-vault --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .orgName
+  register: vault_orgName
+
+- name: Get vault path config
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-config-vault --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .vaultPath
+  register: vault_vaultPath
+
+- name: Get vault root token
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-vault-unseal-key --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: vault_root_token
+
+- name: Get Mongodb User
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-mongodb-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: mongodb_user
+
+- name: Get Mongodb User Token
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-mongodb-user-token --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: mongodb_user_token
+
+- name: Get Apps User
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .access_id
+  register: apps_user_access_id
+
+- name: Get Apps User token
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .secret_key
+  register: apps_user_secret_key
+
+- name: Get User-Pool ID
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws cognito-idp list-user-pools --region {{ aws_region }} --max-results 20 | jq -r ".UserPools[] | select(.Name | contains(\"{{ org_name }}-{{ env }}\")) | .Id"
+  register: cognito_user_pool_id
+
+- name: Get App Client ID
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout_lines[0] }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ org_name }}-{{ env }}\")) | .ClientId"
+  register: cognito_app_client_id
+
+- name: Get Organizations and IDs
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager get-secret-value --secret-id {{ org_name }}-{{ env }}-organization-ids --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .organizations
+  register: organizations
+
+- name: Create a openidl k8s namespace
+  community.kubernetes.k8s:
+    name: openidl
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Launch a temporary pod in cluster
+  no_log: true
+  shell: |
+    kubectl run vault-secrets -n openidl -l app=secrets --image=amazonlinux:latest --command sleep infinity
+    kubectl -n openidl wait --for=condition=ready pod -l app=secrets --timeout=30s 
+    kubectl exec vault-secrets -n openidl -- sh -c "yum install jq curl which tar -y > /dev/null 2&>1"
+
+- name: Get tlscacert from vault
+  no_log: true
+  shell: |
+    kubectl -n openidl exec vault-secrets -- sh -c "curl --header \"X-Vault-Token: {{ vault_token }}\" http://vault.{{ env }}.{{ internal_domain }}/v1/{{ network.org_name }}/crypto/peerOrganizations/{{ network.org_name }}-net/peers/peer0.{{ network.org_name }}-net/msp -s | jq -r .data.tlscacerts"
+  vars:
+    vault_token: "{{ vault_root_token.stdout }}"
+  register: tlscert
+
+- name: Generate configuration files
+  template:
+    src: templates/{{ item }}.j2
+    dest: './{{ org_name }}-{{ env }}-config/{{ item }}'
+    mode: 0755
+  vars:
+    organization_ids: "{{ organizations.stdout }}"
+    aws_access_id: "{{ apps_user_access_id.stdout }}"
+    aws_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
+    mongo_user: "{{ mongodb_user.stdout }}"
+    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    s3_hds_bucket: "{{ org_name }}-{{ env }}-openidl-hdsdatastore"
+  with_items:
+    - channel-config.json
+    - connection-profile.json
+    - data-call-app-default-config.json
+    - data-call-processor-default-config.json
+    - data-call-processor-mappings-config.json
+    - data-call-processor-metadata-config.json
+    - default-config.json
+    - email-config.json
+    - insurance-data-manager-channel-config.json
+    - insurance-data-manager-default-config.json
+    - insurance-data-manager-mappings-config.json
+    - insurance-data-manager-metadata-config.json
+    - listener-channel-config.json
+    - local-cognito-admin-config.json
+    - local-cognito-config.json
+    - local-db-config.json
+    - local-kvs-config.json
+    - local-vault-config.json
+    - s3-bucket-config.json
+    - target-channel-config.json
+    - ui-mappings-config.json
+    - unique-identifiers-config.json
+    - utilities-admin-config.json
+    - utilities-fabric-config.json
+    - utilities-mappings-config.json
+
+- name: Generate configuration files
+  template:
+    src: templates/{{ item }}.j2
+    dest: './{{ org_name }}-{{ env }}-config/{{ item }}'
+    mode: 0755
+  vars:
+    organization_ids: "{{ organizations.stdout }}"
+    aws_access_id: "{{ apps_user_access_id.stdout }}"
+    aws_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
+    mongo_user: "{{ mongodb_user.stdout }}"
+    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    s3_hds_bucket: "{{ org_name }}-{{ env }}-openidl-hdsdatastore"
+  with_items:
+    - transactional-data-event-listener-channel-config.json
+    - transactional-data-event-listener-default-config.json
+    - transactional-data-event-listener-mappings-config.json
+    - transactional-data-event-listener-metadata-config.json
+    - transactional-data-event-listener-target-channel-config.json
+  when: node_type == "analytics"
+
+- name: Copy config files to pod
+  shell: |
+    kubectl -n openidl cp ./{{ org_name }}-{{ env }}-config vault-secrets:/config
+    kubectl -n openidl cp ../vault-scripts/add-vault-config.sh vault-secrets:/
+    kubectl -n openidl exec vault-secrets -- sh -c "chmod +x /add-vault-config.sh"
+    kubectl -n openidl exec vault-secrets -- sh -c "/add-vault-config.sh -V {{ vault_url.stdout }} -U {{ vault_username.stdout }} -P {{ vault_password.stdout }} -a {{ vault_vaultPath.stdout }} -o {{ vault_orgName.stdout }} -c /config"
+
+- name: Remove org config directory
+  file:
+    path: ./{{ org_name }}-{{ env }}-config
+    state: absent
