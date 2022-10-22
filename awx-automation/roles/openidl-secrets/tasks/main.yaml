@@ -82,6 +82,6 @@
 #    wait: yes
 
 - name: Dispose temporary git repository content
- file:
+  file:
    path: /tmp/openidl/
    state: absent
