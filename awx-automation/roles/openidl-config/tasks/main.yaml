@@ -16,6 +16,7 @@
   file:
     path: ./{{ org_name }}-{{ env }}-config
     state: directory
+    mode: 0755
 
 - name: Get vault url config
   no_log: true

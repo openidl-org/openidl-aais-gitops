@@ -3,10 +3,11 @@
   shell: |
     export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
-- name: Dispose temporary git repository content
+- name: temporary git repository content
   file:
     path: /tmp/openidl/
-    state: absent
+    state: directory
+    mode: 0755
 
 - name: Delete deploy-secrets pod
   community.kubernetes.k8s:
@@ -80,7 +81,7 @@
 #    state: absent
 #    wait: yes
 
-#- name: Dispose temporary git repository content
-#  file:
-#    path: /tmp/openidl/
-#    state: absent
+- name: Dispose temporary git repository content
+ file:
+   path: /tmp/openidl/
+   state: absent
