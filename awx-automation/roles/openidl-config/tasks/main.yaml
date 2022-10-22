@@ -193,28 +193,19 @@
     - transactional-data-event-listener-target-channel-config.json
   when: node_type == "analytics"
 
-- name: Download git repository content
-  no_log: true
-  git:
-    repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
-    dest: /tmp/openidl
-    force: yes
-    single_branch: yes
-    version: "{{ gitrepo_branch }}"
+- name: Generate add-vault-config.sh 
+  template:
+    src: templates/add-vault-config.sh.j2
+    dest: './add-vault-config.sh'
+    mode: 0755
 
 - name: Copy config files to pod
   shell: |
     kubectl -n openidl cp ./{{ org_name }}-{{ env }}-config vault-secrets:/config
-    kubectl -n openidl cp /tmp/openidl/vault-scripts/add-vault-config.sh vault-secrets:/
-    kubectl -n openidl exec vault-secrets -- sh -c "chmod +x /add-vault-config.sh"
+    kubectl -n openidl cp ./add-vault-config.sh vault-secrets:/
     kubectl -n openidl exec vault-secrets -- sh -c "/add-vault-config.sh -V {{ vault_url.stdout }} -U {{ vault_username.stdout }} -P {{ vault_password.stdout }} -a {{ vault_vaultPath.stdout }} -o {{ vault_orgName.stdout }} -c /config"
 
 - name: Remove org config directory
   file:
     path: ./{{ org_name }}-{{ env }}-config
-    state: absent
-
-- name: Remove temp directory
-  file:
-    path: /tmp/openidl
     state: absent
