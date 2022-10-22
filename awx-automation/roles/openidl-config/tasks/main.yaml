@@ -95,7 +95,7 @@
   register: cognito_user_pool_id
 
 - name: Get App Client ID
-  no_log: true
+  no_log: false
   shell: |
     export AWS_PROFILE=cicd-role
     aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ org_name }}-{{ env }}\")) | .ClientId"
