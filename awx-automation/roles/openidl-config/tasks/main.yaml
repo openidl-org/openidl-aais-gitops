@@ -3,11 +3,6 @@
   shell: |
     export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
-- name: Remove org config directory
-  file:
-    path: /tmp/openidl
-    state: absent
-
 - name: Delete vault-secrets pod
   community.kubernetes.k8s:
     name: vault-secrets
@@ -197,6 +192,7 @@
     - transactional-data-event-listener-metadata-config.json
     - transactional-data-event-listener-target-channel-config.json
   when: node_type == "analytics"
+
 - name: Download git repository content
   no_log: true
   git:
@@ -216,4 +212,9 @@
 - name: Remove org config directory
   file:
     path: ./{{ org_name }}-{{ env }}-config
+    state: absent
+
+- name: Remove temp directory
+  file:
+    path: /tmp/openidl
     state: absent
