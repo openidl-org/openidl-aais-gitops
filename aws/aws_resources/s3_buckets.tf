@@ -36,7 +36,7 @@ resource "aws_kms_key" "s3_kms_key" {
             "Sid": "Allow use of the key",
             "Effect": "Allow",
             "Principal": {
-                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}", "${aws_iam_role.reporting_lambda[0].arn}"]
+                "AWS": local.org_name == "anal" ? ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}", "${aws_iam_role.reporting_lambda[0].arn}"] :  ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}"]
             },
             "Action": [
                 "kms:Encrypt",
@@ -145,7 +145,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
             "Sid": "AllowGetAndPutObjects",
             "Effect": "Allow",
             "Principal": {
-                "AWS": ["${aws_iam_role.openidl_apps_iam_role.arn}", "${aws_iam_user.openidl_apps_user.arn}", "${aws_iam_role.reporting_lambda[0].arn}"]
+                "AWS": local.org_name == "anal" ? ["${aws_iam_role.openidl_apps_iam_role.arn}", "${aws_iam_user.openidl_apps_user.arn}", "${aws_iam_role.reporting_lambda[0].arn}"] : ["${aws_iam_role.openidl_apps_iam_role.arn}", "${aws_iam_user.openidl_apps_user.arn}"]
             },
             "Action": [
                 "s3:GetObject",

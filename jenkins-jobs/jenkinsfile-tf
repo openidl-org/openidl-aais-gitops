@@ -24,7 +24,7 @@ def checkout() {
 		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
 			sh '''
                     echo "Preparing ETL code for lambda functions"
-                    rm -rf lambda lambda-reporting-processor
+                    rm -rf lambda lambda-reporting-processor aws/aws_resources/resources/openidl-upload-lambda aws/aws_resources/resources/openidl-reporting-processor
                     git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
                     cd ./lambda/openidl-etl-intake-processor/ && npm install
                     cd ../openidl-etl-success-processor/ && npm install

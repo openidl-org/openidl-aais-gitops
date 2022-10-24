@@ -5,7 +5,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: data-call-app-ingress
+  name: data-call-app-ingress-internal
   labels:
     {{- include "openidl-data-call-app.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -35,6 +35,24 @@ spec:
                 name: {{ .Values.global.datacallapp.servicename }}
                 port: 
                   number: {{ .Values.global.datacallapp.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: data-call-app-ingress
+  labels:
+    {{- include "openidl-data-call-app.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  tls:
+  - hosts:
+    - {{ .Values.global.datacallapp.publicingresshostname }}
+    secretName: data-call-app-tls
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  rules:
     - host: {{ .Values.global.datacallapp.publicingresshostname }}
       http:
         paths:
