@@ -1,0 +1,45 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ca02-net-ca
+  namespace: ca02-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: ca02-net-ca
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/ca    
+  values:
+    metadata:
+      namespace: ca02-net
+      images:
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        ca: hyperledger/fabric-ca:1.4.8
+       
+    server:
+      name: ca
+      tlsstatus: true
+      admin: ca02-admin
+    storage:
+      storageclassname: ca02sc
+      storagesize: 20Gi
+    vault:
+      role: vault-role
+      address: http://vault.prod.ca02.internal.uim.openidl.org
+      authpath: prodca02-net-auth
+      secretcert: ca02/crypto/peerOrganizations/ca02-net/ca?ca.ca02-net-cert.pem
+      secretkey: ca02/crypto/peerOrganizations/ca02-net/ca?ca02-net-CA.key
+      secretadminpass: ca02/credentials/ca02-net/ca/ca02?user
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+    service:
+      servicetype: ClusterIP
+      ports:
+        tcp:
+          port: 7054
+    proxy:
+      provider: nginx
+      type: peer
+      external_url_suffix: ca02.prod.ca02.uim.openidl.org
