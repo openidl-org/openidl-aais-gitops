@@ -143,7 +143,7 @@ resource "aws_iam_role" "upload" {
 }
 resource "zipper_file" "upload_zip" {
   source      = "./resources/openidl-upload-lambda/"
-  output_path = "./resources/openidl-upload-lambda.zip"
+  output_path = "./openidl-upload-lambda.zip"
 }
 resource "aws_lambda_function" "upload" {
   function_name = "${local.std_name}-openidl-upload"
@@ -159,8 +159,8 @@ resource "aws_lambda_function" "upload" {
   runtime = "nodejs16.x"
   source_code_hash = "${zipper_file.upload_zip.output_sha}"
   handler = "src/getSignedUrl.handler"
-  filename = "./resources/openidl-upload-lambda.zip"
-  timeout = "3"
+  filename = "./openidl-upload-lambda.zip"
+  timeout = "60"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-upload"})
   depends_on = [zipper_file.upload_zip]
 }
@@ -173,8 +173,8 @@ resource "aws_lambda_function" "upload-cors" {
   runtime = "nodejs16.x"
   source_code_hash = "${zipper_file.upload_zip.output_sha}"
   handler = "src/cors/options.handler"
-  filename = "./resources/openidl-upload-lambda.zip"
-  timeout = "3"
+  filename = "./openidl-upload-lambda.zip"
+  timeout = "30"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-upload-cors"})
   depends_on = [zipper_file.upload_zip]
 }
