@@ -149,6 +149,7 @@
     - channel-config.json
     - connection-profile.json
     - data-call-app-default-config.json
+    - data-call-app-mappings-config.json
     - data-call-processor-default-config.json
     - data-call-processor-mappings-config.json
     - data-call-processor-metadata-config.json
