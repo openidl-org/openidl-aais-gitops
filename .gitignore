@@ -38,4 +38,3 @@ openidl-config/k8s/*
 ansible-automation/orderer.pem
 ansible-automation/orderer.base64.pem
 config.zip
-blockchain-automation-framework/platforms/hyperledger-fabric/releases/*
