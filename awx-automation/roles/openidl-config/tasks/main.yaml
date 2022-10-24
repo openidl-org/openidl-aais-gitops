@@ -139,7 +139,7 @@
   vars:
     organization_ids: "{{ organizations.stdout }}"
     aws_access_id: "{{ apps_user_access_id.stdout }}"
-    aws_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_access_secret_key: "{{ apps_user_secret_key.stdout }}"
     aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
     aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
     mongo_user: "{{ mongodb_user.stdout }}"

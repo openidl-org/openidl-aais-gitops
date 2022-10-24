@@ -324,21 +324,23 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
             ]
         },
         {
+            "Sid": "AllowCognito",
+            "Effect": "Allow",
+            "Action": [
+                "cognito-idp:ListUserPoolClients",
+                "cognito-idp:ListUserPools"
+            ],
+            "Resource": [
+                "arn:aws:cognito-idp:*:${var.aws_account_number}:userpool/*"
+            ]
+        },
+        {
             "Action": [
                 "secretsmanager:*"
             ],
             "Effect": "Allow",
             "Resource": [
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-vault-unseal-key-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-config-vault-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-kvs-vault-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-ca-app-user-token-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-mongodb-user-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-mongodb-user-token-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${local.org_name}-${var.aws_env}-mongodb-root-token-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.aws_env}-orderer-tls-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.aws_env}-analytics-msp-??????",
-              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:${var.aws_env}-*-msp-??????"
+              "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_number}:secret:*"
             ]
         },
         {
