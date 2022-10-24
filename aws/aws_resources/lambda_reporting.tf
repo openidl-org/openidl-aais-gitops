@@ -60,10 +60,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "reporting" {
 }
 resource "aws_s3_bucket_public_access_block" "reporting" {
   count = local.org_name == "anal" ? 1 : 0
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
   bucket                  = aws_s3_bucket.reporting[count.index].id
   depends_on = [aws_s3_bucket.reporting]
 }
@@ -125,15 +125,22 @@ resource "aws_s3_bucket_policy" "reporting" {
           }
         },
         {
-          "Sid":"Allow GET requests",
+          "Sid":"AddPerm",
           "Effect":"Allow",
-          "Principal":"*",
+          "Principal": "*",
           "Action":["s3:GetObject"],
-          "Resource":"arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}/*",
-          "Condition":{
-            "StringLike":{"aws:Referer":["https://openidl.${var.aws_env}.${local.public_domain}/*"]}
-          }
+          "Resource":["arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}/report-*"]
         },
+        #{
+        #  "Sid":"Allow GET requests",
+        #  "Effect":"Allow",
+        #  "Principal":"*",
+        #  "Action":["s3:GetObject"],
+        #  "Resource":"arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}/*",
+        #  "Condition":{
+        #    "StringLike":{"aws:Referer":["https://openidl.${var.aws_env}.${local.public_domain}/*"]}
+        #  }
+        #},
         {
           "Sid": "AllowLambda",
           "Effect": "Allow",
@@ -256,7 +263,7 @@ resource "aws_lambda_function" "reporting-processor" {
   runtime = "nodejs16.x"
   handler = "index.handler"
   filename = "./resources/openidl-reporting-processor.zip"
-  timeout = "3"
+  timeout = "60"
   publish = "true"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-reporting-processor"})
   depends_on = [zipper_file.reporting_processor_zip]

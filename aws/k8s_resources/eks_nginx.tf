@@ -28,6 +28,25 @@ resource "helm_release" "blk_nginx_external" {
   wait_for_jobs = true
   values = ["${file("resources/nginx-blk-cluster/values-external.yaml")}"]
 }
+resource "helm_release" "cert-manager" {
+  depends_on = [data.aws_eks_cluster.app_eks_cluster, data.aws_eks_cluster_auth.app_eks_cluster_auth, kubernetes_config_map.app_config_map]
+  provider = helm.app_cluster
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+  version    = "1.10.0"
+
+  namespace        = "cert-manager"
+  create_namespace = true
+
+  #values = [file("cert-manager-values.yaml")]
+
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+}
 /*
 #Setting up ha proxy in app cluster
 resource "helm_release" "app_nginx_internal" {
