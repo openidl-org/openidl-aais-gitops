@@ -47,17 +47,17 @@ resource "aws_s3_bucket_versioning" "reporting" {
   }
   depends_on = [aws_s3_bucket.reporting]
 }
-resource "aws_s3_bucket_server_side_encryption_configuration" "reporting" {
-  count = local.org_name == "anal" ? 1 : 0
-  bucket = aws_s3_bucket.reporting[count.index].id
-  rule {
-    apply_server_side_encryption_by_default {
-      sse_algorithm     = "aws:kms"
-      kms_master_key_id = var.create_kms_keys ? aws_kms_key.s3_kms_key[0].id : var.s3_kms_key_arn
-    }
-  }
-  depends_on = [aws_s3_bucket.reporting]
-}
+#resource "aws_s3_bucket_server_side_encryption_configuration" "reporting" {
+#  count = local.org_name == "anal" ? 1 : 0
+#  bucket = aws_s3_bucket.reporting[count.index].id
+#  rule {
+#    apply_server_side_encryption_by_default {
+#      sse_algorithm     = "aws:kms"
+#      kms_master_key_id = var.create_kms_keys ? aws_kms_key.s3_kms_key[0].id : var.s3_kms_key_arn
+#    }
+#  }
+#  depends_on = [aws_s3_bucket.reporting]
+#}
 resource "aws_s3_bucket_public_access_block" "reporting" {
   count = local.org_name == "anal" ? 1 : 0
   block_public_acls       = false
@@ -93,7 +93,12 @@ resource "aws_s3_bucket_policy" "reporting" {
           },
           "Action": [
               "s3:GetObject",
-              "s3:PutObject"
+              "s3:PutObject",
+              "s3:AbortMultipartUpload",
+              "s3:RestoreObject",
+              "s3:DeleteObject",
+              "s3:ListMultipartUploadParts",
+              "s3:ListBucket"
           ],
           "Resource": [
               "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}",
