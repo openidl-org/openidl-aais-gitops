@@ -34,4 +34,3 @@ resource "kubernetes_storage_class" "blk_storage_class_aws_ebs" {
     fsType    = "ext4"
   }
 }
-

@@ -5,7 +5,7 @@
 
 - name: temporary git repository content
   file:
-    path: /tmp/openidl/
+    path: /tmp/openidl-code/
     state: directory
     mode: 0755
 
@@ -27,14 +27,14 @@
 
 - name: Download git repository content
   no_log: true
-  # shell: |
-  #   git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl
-  git:
-    repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
-    dest: /tmp/openidl
-    force: yes
-    single_branch: yes
-    version: "{{ gitrepo_branch }}"
+  shell: |
+    git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl-code
+#   git:
+#     repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
+#     dest: /tmp/openidl-code
+#     force: yes
+#     single_branch: yes
+#     version: "{{ gitrepo_branch }}"
 
 - name: Prepare a pod
   no_log: true
@@ -42,8 +42,8 @@
     kubectl run deploy-secrets -n openidl --image=amazonlinux:latest --command sleep infinity
     sleep 60
     kubectl exec deploy-secrets -n openidl -- sh -c "yum install tar -y > /dev/null 2&>1"
-    kubectl cp /tmp/openidl/openidl-k8s/ openidl/deploy-secrets:/
-    kubectl cp /tmp/openidl/vault-scripts/ openidl/deploy-secrets:/
+    kubectl cp /tmp/openidl-code/openidl-k8s/ openidl/deploy-secrets:/
+    kubectl cp /tmp/openidl-code/vault-scripts/ openidl/deploy-secrets:/
     kubectl exec deploy-secrets -n openidl -- sh -c "chmod +x vault-scripts/*.sh"
     kubectl exec deploy-secrets -n openidl -- sh -c \
               "mkdir -p openidl-k8s/charts/openidl-secrets/config-{{ env }}-{{ org_name }}"
@@ -82,6 +82,6 @@
 #    wait: yes
 
 - name: Dispose temporary git repository content
- file:
-   path: /tmp/openidl/
+  file:
+   path: /tmp/openidl-code/
    state: absent

@@ -82,7 +82,7 @@ locals {
   config-reporting-processor-s3 = templatefile("resources/config-reporting-s3Bucket.tftpl",
     {
       region = "${var.aws_region}",
-      reportBucket = "${var.s3_bucket_name_reporting}"
+      reportBucket = "${local.std_name}-${var.s3_bucket_name_reporting}"
     }
   )
   
