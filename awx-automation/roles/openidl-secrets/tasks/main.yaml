@@ -6,8 +6,7 @@
 - name: temporary git repository content
   file:
     path: /tmp/openidl-code/
-    state: directory
-    mode: 0755
+    state: absent
 
 - name: Delete deploy-secrets pod
   community.kubernetes.k8s:
