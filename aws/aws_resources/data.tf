@@ -94,6 +94,7 @@ data "aws_availability_zones" "vpc_azs" {
 }
 #Reading application cluster public subnets
 data "aws_subnet_ids" "vpc_public_subnets" {
+  depends_on = [module.vpc]
   vpc_id     = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
  # filter {
  #   name   = "cidr"
@@ -105,6 +106,7 @@ data "aws_subnet_ids" "vpc_public_subnets" {
 }
 #Reading application cluster private subnets
 data "aws_subnet_ids" "vpc_private_subnets" {
+  depends_on = [module.vpc]
   vpc_id     = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
  # filter {
  #   name   = "cidr"
