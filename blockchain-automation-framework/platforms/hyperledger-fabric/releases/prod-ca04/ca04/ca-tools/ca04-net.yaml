@@ -1,0 +1,27 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ca04-net-ca-tools
+  namespace: ca04-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: ca04-net-ca-tools
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/catools
+  values:
+    metadata:
+      namespace: ca04-net
+      name: ca-tools
+    replicaCount: 1
+
+    image:
+      repository: hyperledger/fabric-ca-tools
+      tag: 1.2.1
+      pullPolicy: IfNotPresent
+      
+    storage:
+      storageclassname: ca04sc
+      storagesize: 10Gi

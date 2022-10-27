@@ -14,6 +14,7 @@ provider "aws" {
     role_arn     = var.aws_role_arn
     session_name = "terraform"
     external_id  = var.aws_external_id
+    duration     = "30m"
   }
 }
 provider "zipper" {
