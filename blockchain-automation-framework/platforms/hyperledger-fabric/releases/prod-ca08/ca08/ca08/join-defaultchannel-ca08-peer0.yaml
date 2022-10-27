@@ -1,0 +1,40 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: join-defaultchannel-ca08-peer0
+  namespace: ca08-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: join-defaultchannel-ca08-peer0
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/join_channel
+  values:
+    metadata:
+      namespace: ca08-net
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+
+    peer:
+      name: peer0
+      address: peer0.ca08-net.ca08.prod.ca08.uim.openidl.org:8443
+      localmspid: ca08MSP
+      loglevel: debug
+      tlsstatus: true
+
+    vault:
+      role: vault-role
+      address: http://vault.prod.ca08.internal.uim.openidl.org
+      authpath: prodca08-net-auth
+      adminsecretprefix: ca08/crypto/peerOrganizations/ca08-net/users/admin
+      orderersecretprefix: ca08/crypto/peerOrganizations/ca08-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+
+    channel:
+      name: defaultchannel      
+    orderer:
+      address: orderer1.ordererorg.prod.aais.uim.openidl.org:8443
