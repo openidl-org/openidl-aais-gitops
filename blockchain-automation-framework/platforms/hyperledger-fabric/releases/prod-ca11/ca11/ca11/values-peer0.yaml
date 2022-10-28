@@ -1,0 +1,63 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ca11-peer0
+  namespace: ca11-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: ca11-peer0
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/peernode    
+  values:
+    metadata:
+      namespace: ca11-net
+      images:
+        couchdb: couchdb:3.1
+        peer: hyperledger/fabric-peer:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        
+    peer:
+      name: peer0
+      gossippeeraddress: peer0.ca11-net.ca11.prod.ca11.uim.openidl.org:8443
+      gossipexternalendpoint: peer0.ca11-net.ca11.prod.ca11.uim.openidl.org:8443
+      localmspid: ca11MSP
+      loglevel: info
+      tlsstatus: true
+      builder: hyperledger/fabric-ccenv:2.2.3
+      couchdb:
+        username: ca11-user
+
+    storage:
+      peer:
+        storageclassname: ca11sc
+        storagesize: 50Gi
+      couchdb:
+        storageclassname: ca11sc
+        storagesize: 50Gi
+
+    vault:
+      role: vault-role
+      address: http://vault.prod.ca11.internal.uim.openidl.org
+      authpath: prodca11-net-auth
+      secretprefix: ca11/crypto/peerOrganizations/ca11-net/peers/peer0.ca11-net
+      secretambassador: ca11/crypto/peerOrganizations/ca11-net/ambassador
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      secretcouchdbpass: ca11/credentials/ca11-net/couchdb/ca11?user
+
+    service:
+      servicetype: ClusterIP
+      ports:
+        grpc:
+          clusteripport: 7051
+        events:
+          clusteripport: 7053
+        couchdb:
+          clusteripport: 5984
+          
+    proxy:
+      provider: "nginx"
+      external_url_suffix: ca11.prod.ca11.uim.openidl.org
