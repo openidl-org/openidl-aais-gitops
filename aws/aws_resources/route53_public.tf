@@ -34,6 +34,7 @@ resource "aws_route53_record" "nlb_bastion_r53_record" {
 #  records = ["s3-website-${var.aws_region}.amazonaws.com"]
 #}
 resource "aws_acm_certificate" "upload_ui" {
+  provider          = aws.acm
   domain_name       = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
   validation_method = "DNS"
   lifecycle {
@@ -50,6 +51,7 @@ resource "aws_route53_record" "certificate_validation_record" {
   ttl             = "300"
 }
 resource "aws_acm_certificate_validation" "cert" {
+  provider                = aws.acm
   certificate_arn         = aws_acm_certificate.upload_ui.arn
   validation_record_fqdns = [ aws_route53_record.certificate_validation_record.fqdn ]
 }
