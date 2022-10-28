@@ -418,3 +418,43 @@ resource "aws_api_gateway_stage" "stage" {
   rest_api_id   = aws_api_gateway_rest_api.upload_ui.id
   stage_name    = "${var.aws_env}"
 }
+resource "aws_cloudfront_distribution" "upload_ui" {
+  depends_on = [aws_s3_bucket.upload_ui,aws_acm_certificate.upload_ui]
+  origin {
+    domain_name = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}.s3-website-${var.aws_region}.amazonaws.com"
+    origin_id   = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+  }
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+  #aliases = [var.domainName]
+  restrictions {
+    geo_restriction {
+      restriction_type = "whitelist"
+      locations        = ["US", "CA"]
+    }
+  }
+  default_cache_behavior {
+    allowed_methods  = ["OPTIONS", "POST"]
+    target_origin_id = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+  viewer_certificate {
+    cloudfront_default_certificate = true
+    acm_certificate_arn = aws_acm_certificate.upload_ui.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1"
+  }
+}

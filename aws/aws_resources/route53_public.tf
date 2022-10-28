@@ -24,12 +24,43 @@ resource "aws_route53_record" "nlb_bastion_r53_record" {
   #  evaluate_target_health = true
   #}
 }
+#resource "aws_route53_record" "upload_ui" {
+#  depends_on = [aws_s3_bucket.upload_ui]
+#  count   = var.domain_info.r53_public_hosted_zone_required == "yes" ? 1 : 0
+#  name = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+#  zone_id = aws_route53_zone.public_zones[0].id
+#  type = "CNAME"
+#  ttl = "300"
+#  records = ["s3-website-${var.aws_region}.amazonaws.com"]
+#}
+resource "aws_acm_certificate" "upload_ui" {
+  domain_name       = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "aws_route53_record" "certificate_validation_record" {
+  depends_on = [aws_acm_certificate.upload_ui]
+  allow_overwrite = true
+  name            = tolist(aws_acm_certificate.upload_ui.domain_validation_options)[0].resource_record_name
+  records         = [ tolist(aws_acm_certificate.upload_ui.domain_validation_options)[0].resource_record_value ]
+  type            = tolist(aws_acm_certificate.upload_ui.domain_validation_options)[0].resource_record_type
+  zone_id         = aws_route53_zone.public_zones[0].id
+  ttl             = "300"
+}
+resource "aws_acm_certificate_validation" "cert" {
+  certificate_arn         = aws_acm_certificate.upload_ui.arn
+  validation_record_fqdns = [ aws_route53_record.certificate_validation_record.fqdn ]
+}
 resource "aws_route53_record" "upload_ui" {
-  depends_on = [aws_s3_bucket.upload_ui]
-  count   = var.domain_info.r53_public_hosted_zone_required == "yes" ? 1 : 0
-  name = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+  depends_on = [aws_cloudfront_distribution.upload_ui]
   zone_id = aws_route53_zone.public_zones[0].id
-  type = "CNAME"
-  ttl = "300"
-  records = ["s3-website-${var.aws_region}.amazonaws.com"]
+  name    = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+  type = "A"
+  alias {
+    name                   = aws_cloudfront_distribution.upload_ui.domain_name
+    zone_id                = aws_cloudfront_distribution.upload_ui.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
