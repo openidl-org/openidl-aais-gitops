@@ -147,6 +147,8 @@
     sudo chmod +x /usr/local/bin/helm
   when: helm_installer_unarchive.changed
 
-
-
-
+- name: Install NodeJs
+  become: true
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+    apt-get install -y nodejs
