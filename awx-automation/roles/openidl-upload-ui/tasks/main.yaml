@@ -1,0 +1,66 @@
+---
+- name: Delete temporary directory
+  file:
+    path: /tmp/openidl-etl
+    state: absent
+
+- name: Get User-Pool ID
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws cognito-idp list-user-pools --region {{ aws_region }} --max-results 20 | jq -r ".UserPools[] | select(.Name | contains(\"{{ org_name }}-{{ env }}\")) | .Id"
+  register: cognito_user_pool_id
+
+- name: Get App Client ID
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ org_name }}-{{ env }}\")) | .ClientId"
+  register: cognito_app_client_id
+
+- name: Get Invoke URL for API GW
+  no_log: false
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws apigateway get-rest-apis --region {{ aws_region }} | jq -r ".items[] | select(.name | contains(\"{{ org_name }}-{{ env }}\")) | .id"
+  register: apigw_url
+
+- name: Clone openidl-etl repo
+  shell: |
+    git clone https://github.com/openidl-org/openidl-etl -b develop /tmp/openidl-etl
+
+- name: Node version
+  shell: |
+    node -v
+    npm -v
+  register: node_version
+
+- debug:
+    var: node_version
+
+- name: NPM install
+  shell: |
+    cd /tmp/openidl-etl/openidl-upload-ui/web-app
+    npm install --silent --suppress-warnings
+    npx browserslist@latest --update-db --suppress-warnings 
+
+- name: Build Upload UI
+  shell: |
+    cd /tmp/openidl-etl/openidl-upload-ui/web-app
+    REACT_APP_AMPLIFY_AUTH_REGION={{ aws_region }} REACT_APP_AMPLIFY_AUTH_USER_POOL_ID={{ cognito_user_pool_id.stdout }} REACT_APP_AMPLIFY_AUTH_USER_POOL_WEB_CLIENT_ID={{ cognito_app_client_id.stdout }} REACT_APP_AMPLIFY_API_ENDPOINT_REGION={{ aws_region }} REACT_APP_AMPLIFY_API_ENDPOINT_MDS_URL=https://{{ apigw_url.stdout }}.execute-api.{{ aws_region }}.amazonaws.com/{{ env }} REACT_APP_AMPLIFY_IDL_UTIL_API_ENDPOINT_REGION={{ aws_region }} REACT_APP_AMPLIFY_IDL_UTIL_API_ENDPOINT_MDS_URL=https://utilities-service.{{ env }}.{{ domain }}/openidl/api REACT_APP_AMPLIFY_IDL_IDM_API_ENDPOINT_REGION={{ aws_region }} REACT_APP_AMPLIFY_IDL_IDM_API_ENDPOINT_MDS_URL=https://insurance-data-manager-service.{{ env }}.{{ domain }}/openidl/api CI=false npm run build
+
+- name: Copy build directory to s3
+  shell: |
+    cd /tmp/openidl-etl/openidl-upload-ui/web-app
+    ls -lrt build/*
+    export AWS_PROFILE=cicd-role
+    aws s3 cp --region {{ aws_region }} build/ s3://{{ org_name }}-{{ env }}-openidl-upload.{{ env }}.{{ domain }}/ --recursive
+  register: copy
+
+- debug:
+    var: copy
+
+- name: Delete temporary directory
+  file:
+    path: /openidl/etl
+    state: absent

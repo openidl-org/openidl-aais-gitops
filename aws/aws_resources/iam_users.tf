@@ -338,6 +338,12 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
             ]
         },
         {
+            "Sid": "AllowPutObjects",
+            "Effect": "Allow",
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
+        },
+        {
             "Action": [
                 "secretsmanager:*"
             ],
