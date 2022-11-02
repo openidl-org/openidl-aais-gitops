@@ -524,7 +524,7 @@ resource "aws_api_gateway_integration_response" "control-table_Get" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,GET'",
-    "method.response.header.Access-Control-Allow-Origin" = "'*.${var.aws_env}.${local.public_domain}'"
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
   }
   depends_on = [aws_api_gateway_integration.control-table_Get]
 }

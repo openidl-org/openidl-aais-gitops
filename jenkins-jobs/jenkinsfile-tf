@@ -19,6 +19,7 @@ node('openidl') {
 }
 def checkout() {
     stage('Checkout Code') {
+        cleanWs()
 		tool name: 'nodejs', type: 'nodejs'
         nodejs(cacheLocationStrategy: workspace(), nodeJSInstallationName: 'nodejs') {
 		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
