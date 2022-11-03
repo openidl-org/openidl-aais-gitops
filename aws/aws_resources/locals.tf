@@ -73,9 +73,9 @@ locals {
     {
       apiUsername = "${var.api_username}",
       apiPassword = "${var.api_user_password}",
-      utilitiesAPIURL = "http://utilities-service.${var.aws_env}.${local.public_domain}",
-      datacallURL = "http://data-call-app-service.${var.aws_env}.${local.public_domain}",
-      idmAPIURL = "http://insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
+      utilitiesAPIURL = "https://utilities-service.${var.aws_env}.${local.public_domain}",
+      datacallURL = "https://data-call-app-service.${var.aws_env}.${local.public_domain}",
+      idmAPIURL = "https://insurance-data-manager-service.${var.aws_env}.${local.public_domain}"
     }
   )
 

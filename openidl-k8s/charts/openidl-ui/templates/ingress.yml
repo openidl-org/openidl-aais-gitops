@@ -17,10 +17,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.global.ui.ingressenabled }}
   tls:
   - hosts:
     - {{ .Values.global.ui.ingresshostname }}
     secretName: ui-tls
+  {{- end }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
     - host: {{ .Values.global.ui.ingresshostname }}

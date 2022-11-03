@@ -17,10 +17,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.global.insurancedatamanager.ingressenabled }}
   tls:
   - hosts:
     - {{ .Values.global.insurancedatamanager.ingresshostname }}
     secretName: insurance-data-manager-tls
+  {{- end }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
     - host: {{ .Values.global.insurancedatamanager.ingresshostname }}

@@ -48,10 +48,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.global.utilities.ingressenabled }}
   tls:
   - hosts:
     - {{ .Values.global.utilities.publicingresshostname }}
     secretName: utilities-tls
+  {{- end }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
     - host: {{ .Values.global.utilities.publicingresshostname }}

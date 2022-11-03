@@ -68,3 +68,4 @@
 - name: Annotate ingress
   shell: |
     kubectl -n openidl annotate ingress kubernetes.io/ingress.class=nginx --all
+  ignore_errors: yes 
