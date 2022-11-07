@@ -11,9 +11,9 @@ global:
         ingresshostname: data-call-app-service.dev.analytics.internal.thetech.digital
         publicingresshostname: data-call-app-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-app
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-c4cf397-053120221932
+            tag: 17-openidl-nd-poc-main-db892de-110220221949
     utilities:
         install: true
         port: 8080
@@ -23,9 +23,9 @@ global:
         ingresshostname: utilities-service.dev.analytics.internal.thetech.digital
         publicingresshostname: utilities-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
+            repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 5-develop-jenkins-0edbace-053120221949
+            tag: 26-openidl-nd-poc-main-db892de-110220221951
     ui:
         install: true
         servicename: ui-service
@@ -34,47 +34,49 @@ global:
         ingressenabled: false
         ingresshostname: openidl.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-org/openidl-ui
+            repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 17-develop-jenkins-58b8788-062820221410
+            tag: 25-openidl-nd-poc-main-18b90d5-110120221447
     datacallmoodlistener:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-mood-listener-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-mood-listener
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-0edbace-053120221949
+            tag: 10-openidl-nd-poc-main-db892de-110220221950
     transactionaldataeventlistener:
         install: true
         port: 8080
         targetport: 8080
         servicename: transactional-data-event-listener-service
+        ingressenabled: false
+        ingresshostname: transactional-data-event-listener-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
+            repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 10-develop-jenkins-5e5ec5c-071320222002
+            tag: 13-openidl-nd-poc-main-db892de-110220221951
     datacallprocessor:
         install: false
         port: 8080
         targetport: 8080
         servicename: data-call-processor-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
             tag: 8-develop-jenkins-24f6b1e-071520222006
     insurancedatamanager:
-        install: false
+        install: true
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
         ingressenabled: false
         ingresshostname: insurance-data-manager-service.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-insurance-data-manager
+            repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 7-develop-jenkins-0edbace-053120221949
+            tag: 16-openidl-nd-poc-main-db892de-110220221950
     upload:
         install: false
         port: 80
@@ -92,7 +94,7 @@ global:
         ingressenabled: false
         ingresshostname: openidl.dev.analytics.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-carrier-ui
+            repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
             tag: 17-develop-jenkins-58b8788-062820221410
     secrets:

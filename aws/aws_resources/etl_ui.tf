@@ -54,30 +54,67 @@ resource "aws_s3_bucket_versioning" "upload_ui" {
 #    depends_on = [aws_s3_bucket.upload_ui]
 #}
 resource "aws_s3_bucket_public_access_block" "upload_ui" {
-    block_public_acls       = false
-    block_public_policy     = false
-    ignore_public_acls      = false
-    restrict_public_buckets = false
+    block_public_acls       = true
+    block_public_policy     = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
     bucket = aws_s3_bucket.upload_ui.id
     depends_on = [aws_s3_bucket.upload_ui]
 }
 resource "aws_s3_bucket_policy" "upload_ui" {
-  depends_on = [aws_s3_bucket.upload_ui]
+  depends_on = [aws_s3_bucket.upload_ui,aws_cloudfront_origin_access_identity.origin_access_identity,aws_cloudfront_distribution.upload_ui]
   bucket = aws_s3_bucket.upload_ui.id
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "AllowPublicAccess",
+            "Sid": "AllowCloudFrontServicePrincipalReadOnly",
             "Effect": "Allow",
-            "Principal": "*",
-            "Action": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "${aws_cloudfront_distribution.upload_ui.arn}"
+                }
+            }
+        },
+        {
+            "Sid": "AllowPutObjects",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "${aws_iam_role.git_actions_admin_role.arn}"
+            },
+            "Action": [
+                "s3:PutObject"
+            ],
             "Resource": [
                 "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
             ]
         },
-      {
+        {
+            "Sid": "AllowLegacyOAIReadOnly",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "${aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn}"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
+        },
+        #{
+        #    "Sid": "AllowPublicAccess",
+        #    "Effect": "Allow",
+        #    "Principal": "*",
+        #    "Action": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
+        #    "Resource": [
+        #        "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+        #        "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+        #    ]
+        #},
+        {
             "Sid": "AllowIAMAccess",
             "Effect": "Allow",
             "Principal": {
@@ -93,21 +130,21 @@ resource "aws_s3_bucket_policy" "upload_ui" {
         "Sid": "DenyOthers",
         "Effect": "Deny",
         "Principal": "*",
-        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
+        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:PutObject"],
         "Resource": [
           "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
           "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
         ],
         "Condition": {
-		  "StringNotLike": {
-		      "aws:userid": [
+		      "StringNotLike": {
+		          "aws:userid": [
                   "${data.aws_iam_role.terraform_role.unique_id}:*",
                   "${data.aws_iam_user.terraform_user.user_id}",
-				  "${var.aws_account_number}",
+				          "${var.aws_account_number}",
                   "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
               ]
           }
-		}
+		    }
       }
     ]
   })
@@ -163,6 +200,25 @@ resource "aws_lambda_function" "upload" {
   timeout = "60"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-upload"})
   depends_on = [zipper_file.upload_zip]
+}
+resource "aws_lambda_function" "upload-control-table" {
+  function_name = "${local.std_name}-openidl-upload-control-table"
+  role              = aws_iam_role.upload.arn
+  architectures     = ["x86_64"]
+  description       = "Openidl Upload UI Control Table"
+  environment {
+    variables = {
+      ETL_CONTROL_TABLE = "${aws_dynamodb_table.etl.name}"
+    }
+  }
+  package_type = "Zip"
+  runtime = "nodejs16.x"
+  source_code_hash = "${zipper_file.upload_zip.output_sha}"
+  handler = "src/control-table/read.handler"
+  filename = "./openidl-upload-lambda.zip"
+  timeout = "60"
+  tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-upload-control-table"})
+  depends_on = [zipper_file.upload_zip,aws_dynamodb_table.etl]
 }
 resource "aws_lambda_function" "upload-cors" {
   function_name = "${local.std_name}-openidl-upload-cors"
@@ -232,6 +288,17 @@ resource "aws_iam_policy" "upload" {
             "Resource": "arn:aws:s3:::${aws_s3_bucket.etl["intake"].id}"
         },
         {
+            "Sid": "AllowDynamoDB",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan"
+            ],
+            "Resource": "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_number}:table/${local.std_name}-openidl-etl-control-table"
+        },
+        {
             "Sid": "AllowKMS",
             "Effect": "Allow",
             "Action": [
@@ -261,12 +328,26 @@ resource "aws_lambda_permission" "upload-cors" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_number}:${aws_api_gateway_rest_api.upload_ui.id}/*/OPTIONS/getSignedUrl"
 }
+resource "aws_lambda_permission" "upload-control-table" {
+  statement_id  = "AllowExecutionFromAPIGW"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.upload-control-table.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_number}:${aws_api_gateway_rest_api.upload_ui.id}/*/GET/control-table"
+}
 #create APIGW
 resource "aws_api_gateway_rest_api" "upload_ui" {
   name          = "${local.std_name}-upload-ui"
   endpoint_configuration {
     types = ["EDGE"]
   }
+}
+resource "aws_lambda_permission" "upload-control-table-cors" {
+  statement_id  = "AllowExecutionFromAPIGWControlTable"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.upload-cors.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.aws_region}:${var.aws_account_number}:${aws_api_gateway_rest_api.upload_ui.id}/*/OPTIONS/control-table"
 }
 resource "aws_api_gateway_authorizer" "upload" {
   depends_on = [data.aws_cognito_user_pools.user_pool]
@@ -288,6 +369,31 @@ resource "aws_api_gateway_documentation_part" "upload_method" {
      "summary": "CORS support"
     })
 }
+resource "aws_api_gateway_documentation_part" "upload-control-table_method" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  location {
+    type = "METHOD"
+    path = "/control-table"
+    method = "OPTIONS"
+  }
+  properties = jsonencode(
+    {
+     "summary": "CORS support"
+    })
+}
+resource "aws_api_gateway_documentation_part" "upload-control-table_response" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  location {
+    type = "RESPONSE"
+    path = "/control-table"
+    method = "OPTIONS"
+    status_code = "200"
+  }
+  properties = jsonencode(
+    {
+      "description": "Default response for CORS method"
+    })
+}
 resource "aws_api_gateway_documentation_part" "upload_response" {
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
   location {
@@ -305,7 +411,11 @@ resource "aws_api_gateway_resource" "getSignedUrl" {
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
   parent_id = aws_api_gateway_rest_api.upload_ui.root_resource_id
   path_part = "getSignedUrl"
-
+}
+resource "aws_api_gateway_resource" "control-table" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  parent_id = aws_api_gateway_rest_api.upload_ui.root_resource_id
+  path_part = "control-table"
 }
 resource "aws_api_gateway_method" "getSignedUrl_Options" {
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
@@ -388,6 +498,87 @@ resource "aws_api_gateway_integration_response" "getSignedUrl_Post" {
   }
   depends_on = [aws_api_gateway_integration.getSignedUrl_Post]
 }
+resource "aws_api_gateway_method" "control-table_Get" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = "GET"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.upload.id
+  request_models = {}
+}
+resource "aws_api_gateway_method_response" "control-table_Get" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = aws_api_gateway_method.control-table_Get.http_method
+  status_code = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+  response_models = {
+    "application/json" = "Empty"
+  }
+  depends_on = [aws_api_gateway_method.control-table_Get]
+}
+resource "aws_api_gateway_integration" "control-table_Get" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = aws_api_gateway_method.control-table_Get.http_method
+  type        = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri = aws_lambda_function.upload-control-table.invoke_arn
+  depends_on = [aws_api_gateway_method_response.control-table_Get]
+}
+resource "aws_api_gateway_integration_response" "control-table_Get" {
+  rest_api_id         = aws_api_gateway_rest_api.upload_ui.id
+  resource_id         = aws_api_gateway_resource.control-table.id
+  http_method         = aws_api_gateway_method.control-table_Get.http_method
+  status_code         = aws_api_gateway_method_response.control-table_Get.status_code
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,GET'",
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+  depends_on = [aws_api_gateway_integration.control-table_Get]
+}
+resource "aws_api_gateway_method" "control-table_Options" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = "OPTIONS"
+  authorization = "NONE"
+}
+resource "aws_api_gateway_method_response" "control-table_Options" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = "OPTIONS"
+  status_code = "200"
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+  response_models = {
+    "application/json" = "Empty"
+  }
+  depends_on = [aws_api_gateway_method.control-table_Options]
+}
+resource "aws_api_gateway_integration" "control-table_Options" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = aws_api_gateway_method.control-table_Options.http_method
+  type        = "AWS_PROXY"
+  integration_http_method = "POST"
+  uri = aws_lambda_function.upload-cors.invoke_arn
+  depends_on = [aws_api_gateway_method.control-table_Options, aws_api_gateway_method_response.control-table_Options]
+}
+resource "aws_api_gateway_integration_response" "control-table_Options" {
+  rest_api_id = aws_api_gateway_rest_api.upload_ui.id
+  resource_id = aws_api_gateway_resource.control-table.id
+  http_method = aws_api_gateway_method.control-table_Options.http_method
+  status_code = aws_api_gateway_method_response.control-table_Options.status_code
+  depends_on = [aws_api_gateway_integration.control-table_Options]
+}
 resource "aws_api_gateway_deployment" "upload_v1" {
   rest_api_id = aws_api_gateway_rest_api.upload_ui.id
   
@@ -402,7 +593,16 @@ resource "aws_api_gateway_deployment" "upload_v1" {
       aws_api_gateway_integration.getSignedUrl_Options.id,
       aws_api_gateway_integration_response.getSignedUrl_Post.id,
       aws_api_gateway_integration_response.getSignedUrl_Options.id,
-      aws_api_gateway_resource.getSignedUrl.id
+      aws_api_gateway_resource.getSignedUrl.id,
+      aws_api_gateway_method.control-table_Get.id,
+      aws_api_gateway_method.control-table_Options.id,
+      aws_api_gateway_method_response.control-table_Get.id,
+      aws_api_gateway_method_response.control-table_Options.id,
+      aws_api_gateway_integration.control-table_Get.id,
+      aws_api_gateway_integration.control-table_Options.id,
+      aws_api_gateway_integration_response.control-table_Get.id,
+      aws_api_gateway_integration_response.control-table_Options.id,
+      aws_api_gateway_resource.control-table.id
     ]))
   }
   lifecycle {
@@ -411,10 +611,59 @@ resource "aws_api_gateway_deployment" "upload_v1" {
   depends_on = [
     aws_api_gateway_resource.getSignedUrl,
     aws_api_gateway_integration_response.getSignedUrl_Post,
-    aws_api_gateway_integration_response.getSignedUrl_Options]
+    aws_api_gateway_integration_response.getSignedUrl_Options,
+    aws_api_gateway_resource.control-table,
+    aws_api_gateway_integration_response.control-table_Get,
+    aws_api_gateway_integration_response.control-table_Options]
 }
 resource "aws_api_gateway_stage" "stage" {
   deployment_id = aws_api_gateway_deployment.upload_v1.id
   rest_api_id   = aws_api_gateway_rest_api.upload_ui.id
   stage_name    = "${var.aws_env}"
+}
+resource "aws_cloudfront_distribution" "upload_ui" {
+  depends_on = [aws_s3_bucket.upload_ui,aws_acm_certificate.upload_ui,aws_cloudfront_origin_access_identity.origin_access_identity]
+  origin {
+    domain_name = "${aws_s3_bucket.upload_ui.bucket_regional_domain_name}"
+    origin_id   = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+    }
+  }
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = "index.html"
+  aliases = ["${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"]
+  restrictions {
+    geo_restriction {
+      restriction_type = "whitelist"
+      locations        = ["US", "CA"]
+    }
+  }
+  default_cache_behavior {
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+    viewer_protocol_policy = "redirect-to-https"
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+  viewer_certificate {
+    cloudfront_default_certificate = false
+    acm_certificate_arn = aws_acm_certificate.upload_ui.arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+}
+resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
+  comment = "access-identity-${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}.s3.amazonaws.com"
 }

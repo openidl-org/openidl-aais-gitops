@@ -5,6 +5,10 @@ pipeline {
             label 'openidl'
         }
     }
+    options {
+        // This is required if you want to clean before build
+        skipDefaultCheckout(true)
+    }
     parameters {
         string description: 'Organization name of the node', name: 'org_name', trim: true
         string description: 'Environment (dev | test | prod)', name: 'env', trim: true
@@ -18,6 +22,8 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
+                cleanWs()
+                checkout scm
                 script {
                     length = params.org_name.length()
                     if( length <= 4) {
