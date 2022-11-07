@@ -150,5 +150,6 @@
 - name: Install NodeJs
   become: true
   shell: |
-    curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+    apt-get remove -y nodejs
+    curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
     apt-get install -y nodejs

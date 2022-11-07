@@ -82,6 +82,20 @@ resource "aws_s3_bucket_policy" "upload_ui" {
             }
         },
         {
+            "Sid": "AllowPutObjects",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "${aws_iam_role.git_actions_admin_role.arn}"
+            },
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
+            ]
+        },
+        {
             "Sid": "AllowLegacyOAIReadOnly",
             "Effect": "Allow",
             "Principal": {
@@ -116,7 +130,7 @@ resource "aws_s3_bucket_policy" "upload_ui" {
         "Sid": "DenyOthers",
         "Effect": "Deny",
         "Principal": "*",
-        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
+        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:PutObject"],
         "Resource": [
           "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
           "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",

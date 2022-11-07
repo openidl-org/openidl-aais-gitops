@@ -1,16 +1,11 @@
 ---
-- name: Dispose temporary git repository content
-  file:
-    path: /tmp/openidl/
-    state: absent
-
 - name: Update kubeconfig and set context to openidl {{ app_cluster_name }}
   shell: |
     export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
 - name: Dispose temporary git repository content
   file:
-    path: /tmp/openidl/
+    path: /tmp/openidl-code/
     state: absent
 
 - name: Create a openidl k8s namespace
@@ -23,7 +18,7 @@
 - name: Download git repository content
   no_log: true
   shell: |
-    git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl
+    git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl-code
   # git:
   #   repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
   #   dest: /tmp/openidl
@@ -33,8 +28,8 @@
 
 - name: Deploy openIDL app on AAIS node using helm
   shell: |
-    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl/openidl-k8s \
-    -f /tmp/openidl/openidl-k8s/global-values-{{ env }}-{{ org_name }}.yaml -n openidl \
+    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl-code/openidl-k8s \
+    -f /tmp/openidl-code/openidl-k8s/global-values-{{ env }}-{{ org_name }}.yaml -n openidl \
     --set global.datacallapp.ingressenabled=true \
     --set global.utilities.ingressenabled=true \
     --set global.ui.ingressenabled=true \
@@ -44,8 +39,8 @@
 
 - name: Deploy openIDL app on Analytics node using helm
   shell: |
-    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl/openidl-k8s \
-    -f /tmp/openidl/openidl-k8s/global-values-{{ env }}-{{ org_name }}.yaml -n openidl \
+    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl-code/openidl-k8s \
+    -f /tmp/openidl-code/openidl-k8s/global-values-{{ env }}-{{ org_name }}.yaml -n openidl \
     --set global.datacallapp.ingressenabled=true \
     --set global.utilities.ingressenabled=true \
     --set global.ui.ingressenabled=true \
@@ -56,8 +51,8 @@
 
 - name: Deploy openIDL app on Carrier node using helm
   shell: |
-    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl/openidl-k8s \
-    -f /tmp/openidl/openidl-k8s/global-values-{{ env }}-{{ org_name }}.yaml -n openidl \
+    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl-code/openidl-k8s \
+    -f /tmp/openidl-code/openidl-k8s/global-values-{{ env }}-{{ org_name }}.yaml -n openidl \
     --set global.datacallapp.ingressenabled=true \
     --set global.utilities.ingressenabled=true \
     --set global.carrierui.ingressenabled=true \

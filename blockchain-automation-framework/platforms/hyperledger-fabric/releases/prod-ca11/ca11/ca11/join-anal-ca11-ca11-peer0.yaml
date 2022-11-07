@@ -1,0 +1,40 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: join-anal-ca11-ca11-peer0
+  namespace: ca11-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: join-anal-ca11-ca11-peer0
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/join_channel
+  values:
+    metadata:
+      namespace: ca11-net
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+
+    peer:
+      name: peer0
+      address: peer0.ca11-net.ca11.prod.ca11.uim.openidl.org:8443
+      localmspid: ca11MSP
+      loglevel: debug
+      tlsstatus: true
+
+    vault:
+      role: vault-role
+      address: http://vault.prod.ca11.internal.uim.openidl.org
+      authpath: prodca11-net-auth
+      adminsecretprefix: ca11/crypto/peerOrganizations/ca11-net/users/admin
+      orderersecretprefix: ca11/crypto/peerOrganizations/ca11-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+
+    channel:
+      name: anal-ca11      
+    orderer:
+      address: orderer1.ordererorg.prod.aais.uim.openidl.org:8443

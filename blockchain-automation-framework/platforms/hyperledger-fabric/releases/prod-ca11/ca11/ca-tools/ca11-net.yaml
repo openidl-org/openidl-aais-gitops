@@ -1,0 +1,27 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: ca11-net-ca-tools
+  namespace: ca11-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: ca11-net-ca-tools
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/catools
+  values:
+    metadata:
+      namespace: ca11-net
+      name: ca-tools
+    replicaCount: 1
+
+    image:
+      repository: hyperledger/fabric-ca-tools
+      tag: 1.2.1
+      pullPolicy: IfNotPresent
+      
+    storage:
+      storageclassname: ca11sc
+      storagesize: 10Gi

@@ -270,7 +270,8 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
                 "eks:ListClusters",
                 "eks:DescribeAddonVersions",
                 "eks:ListIdentityProviderConfigs",
-                "secretsmanager:ListSecrets"
+                "secretsmanager:ListSecrets",
+                "cognito-idp:ListUserPools"
             ],
             "Resource": "*"
         },
@@ -282,10 +283,12 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
                 "iam:ListGroupsForUser",
                 "iam:ListAttachedUserPolicies",
                 "iam:ListUserPolicies",
-                "iam:GetUser"
+                "iam:GetUser",
+                "cognito-idp:ListUserPoolClients",
             ],
             "Resource": [
-                "arn:aws:iam::*:user/$${aws:username}"
+                "arn:aws:iam::*:user/$${aws:username}",
+                "arn:aws:cognito-idp:*:${var.aws_account_number}:userpool/*"
             ]
         },
         {
@@ -333,6 +336,12 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
             "Resource": [
                 "arn:aws:cognito-idp:*:${var.aws_account_number}:userpool/*"
             ]
+        },
+        {
+            "Sid": "AllowPutObjects",
+            "Effect": "Allow",
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
         },
         {
             "Action": [
