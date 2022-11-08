@@ -13,8 +13,7 @@
                 }
             ]
         },
-{% for channel in network.channels %}
-{% if org_name in channel.name %}
+{% for channel in network.channels if org_name in channel.name %}
         {
             "channelName": "anal-{{ network.org_name }}",
             "events": [
@@ -23,7 +22,6 @@
                 }
             ]
         }{% if loop.last %}{% else %},{% endif %}
-{% endif %}
 {% endfor %}
     ]
 }

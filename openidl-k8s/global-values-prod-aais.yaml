@@ -1,15 +1,15 @@
 global:
-    clusterurl: ca05.uim.openidl.org
+    clusterurl: aais.uim.openidl.org
     appsecret: apps-secret
-    configpath: config-ca05
+    configpath: config-aais
     datacallapp:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-app-service
         ingressenabled: true
-        ingresshostname: data-call-app-service.prod.ca05.internal.uim.openidl.org
-        publicingresshostname: data-call-app-service.prod.ca05.uim.openidl.org
+        ingresshostname: data-call-app-service.prod.aais.internal.uim.openidl.org
+        publicingresshostname: data-call-app-service.prod.aais.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
@@ -20,21 +20,21 @@ global:
         targetport: 8080
         servicename: utilities-service
         ingressenabled: true
-        ingresshostname: utilities-service.prod.ca05.internal.uim.openidl.org
-        publicingresshostname: utilities-service.prod.ca05.uim.openidl.org
+        ingresshostname: utilities-service.prod.aais.internal.uim.openidl.org
+        publicingresshostname: utilities-service.prod.aais.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
             tag: 27-npm-error-9b6d860-110820222100
-    carrierui:
+    ui:
         install: true
-        servicename: ca05-ui-service
+        servicename: ui-service
         port: 8080
         targetport: 8080
         ingressenabled: true
-        ingresshostname: openidl.prod.ca05.uim.openidl.org
+        ingresshostname: openidl.prod.aais.uim.openidl.org
         image:
-            repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
+            repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
             tag: 31-npm-error-9b6d860-110820222049
     insurancedatamanager:
@@ -43,7 +43,7 @@ global:
         targetport: 8080
         servicename: insurance-data-manager-service
         ingressenabled: true
-        ingresshostname: insurance-data-manager-service.prod.ca05.uim.openidl.org
+        ingresshostname: insurance-data-manager-service.prod.aais.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
@@ -58,7 +58,7 @@ global:
             pullPolicy: IfNotPresent
             tag: 18-npm-error-9b6d860-110820222049
     upload:
-        install: true
+        install: false
         port: 80
         targetport: 80
         servicename: upload-service
@@ -84,15 +84,15 @@ global:
             repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
             tag: 15-npm-error-9b6d860-110820222049
-    ui:
+    carrierui:
         install: false
-        servicename: ui-service
+        servicename: carrier-ui-service
         port: 8080
         targetport: 8080
         ingressenabled: false
-        ingresshostname: openidl.prod.ca05.uim.openidl.org
+        ingresshostname: openidl.prod.aais.openidl.aaisdirect.com
         image:
-            repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
+            repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
             tag: 31-npm-error-9b6d860-110820222049
     secrets:

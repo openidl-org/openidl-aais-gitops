@@ -205,6 +205,9 @@
   shell: |
     kubectl -n openidl cp ./{{ org_name }}-{{ env }}-config vault-secrets:/config
     kubectl -n openidl cp ./add-vault-config.sh vault-secrets:/
+
+- name: Run add-vault-config script
+  shell: |
     kubectl -n openidl exec vault-secrets -- sh -c "/add-vault-config.sh -V {{ vault_url.stdout }} -U {{ vault_username.stdout }} -P {{ vault_password.stdout }} -a {{ vault_vaultPath.stdout }} -o {{ vault_orgName.stdout }} -c /config"
 
 - name: Remove org config directory

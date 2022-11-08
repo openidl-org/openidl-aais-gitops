@@ -1,6 +1,7 @@
 #Setting up private dns entries for data call and insurance data manager services
 resource "aws_route53_record" "private_record_services_internal" {
   for_each = toset(["data-call-app-service", "insurance-data-manager-service"])
+  allow_overwrite = true
   zone_id = data.aws_route53_zone.private_zone_internal.zone_id
   name = "${each.value}.${local.private_domain}"
   type    = "A"
@@ -14,6 +15,7 @@ resource "aws_route53_record" "private_record_services_internal" {
 resource "aws_route53_record" "private_record_vault" {
   zone_id = data.aws_route53_zone.private_zone_internal.zone_id
   name = "vault.${local.private_domain}"
+  allow_overwrite = true
   type    = "A"
   alias {
     name                   = data.aws_alb.blk_nlb_external.dns_name
@@ -37,6 +39,7 @@ resource "aws_route53_record" "private_record_aais" {
 resource "aws_route53_record" "private_record_common" {
  #name = var.aws_env != "prod" ? "*.${var.org_name}-net.${var.org_name}.${var.aws_env}.${var.domain_info.sub_domain_name}" : "*.${var.org_name}-net.${var.org_name}.${var.domain_info.sub_domain_name}"
   name = "*.${var.org_name}-net.${var.org_name}"
+  allow_overwrite = true
   type = "A"
   zone_id = data.aws_route53_zone.private_zone.zone_id
   alias {
@@ -47,8 +50,9 @@ resource "aws_route53_record" "private_record_common" {
 }
 #Setting up private dns entry for data call and insurance data manager
 resource "aws_route53_record" "private_record_public_services" {
-  for_each = toset(["data-call-app-service", "insurance-data-manager-service", "utilities-service"])
+  for_each = toset(["data-call-app-service", "insurance-data-manager-service", "utilities-service", "transactional-data-event-listener"])
   name = "${each.value}"
+  allow_overwrite = true
   type = "A"
   zone_id = data.aws_route53_zone.private_zone.zone_id
   alias {
@@ -60,6 +64,7 @@ resource "aws_route53_record" "private_record_public_services" {
 #Setting up private dns entry for openidl application UI
 resource "aws_route53_record" "private_record_openidl_ui" {
   name = "openidl"
+  allow_overwrite = true
   type = "A"
   zone_id = data.aws_route53_zone.private_zone.zone_id
   alias {
@@ -68,5 +73,3 @@ resource "aws_route53_record" "private_record_openidl_ui" {
     zone_id = data.aws_alb.app_nlb_external.zone_id
   }
 }
-
-

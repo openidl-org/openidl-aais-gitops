@@ -21,6 +21,7 @@ pipeline {
                 cleanWs()
                 checkout scm
                 script {
+                    currentBuild.displayName = "${params.org_name} - ${params.env} - ${params.deploy_action}"
                     buildType = "${params.deploy_action}"
                     length = params.org_name.length()
                     if( length <= 4) {

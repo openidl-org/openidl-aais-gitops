@@ -1,25 +1,53 @@
-#!groovy
 import groovy.json.JsonSlurper
-    properties([
-        parameters([
-            string(defaultValue: '', description: 'Terraform endpoint', name: 'TF_ADDRESS', trim: true),
-            string(defaultValue: '', description: 'TF Organization', name: 'TF_ORG_NAME', trim: true),
-            string(defaultValue: '', description: 'AWS resources workspace', name: 'TF_AWS_WORKSPACE', trim: true),
-            string(defaultValue: '', description: 'K8s resources workspace', name: 'TF_K8S_WORKSPACE', trim: true),
-            string(defaultValue: '', description: 'GitHub URL', name: 'GITHUB_URL', trim: true),
-            string(defaultValue: '', description: 'GitHub Branch', name: 'GITHUB_BRANCH', trim: true),
-        ])
-    ])
-node('openidl') {
-    withCredentials([string(credentialsId: 'TF_BEARER_TOKEN', variable: 'TF_BEARER_TOKEN')])
-    {
-		checkout()
-        buildInfra()
+pipeline {
+    agent {
+        node {
+            label 'openidl'
+        }
+    }
+    options {
+        // This is required if you want to clean before build
+        skipDefaultCheckout(true)
+    }
+    parameters {
+        string defaultValue: 'app.terraform.io', description: 'Terraform endpoint', name: 'TF_ADDRESS', trim: true
+        string defaultValue: '', description: 'TF Organization', name: 'TF_ORG_NAME', trim: true
+        string defaultValue: '', description: 'Organization Names (comma separated list for multiple organizations without spaces)', name: 'org_name', trim:true
+        string defaultValue: '', description: 'Environment (dev | test | prod)', name: 'env', trim: true
+        string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
+        string defaultValue: 'https://github.com/openidl-org/openidl-aais-gitops', description: 'GitHub URL', name: 'GITHUB_URL', trim: true
+        string defaultValue: 'develop', description: 'GitHub Branch', name: 'GITHUB_BRANCH', trim: true
+    }
+    stages {
+        stage('Prepare') {
+            steps {
+                cleanWs()
+                checkout scm
+                withCredentials([string(credentialsId: 'TF_BEARER_TOKEN', variable: 'TF_BEARER_TOKEN')])
+                {
+                    codeCheckout()
+                    script {
+                        currentBuild.displayName = "${params.org_name} - ${params.env}"
+                        def orgs = "${params.org_name}".split(',')
+                        orgs.each { item ->
+                            length = "${item}".length()
+                            if( length <= 4) {
+                                org = "${item}".substring(0,length)
+                            } else {
+                                org = "${item}".substring(0,4)
+                            }
+                            echo "Triggering for ${org}"
+                            buildInfra()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
-def checkout() {
+
+def codeCheckout() {
     stage('Checkout Code') {
-        cleanWs()
 		tool name: 'nodejs', type: 'nodejs'
         nodejs(cacheLocationStrategy: workspace(), nodeJSInstallationName: 'nodejs') {
 		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
@@ -47,16 +75,16 @@ def checkout() {
     }
 }
 def buildInfra() {
-    stage('AWS-Plan-Apply') {
-        def ws_id = getWorkspaceId("${params.TF_AWS_WORKSPACE}")
+    stage("AWS-Plan-Apply ${org}") {
+        def ws_id = getWorkspaceId("${params.jobPrefix}${org}-${params.env}-aws-resources")
         def (config_version, upload_url) = createConfig("${ws_id}")
         def upload_status = uploadAWSConfig("${upload_url}")
         def runid = ""
         runid = plan("${ws_id}")
         waitForPlan("${runid}")
     }
-    stage('K8s-Plan-Apply') {
-        def ws_id = getWorkspaceId("${params.TF_K8S_WORKSPACE}")
+    stage("K8s-Plan-Apply ${org}") {
+        def ws_id = getWorkspaceId("${params.jobPrefix}${org}-${params.env}-k8s-resources")
         def (config_version, upload_url) = createConfig("${ws_id}")
         def upload_status = uploadK8sConfig("${upload_url}")
         def runid = ""
@@ -158,9 +186,11 @@ def plan(ws_id) {
             ],
         httpMode: 'POST',
         requestBody: "${payload}",
+        validResponseCodes: '200:399',
         url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs"
     )
     def data = new JsonSlurper().parseText(response.content)
+    println("Response Status: " + response.status)
     println("Run Id: " + data.data.id)
     println("HTTP response for Plan:" + response)
     return data.data.id
