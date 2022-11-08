@@ -11,16 +11,17 @@ pipeline {
     }
     parameters {
         string description: 'Organization name of the node', name: 'org_name', trim: true
-        string description: 'Environment (dev | test | prod)', name: 'env', trim: true
+        choice choices: ['dev', 'test', 'prod'], description: 'Environment (dev | test | prod)', name: 'env'
         string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
         choice choices: ['vault-deploy', 'vault-cleanup'], description: 'Choose setup/clean vault instance', name: 'deploy_action'
-        }
+    }
     stages {
         stage('Prepare') {
             steps {
                 cleanWs()
                 checkout scm
                 script {
+                    currentBuild.displayName = "${params.org_name} - ${params.env} - ${params.deploy_action}"
                     buildType = "${params.deploy_action}"
                     length = params.org_name.length()
                     if( length <= 4) {
@@ -29,7 +30,6 @@ pipeline {
                     org = params.org_name.substring(0,4)
                     }
                     vault(buildType)
-
                 }
             }
         }
@@ -65,6 +65,3 @@ def vault(thestage){
         }
     }
 }
-
-
-

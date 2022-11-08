@@ -1,18 +1,9 @@
 #S3 bucket for static content - UI
 resource "aws_s3_bucket" "upload_ui" {
-    bucket = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
-    force_destroy = true
-    tags = merge( local.tags, {"name" = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"})
-
-    website {
-      index_document = "index.html"
-      error_document = "index.html"
-    }
-}
-resource "aws_s3_bucket_acl" "upload_ui" {
-    bucket = aws_s3_bucket.upload_ui.id
-    acl = "public-read"
-    depends_on = [aws_s3_bucket.upload_ui]
+  bucket = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+  force_destroy = true
+  tags = merge( local.tags, {"name" = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"})
+  acl  = "public-read"
 }
 resource "aws_s3_bucket_lifecycle_configuration" "upload_ui" {
     bucket = aws_s3_bucket.upload_ui.id
@@ -41,11 +32,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "upload_ui" {
   depends_on = [aws_s3_bucket.upload_ui]
 }
 resource "aws_s3_bucket_versioning" "upload_ui" {
-      bucket = aws_s3_bucket.upload_ui.id
-      versioning_configuration {
-      status = "Enabled"
-      }
-    depends_on = [aws_s3_bucket.upload_ui]
+  bucket = aws_s3_bucket.upload_ui.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+  depends_on = [aws_s3_bucket.upload_ui]
 }
 #resource "aws_s3_bucket_logging" "upload_ui" {
 #    bucket = aws_s3_bucket.upload_ui.id
@@ -62,7 +53,7 @@ resource "aws_s3_bucket_public_access_block" "upload_ui" {
     depends_on = [aws_s3_bucket.upload_ui]
 }
 resource "aws_s3_bucket_policy" "upload_ui" {
-  depends_on = [aws_s3_bucket.upload_ui,aws_cloudfront_origin_access_identity.origin_access_identity,aws_cloudfront_distribution.upload_ui]
+  depends_on = [aws_cloudfront_origin_access_identity.origin_access_identity,aws_cloudfront_distribution.upload_ui]
   bucket = aws_s3_bucket.upload_ui.id
   policy = jsonencode({
     "Version": "2012-10-17",
@@ -130,7 +121,7 @@ resource "aws_s3_bucket_policy" "upload_ui" {
         "Sid": "DenyOthers",
         "Effect": "Deny",
         "Principal": "*",
-        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:PutObject"],
+        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:PutObject", "s3:PutBucketAcl", "s3:PutObjectAcl", "s3:PutObjectVersionAcl"],
         "Resource": [
           "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
           "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
@@ -158,7 +149,7 @@ resource "aws_s3_bucket_website_configuration" "upload_ui" {
   error_document {
     key = "index.html"
   }
- }
+}
 #Lambda specifics related to openidl upload ui
 resource "aws_iam_role" "upload" {
   name = "${local.std_name}-openidl-upload"
