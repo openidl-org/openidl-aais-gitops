@@ -271,7 +271,8 @@ resource "aws_iam_policy" "git_actions_admin_policy" {
                 "eks:DescribeAddonVersions",
                 "eks:ListIdentityProviderConfigs",
                 "secretsmanager:ListSecrets",
-                "cognito-idp:ListUserPools"
+                "cognito-idp:ListUserPools",
+                "apigateway:GET"
             ],
             "Resource": "*"
         },

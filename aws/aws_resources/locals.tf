@@ -86,6 +86,12 @@ locals {
     }
   )
   
+  config-reporting-processor-default = templatefile("resources/config-reporting-default.tftpl",
+    {
+      carrierId = "${var.carrier_id}"
+    }
+  )
+
   def_sg_ingress = [{
     cidr_blocks = var.create_vpc ? var.vpc_cidr : data.aws_vpc.vpc[0].cidr_block
     description = "Inbound SSH traffic"

@@ -156,6 +156,7 @@ resource "aws_s3_bucket_policy" "reporting" {
           },
           "Action": [
               "s3:PutObject",
+              "s3:DeleteObject"
           ],
           "Resource": [
               "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}",
@@ -240,6 +241,11 @@ resource "local_file" "config_reporting_datacall" {
   content = local.config-reporting-processor-datacall
   filename = "./resources/openidl-reporting-processor/config/datacall-config.json"
 }
+resource "local_file" "config_reporting_default" {
+  count = local.org_name == "anal" ? 1 : 0
+  content = local.config-reporting-processor-default
+  filename = "./resources/openidl-reporting-processor/config/default.json"
+}
 resource "local_file" "config_reporting_s3" {
   count = local.org_name == "anal" ? 1 : 0
   content = local.config-reporting-processor-s3
@@ -250,7 +256,7 @@ resource "zipper_file" "reporting_processor_zip" {
   count = local.org_name == "anal" ? 1 : 0
   source      = "./resources/openidl-reporting-processor/"
   output_path = "./resources/openidl-reporting-processor.zip"
-  depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall]
+  depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall, local_file.config_reporting_default]
 }
 resource "aws_lambda_function" "reporting-processor" {
   count = local.org_name == "anal" ? 1 : 0

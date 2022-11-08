@@ -1,4 +1,9 @@
 ---
+- name: Apt Update
+  become: true
+  shell: |
+    apt-get update
+
 - name: Install package dependencies - ubuntu
   become: true
   package:
@@ -150,6 +155,5 @@
 - name: Install NodeJs
   become: true
   shell: |
-    apt-get remove -y nodejs
     curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
     apt-get install -y nodejs

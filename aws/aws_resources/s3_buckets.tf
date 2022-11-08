@@ -76,7 +76,7 @@ resource "aws_kms_alias" "s3_kms_key_alais" {
 }
 #Creating an s3 bucket for HDS data extract for analytics node
 resource "aws_s3_bucket" "s3_bucket_hds" {
-  count = var.org_name == "aais" ? 1 : 1 #update to 0 : 1
+  #count = var.org_name == "aais" ? 1 : 1 #update to 0 : 1
   bucket = "${local.std_name}-${var.s3_bucket_name_hds_analytics}"
   acl    = "private"
   force_destroy = true
@@ -125,17 +125,17 @@ resource "aws_s3_bucket" "s3_bucket_hds" {
 }
 #Blocking public access to s3 bucket used for HDS data extract for analytics node
 resource "aws_s3_bucket_public_access_block" "s3_bucket_public_access_block_hds" {
-  count = var.org_name == "aais" ? 0 : 1
+  #count = var.org_name == "aais" ? 0 : 1
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-  bucket                  = aws_s3_bucket.s3_bucket_hds[0].id
+  bucket                  = aws_s3_bucket.s3_bucket_hds.id
   depends_on              = [aws_s3_bucket.s3_bucket_hds, aws_s3_bucket_policy.s3_bucket_policy_hds]
 }
 #Setting up a bucket policy to restrict access to s3 bucket used for HDS data extract for analytics node
 resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
-  count = var.org_name == "aais" ? 0 : 1 #update to 0:1
+  #count = var.org_name == "aais" ? 0 : 1 #update to 0:1
   bucket     = "${local.std_name}-${var.s3_bucket_name_hds_analytics}"
   depends_on = [aws_s3_bucket.s3_bucket_hds]
   policy = jsonencode({
