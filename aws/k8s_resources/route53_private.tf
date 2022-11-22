@@ -10,6 +10,11 @@ resource "aws_route53_record" "private_record_services_internal" {
     zone_id                = data.aws_alb.app_nlb_external.zone_id
     evaluate_target_health = true
   }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
+  }
 }
 #Setting up private dns entries for vault
 resource "aws_route53_record" "private_record_vault" {
@@ -21,6 +26,11 @@ resource "aws_route53_record" "private_record_vault" {
     name                   = data.aws_alb.blk_nlb_external.dns_name
     zone_id                = data.aws_alb.blk_nlb_external.zone_id
     evaluate_target_health = true
+  }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
   }
 }
 #Setting up private dns entries on aais nodes specific
@@ -47,6 +57,11 @@ resource "aws_route53_record" "private_record_common" {
     name = data.aws_alb.blk_nlb_external.dns_name
     zone_id = data.aws_alb.blk_nlb_external.zone_id
   }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
+  }
 }
 #Setting up private dns entry for data call and insurance data manager
 resource "aws_route53_record" "private_record_public_services" {
@@ -60,6 +75,11 @@ resource "aws_route53_record" "private_record_public_services" {
     name = data.aws_alb.app_nlb_external.dns_name
     zone_id = data.aws_alb.app_nlb_external.zone_id
   }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
+  }
 }
 #Setting up private dns entry for openidl application UI
 resource "aws_route53_record" "private_record_openidl_ui" {
@@ -71,5 +91,10 @@ resource "aws_route53_record" "private_record_openidl_ui" {
     evaluate_target_health = true
     name = data.aws_alb.app_nlb_external.dns_name
     zone_id = data.aws_alb.app_nlb_external.zone_id
+  }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
   }
 }

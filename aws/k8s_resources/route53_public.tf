@@ -22,6 +22,11 @@ resource "aws_route53_record" "public_aais_orderorg_r53_record" {
     zone_id                = data.aws_alb.blk_nlb_external.zone_id
     evaluate_target_health = true
   }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
+  }
 }
 #Setting up public dns entry for org-net
 resource "aws_route53_record" "public_common_r53_record" {
@@ -34,6 +39,11 @@ resource "aws_route53_record" "public_common_r53_record" {
     name                   = data.aws_alb.blk_nlb_external.dns_name
     zone_id                = data.aws_alb.blk_nlb_external.zone_id
     evaluate_target_health = true
+  }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
   }
 }
 #Setting up public dns entry for data call service
@@ -48,6 +58,11 @@ resource "aws_route53_record" "public_data_call_r53_record" {
     zone_id                = data.aws_alb.app_nlb_external.zone_id
     evaluate_target_health = true
   }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
+  }
 }
 #Setting up public dns entry for insurance data manager
 resource "aws_route53_record" "public_insurance_manager_r53_record" {
@@ -60,6 +75,11 @@ resource "aws_route53_record" "public_insurance_manager_r53_record" {
     name                   = data.aws_alb.app_nlb_external.dns_name
     zone_id                = data.aws_alb.app_nlb_external.zone_id
     evaluate_target_health = true
+  }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
   }
 }
 #Setting up dns entry for utilities service
@@ -74,6 +94,11 @@ resource "aws_route53_record" "public_utilities_service_r53_record" {
     zone_id                = data.aws_alb.app_nlb_external.zone_id
     evaluate_target_health = true
   }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
+  }
 }
 #Setting up public dns entry for insurance data manager
 resource "aws_route53_record" "public_transactional_event_listener_r53_record" {
@@ -86,5 +111,10 @@ resource "aws_route53_record" "public_transactional_event_listener_r53_record" {
     name                   = data.aws_alb.app_nlb_external.dns_name
     zone_id                = data.aws_alb.app_nlb_external.zone_id
     evaluate_target_health = true
+  }
+  lifecycle {
+    ignore_changes = [
+      allow_overwrite,
+    ]
   }
 }

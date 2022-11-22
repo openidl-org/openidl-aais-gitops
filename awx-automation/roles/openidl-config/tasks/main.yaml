@@ -150,23 +150,18 @@
     - connection-profile.json
     - data-call-app-default-config.json
     - data-call-app-mappings-config.json
-    - data-call-processor-default-config.json
-    - data-call-processor-mappings-config.json
-    - data-call-processor-metadata-config.json
     - default-config.json
     - email-config.json
     - insurance-data-manager-channel-config.json
     - insurance-data-manager-default-config.json
     - insurance-data-manager-mappings-config.json
     - insurance-data-manager-metadata-config.json
-    - listener-channel-config.json
     - local-cognito-admin-config.json
     - local-cognito-config.json
     - local-db-config.json
     - local-kvs-config.json
     - local-vault-config.json
     - s3-bucket-config.json
-    - target-channel-config.json
     - ui-mappings-config.json
     - unique-identifiers-config.json
     - utilities-admin-config.json
@@ -193,7 +188,34 @@
     - transactional-data-event-listener-mappings-config.json
     - transactional-data-event-listener-metadata-config.json
     - transactional-data-event-listener-target-channel-config.json
+    - data-call-mood-listener-channel-config.json
+    - data-call-mood-listener-default-config.json
+    - data-call-mood-listener-mappings-config.json
+    - data-call-mood-listener-metadata-config.json
+    - data-call-mood-listener-target-channel-config.json
   when: node_type == "analytics"
+
+- name: Generate configuration files
+  template:
+    src: templates/{{ item }}.j2
+    dest: './{{ org_name }}-{{ env }}-config/{{ item }}'
+    mode: 0755
+  vars:
+    organization_ids: "{{ organizations.stdout }}"
+    aws_access_id: "{{ apps_user_access_id.stdout }}"
+    aws_access_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
+    mongo_user: "{{ mongodb_user.stdout }}"
+    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    s3_hds_bucket: "{{ org_name }}-{{ env }}-openidl-hdsdatastore"
+  with_items:
+    - data-call-processor-default-config.json
+    - data-call-processor-mappings-config.json
+    - data-call-processor-metadata-config.json
+    - listener-channel-config.json
+    - target-channel-config.json
+  when: node_type != "analytics"
 
 - name: Generate add-vault-config.sh 
   template:
