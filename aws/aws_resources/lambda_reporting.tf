@@ -30,11 +30,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "reporting" {
       days = 365
     }
     noncurrent_version_transition {
-      noncurrent_days = 90
+      noncurrent_days = 0
       storage_class = "GLACIER"
     }
     noncurrent_version_expiration {
-      noncurrent_days = 180
+      noncurrent_days = 1
     }
   }
   depends_on = [aws_s3_bucket.reporting]
@@ -43,7 +43,7 @@ resource "aws_s3_bucket_versioning" "reporting" {
   count = local.org_name == "anal" ? 1 : 0
   bucket = aws_s3_bucket.reporting[count.index].id
   versioning_configuration {
-    status = "Disabled"
+    status = "Suspended"
   }
   depends_on = [aws_s3_bucket.reporting]
 }
@@ -156,7 +156,9 @@ resource "aws_s3_bucket_policy" "reporting" {
           },
           "Action": [
               "s3:PutObject",
-              "s3:DeleteObject"
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetObject"
           ],
           "Resource": [
               "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}",
@@ -214,6 +216,8 @@ resource "aws_iam_policy" "reporting_lambda_role_policy" {
             "Action": [
               "s3:PutObject",
               "s3:GetObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
               "s3-object-lambda:*"
 			      ],
             "Resource": [

@@ -40,8 +40,8 @@ locals {
 
   #cognito specifics
   client_app_name              = "${local.std_name}-${var.userpool_name}-app-client" #name of the application client
-  client_callback_urls         = ["https://openidl.${var.aws_env}.${local.public_domain}/callback", "https://openidl.${var.aws_env}.${local.public_domain}/redirect"]
-  client_default_redirect_url  = "https://openidl.${var.aws_env}.${local.public_domain}/redirect" #redirect url
+  client_callback_urls         = ["https://openidl.${var.aws_env}.${local.public_domain}/"]
+  client_default_redirect_url  = "https://openidl.${var.aws_env}.${local.public_domain}/" #redirect url
   client_logout_urls           = ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
   cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain[0]}"
 
