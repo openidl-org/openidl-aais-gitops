@@ -1,3 +1,106 @@
+resource "aws_iam_role" "custom_message_lambda" {
+  count = var.create_cognito_userpool ? 1 : 0
+  name = "${local.std_name}-openidl-custom-message"
+  managed_policy_arns = [aws_iam_policy.custom_message_lambda_role_policy[count.index].arn]
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "lambda.amazonaws.com"
+        },
+        "Effect": "Allow",
+        "Sid": ""
+      }
+    ]
+  })
+  tags = merge(local.tags, { "name" = "${local.std_name}-openidl-custom-message-lambda"})
+}
+resource "aws_iam_policy" "custom_message_lambda_role_policy" {
+  count = var.create_cognito_userpool ? 1 : 0
+  name = "${local.std_name}-custom-message-lambda-role-policy"
+  policy = jsonencode(
+    {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowCloudWatchLogGroups",
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:${var.aws_region}:${var.aws_account_number}:*"
+        },
+        {
+            "Sid": "AllowCWLogStream",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*",
+        },
+        {
+            "Sid": "AllowCognito",
+            "Effect": "Allow",
+            "Action": [
+              "cognito-idp:ListUserPoolClients"
+			      ],
+            "Resource": [
+                "arn:aws:cognito-idp:${var.aws_region}:${var.aws_account_number}:userpool/*"
+            ]
+        },
+        {
+            "Sid": "AllowKMS",
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt",
+                "kms:GenerateDataKey"
+            ],
+            "Resource": "*"
+        }
+    ]
+  })
+  tags = merge(local.tags, {
+    name = "${local.std_name}-custom-message-lambda-role-policy"
+  })
+}
+resource "zipper_file" "custom_message_zip" {
+  count = var.create_cognito_userpool ? 1 : 0
+  source      = "./resources/openidl-cognito-custom-message/"
+  output_path = "./resources/openidl-cognito-custom-message.zip"
+}
+resource "aws_lambda_permission" "custom-message" {
+  count = var.create_cognito_userpool ? 1 : 0
+  statement_id  = "AllowExecutionFromCognito"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.custom-message[count.index].arn
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = "${aws_cognito_user_pool.user_pool[count.index].arn}"
+  depends_on = [ aws_lambda_function.custom-message ]
+}
+resource "aws_lambda_function" "custom-message" {
+  count = var.create_cognito_userpool ? 1 : 0
+  function_name = "${local.std_name}-openidl-custom-message"
+  role              = aws_iam_role.custom_message_lambda[count.index].arn
+  architectures     = ["x86_64"]
+  description       = "Openidl Cognito Custom Message"
+  environment {
+    variables = {
+      APP_CLIENT_NAME	= "${local.client_app_name}"
+      COGNITO_DOMAIN = "${local.cognito_domain}"
+      REDIRECT_URI = "${local.client_default_redirect_url}"
+    }
+  }
+  package_type = "Zip"
+  source_code_hash = "${zipper_file.custom_message_zip[count.index].output_sha}"
+  runtime = "nodejs16.x"
+  handler = "index.handler"
+  filename = "./resources/openidl-cognito-custom-message.zip"
+  timeout = "15"
+  publish = "true"
+  tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-custom-message"})
+  depends_on = [zipper_file.custom_message_zip]
+}
 #Setting up congnito user pool
 resource "aws_cognito_user_pool" "user_pool" {
   count = var.create_cognito_userpool ? 1 : 0
@@ -21,6 +124,9 @@ resource "aws_cognito_user_pool" "user_pool" {
       email_subject = "Your password"
       sms_message   = "Your username is {username} and password is {####}."
     }
+  }
+  lambda_config {
+    custom_message = aws_lambda_function.custom-message[count.index].arn
   }
   #alias_attributes = var.userpool_alais_attributes
   username_attributes      = var.userpool_username_attributes
