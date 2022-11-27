@@ -52,6 +52,8 @@ def codeCheckout() {
         nodejs(cacheLocationStrategy: workspace(), nodeJSInstallationName: 'nodejs') {
 		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
 			sh '''
+                    echo "Installing Node Modules in Openidl Cognito Custom Message"
+                    cd aws/aws_resources/resources/openidl-cognito-custom-message/ && npm i && cd -
                     echo "Preparing ETL code for lambda functions"
                     rm -rf lambda lambda-reporting-processor aws/aws_resources/resources/openidl-upload-lambda aws/aws_resources/resources/openidl-reporting-processor
                     git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
