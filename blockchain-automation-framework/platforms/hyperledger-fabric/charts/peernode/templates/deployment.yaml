@@ -234,6 +234,9 @@ spec:
           - name: dockerendpoint
             containerPort: 2375
             protocol: TCP
+        volumeMounts:
+          - mountPath: /var/lib/docker
+            name: docker
       volumes:
       {{ if .Values.vault.tls  }}
       - name: vaultca
@@ -261,3 +264,6 @@ spec:
       - name: datadir-couchdb
         persistentVolumeClaim:
           claimName: {{ $.Values.peer.name }}-db-volume
+      - name: docker
+        persistentVolumeClaim:
+          claimName: {{ .Values.peer.name }}-dind-volume
