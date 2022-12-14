@@ -166,6 +166,7 @@ spec:
           chmod 664 /opt/couchdb/etc/*.ini
           chmod 664 /opt/couchdb/etc/local.d/*.ini
           chmod 775 /opt/couchdb/etc/*.d
+          sed -i -e 's/max_document_size\ =\ 8000000/max_document_size\ =\ 4294967296/g' /opt/couchdb/etc/default.ini
           if [ -e /etc/hyperledger/fabric/crypto/user_cred ] && [ -z $COUCHDB_USER ]
           then
             echo " Error! Please provide username for the password "
