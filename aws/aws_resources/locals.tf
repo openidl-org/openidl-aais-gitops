@@ -274,20 +274,27 @@ locals {
       protocol                 = "tcp"
       description              = "Inbound from node group sg to node group sg-1024-65535"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
-  },
-  {
+    },
+    {
       from_port                = 53
       to_port                  = 53
       protocol                 = "udp"
       description              = "Inbound from node group sg to node group sg-53"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
-  },
-  {
+    },
+    {
       from_port                = 22
       to_port                  = 22
       protocol                 = "tcp"
       description              = "Inbound from bastion hosts sg to node group sg-22"
       source_security_group_id = module.bastion_sg[0].security_group_id
+    },
+    {
+      from_port                = 53
+      to_port                  = 53
+      protocol                 = "tcp"
+      description              = "Inbound from node group sg to node group sg-53"
+      source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
   }] : [
     {
       from_port                = 10250
@@ -323,11 +330,18 @@ locals {
       protocol                 = "tcp"
       description              = "Inbound from node group sg to node group sg-1024-65535"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
-  },
-  {
+    },
+    {
       from_port                = 53
       to_port                  = 53
       protocol                 = "udp"
+      description              = "Inbound from node group sg to node group sg-53"
+      source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
+    },
+    {
+      from_port                = 53
+      to_port                  = 53
+      protocol                 = "tcp"
       description              = "Inbound from node group sg to node group sg-53"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
   }]

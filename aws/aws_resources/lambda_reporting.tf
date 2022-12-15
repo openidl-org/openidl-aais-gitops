@@ -278,7 +278,8 @@ resource "aws_lambda_function" "reporting-processor" {
   runtime = "nodejs16.x"
   handler = "index.handler"
   filename = "./resources/openidl-reporting-processor.zip"
-  timeout = "60"
+  timeout = "600"
+  memory_size = "8192"
   publish = "true"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-reporting-processor"})
   depends_on = [zipper_file.reporting_processor_zip]
