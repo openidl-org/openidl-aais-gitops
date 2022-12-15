@@ -156,6 +156,22 @@ spec:
         - name: certificates
           mountPath: /secret
       containers:
+      - name: dind
+        image: docker:dind
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        args:
+          - dockerd
+          - -H unix:///var/run/docker.sock
+          - -H tcp://0.0.0.0:2375
+        ports:
+          - name: dockerendpoint
+            containerPort: 2375
+            protocol: TCP
+        volumeMounts:
+          - mountPath: /var/lib/docker
+            name: docker
       - name: couchdb
         image: {{ $.Values.metadata.images.couchdb }}
         command: ["sh", "-c"]
@@ -203,6 +219,7 @@ spec:
         - |-
           cp /etc/hyperledger/fabric/NodeOUconfig/mspconfig  /etc/hyperledger/fabric/crypto/msp/config.yaml
           export CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=`cat /etc/hyperledger/fabric/crypto/user_cred`
+          sleep 30
           peer node start
         ports:
         - name: grpc
@@ -222,22 +239,6 @@ spec:
         - name: {{ $.Values.peer.name }}-msp-config-volume
           mountPath: /etc/hyperledger/fabric/NodeOUconfig
           readOnly: true
-      - name: dind
-        image: docker:dind
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        args:
-          - dockerd
-          - -H unix:///var/run/docker.sock
-          - -H tcp://0.0.0.0:2375
-        ports:
-          - name: dockerendpoint
-            containerPort: 2375
-            protocol: TCP
-        volumeMounts:
-          - mountPath: /var/lib/docker
-            name: docker
       volumes:
       {{ if .Values.vault.tls  }}
       - name: vaultca
