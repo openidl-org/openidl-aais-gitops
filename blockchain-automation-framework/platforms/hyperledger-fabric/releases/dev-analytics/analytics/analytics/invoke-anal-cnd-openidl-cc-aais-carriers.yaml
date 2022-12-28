@@ -1,0 +1,52 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: invoke-anal-cnd-openidl-cc-aais-carriers
+  namespace: analytics-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: invoke-anal-cnd-openidl-cc-aais-carriers
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops.git
+    ref: develop-nginx-v1
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/invoke_chaincode
+  values:
+    metadata:
+      namespace: analytics-net
+      network:
+        version: 2.2.3
+      add_organization: false
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+    peer:
+      name: peer0
+      address: peer0.analytics-net:7051
+      localmspid: analyticsMSP
+      loglevel: debug
+      tlsstatus: true
+    vault:
+      role: vault-role
+      address: http://vault.dev.analytics.internal.thetech.digital
+      authpath: devanalytics-net-auth
+      adminsecretprefix: analytics/crypto/peerOrganizations/analytics-net/users/admin 
+      secretpath: analytics
+      orderersecretprefix: analytics/crypto/peerOrganizations/analytics-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      tls: false
+    orderer:
+      address: orderer1.ordererorg.dev.thetech.digital:8443
+    chaincode:
+      builder: hyperledger/fabric-ccenv:2.2.3
+      name: openidl-cc-aais-carriers
+      version: v11
+      invokearguments: ''
+      endorsementpolicies:  ''
+    channel:
+      name: anal-cnd
+    endorsers:
+        creator: analytics-net
+        name:  analytics  
+        corepeeraddress:  peer0.analytics-net.analytics.dev.analytics.thetech.digital:8443 
