@@ -7,47 +7,47 @@ global:
         port: 8080
         targetport: 8080
         servicename: data-call-app-service
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: data-call-app-service.prod.ca01.internal.uim.openidl.org
         publicingresshostname: data-call-app-service.prod.ca01.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 19-npm-error-9b6d860-110820222048
+            tag: 20-openidl-nd-poc-main-8c15132-010520230158
     utilities:
         install: true
         port: 8080
         targetport: 8080
         servicename: utilities-service
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: utilities-service.prod.ca01.internal.uim.openidl.org
         publicingresshostname: utilities-service.prod.ca01.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 27-npm-error-9b6d860-110820222100
+            tag: 28-openidl-nd-poc-main-8c15132-010520230200
     carrierui:
         install: true
         servicename: ca01-ui-service
         port: 8080
         targetport: 8080
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: openidl.prod.ca01.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 31-npm-error-9b6d860-110820222049
+            tag: 36-openidl-nd-poc-main-8c15132-010520230159
     insurancedatamanager:
         install: true
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: insurance-data-manager-service.prod.ca01.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 24-npm-error-9b6d860-110820222049
+            tag: 27-openidl-nd-poc-main-8c15132-010520230159
     datacallprocessor:
         install: true
         port: 8080
@@ -56,7 +56,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 18-npm-error-9b6d860-110820222049
+            tag: 24-openidl-nd-poc-main-8c15132-010520230158
     upload:
         install: true
         port: 80
@@ -74,7 +74,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 15-npm-error-9b6d860-110820222048
+            tag: 17-openidl-nd-poc-main-8c15132-010520230158
     transactionaldataeventlistener:
         install: false
         port: 8080
@@ -83,7 +83,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 15-npm-error-9b6d860-110820222049
+            tag: 27-openidl-nd-poc-main-8c15132-010520230159
     ui:
         install: false
         servicename: ui-service
@@ -94,6 +94,6 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 31-npm-error-9b6d860-110820222049
+            tag: 36-openidl-nd-poc-main-8c15132-010520230159
     secrets:
         install: true

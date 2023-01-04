@@ -156,6 +156,22 @@ spec:
         - name: certificates
           mountPath: /secret
       containers:
+      - name: dind
+        image: docker:dind
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        args:
+          - dockerd
+          - -H unix:///var/run/docker.sock
+          - -H tcp://0.0.0.0:2375
+        ports:
+          - name: dockerendpoint
+            containerPort: 2375
+            protocol: TCP
+        volumeMounts:
+          - mountPath: /var/lib/docker
+            name: docker
       - name: couchdb
         image: {{ $.Values.metadata.images.couchdb }}
         command: ["sh", "-c"]
@@ -166,6 +182,7 @@ spec:
           chmod 664 /opt/couchdb/etc/*.ini
           chmod 664 /opt/couchdb/etc/local.d/*.ini
           chmod 775 /opt/couchdb/etc/*.d
+          sed -i -e 's/max_document_size\ =\ 8000000/max_document_size\ =\ 4294967296/g' /opt/couchdb/etc/default.ini
           if [ -e /etc/hyperledger/fabric/crypto/user_cred ] && [ -z $COUCHDB_USER ]
           then
             echo " Error! Please provide username for the password "
@@ -202,6 +219,7 @@ spec:
         - |-
           cp /etc/hyperledger/fabric/NodeOUconfig/mspconfig  /etc/hyperledger/fabric/crypto/msp/config.yaml
           export CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=`cat /etc/hyperledger/fabric/crypto/user_cred`
+          sleep 30
           peer node start
         ports:
         - name: grpc
@@ -221,19 +239,6 @@ spec:
         - name: {{ $.Values.peer.name }}-msp-config-volume
           mountPath: /etc/hyperledger/fabric/NodeOUconfig
           readOnly: true
-      - name: dind
-        image: docker:dind
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        args:
-          - dockerd
-          - -H unix:///var/run/docker.sock
-          - -H tcp://0.0.0.0:2375
-        ports:
-          - name: dockerendpoint
-            containerPort: 2375
-            protocol: TCP
       volumes:
       {{ if .Values.vault.tls  }}
       - name: vaultca
@@ -261,3 +266,6 @@ spec:
       - name: datadir-couchdb
         persistentVolumeClaim:
           claimName: {{ $.Values.peer.name }}-db-volume
+      - name: docker
+        persistentVolumeClaim:
+          claimName: {{ .Values.peer.name }}-dind-volume

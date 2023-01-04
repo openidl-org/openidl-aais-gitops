@@ -76,8 +76,8 @@ module "app_eks_cluster" {
       max_capacity     = var.wg_asg_max_size
       min_capacity     = var.wg_asg_min_size
       name_prefix      = "${local.std_name}-app-worker-node-group-1"
-      # instance_types = ["${var.app_eks_worker_instance_type}"]
-      instance_types = ["t3.large"]
+      instance_types = ["${var.app_eks_worker_instance_type}"]
+      # instance_types = ["t3.large"]
       subnets        = var.create_vpc ? tolist([module.vpc[0].private_subnets[0]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]])
       version        = var.app_cluster_version
     },
@@ -95,8 +95,8 @@ module "app_eks_cluster" {
       max_capacity     = var.wg_asg_max_size
       min_capacity     = var.wg_asg_min_size
       name_prefix      = "${local.std_name}-app-worker-node-group-2"
-      # instance_types = ["${var.app_eks_worker_instance_type}"]
-      instance_types = ["t3.large"]
+      instance_types = ["${var.app_eks_worker_instance_type}"]
+      # instance_types = ["t3.large"]
       subnets        = var.create_vpc ? tolist([module.vpc[0].private_subnets[1]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]])
       version        = var.app_cluster_version
     }
