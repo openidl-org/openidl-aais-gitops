@@ -7,6 +7,7 @@
   file:
     path: /tmp/openidl-code/
     state: absent
+  become: yes
 
 - name: Create a openidl k8s namespace
   community.kubernetes.k8s:
@@ -62,4 +63,5 @@
 
 - name: Annotate ingress
   shell: |
-    kubectl -n openidl annotate ingress kubernetes.io/ingress.class=nginx --all
+    kubectl -n openidl annotate ingress kubernetes.io/ingress.class=nginx-external --all
+  ignore_errors: yes 

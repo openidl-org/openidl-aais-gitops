@@ -50,6 +50,7 @@ module "app_eks_cluster" {
   cluster_log_retention_in_days                      = var.cw_logs_retention_period
   worker_create_security_group                       = false
   worker_security_group_id                           = module.app_eks_worker_node_group_sg.security_group_id
+  worker_additional_security_group_ids               = ["${module.app_eks_worker_node_group_sg.security_group_id}"]
   worker_create_cluster_primary_security_group_rules = true
   #map_roles                                          = concat(local.app_cluster_map_roles, local.app_cluster_map_roles_list)
   #map_users                                          = concat(local.app_cluster_map_users, local.app_cluster_map_users_list)
@@ -59,61 +60,47 @@ module "app_eks_cluster" {
       resources        = ["secrets"]
     }
   ]
-  worker_groups = [
-    {
-      name                          = "${local.std_name}-app-worker-group-1"
-      instance_type                 = var.app_eks_worker_instance_type
-      ami_id                        = var.app_worker_nodes_ami_id == "" ? data.aws_ami.eks_app_worker_nodes_ami.id : var.app_worker_nodes_ami_id
-      platform                      = "linux"
-      additional_userdata           = local.worker_nodes_userdata
-      asg_min_size                  = var.wg_asg_min_size
-      asg_max_size                  = var.wg_asg_max_size
-      asg_desired_capacity          = var.wg_asg_desired_capacity
-      security_groups               = module.app_eks_worker_node_group_sg.security_group_id
-    #  additional_security_group_ids = module.app_eks_workers_app_traffic_sg.security_group_id
-      public_ip                     = var.eks_wg_public_ip
-      root_encrypted                = var.eks_wg_root_vol_encrypted
-      root_volume_size              = var.eks_wg_root_volume_size
-      root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_name
-      subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[0]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]])
-      #target_group_arns            = module.app_eks_nlb.target_group_arns
-      health_check_type             = var.eks_wg_health_check_type
-      ebs_optimized                 = var.wg_ebs_optimized
-      instance_refresh_enabled      = var.wg_instance_refresh_enabled
-      enable_monitoring             = true
-      iam_instance_profile_name     = aws_iam_instance_profile.eks_instance_profile["app-node-group"].name
-      metadata_http_tokens          = "required"
-      metadata_http_endpoint        = "enabled"
-      metadata_http_put_response_hop_limit = 5
+  
+  node_groups = {
+    "${local.std_name}-app-worker-node-group-1" = {
+      ami_type         = "AL2_x86_64"
+      # ami_release_version = var.app_worker_nodes_ami_id == "" ? data.aws_ami.eks_app_worker_nodes_ami.id : var.app_worker_nodes_ami_id
+      capacity_type  = "ON_DEMAND"
+      create_launch_template = true
+      desired_capacity = var.wg_asg_desired_capacity
+      disk_size        = var.eks_wg_root_volume_size
+      enable_monitoring = true
+      public_ip         = var.eks_wg_public_ip
+      force_update_version = true
+      iam_role_arn     = aws_iam_role.eks_nodegroup_role["app-node-group"].arn
+      max_capacity     = var.wg_asg_max_size
+      min_capacity     = var.wg_asg_min_size
+      name_prefix      = "${local.std_name}-app-worker-node-group-1"
+      instance_types = ["${var.app_eks_worker_instance_type}"]
+      # instance_types = ["t3.large"]
+      subnets        = var.create_vpc ? tolist([module.vpc[0].private_subnets[0]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[0]])
+      version        = var.app_cluster_version
     },
-    {
-      name                          = "${local.std_name}-app-worker-group-2"
-      instance_type                 = var.app_eks_worker_instance_type
-      ami_id                        = var.app_worker_nodes_ami_id == "" ? data.aws_ami.eks_app_worker_nodes_ami.id : var.app_worker_nodes_ami_id
-      platform                      = "linux"
-      additional_userdata           = local.worker_nodes_userdata
-      asg_min_size                  = var.wg_asg_min_size
-      asg_max_size                  = var.wg_asg_max_size
-      asg_desired_capacity          = var.wg_asg_desired_capacity
-      security_groups               = module.app_eks_worker_node_group_sg.security_group_id
-      #additional_security_group_ids = module.app_eks_workers_app_traffic_sg.security_group_id
-      public_ip                     = var.eks_wg_public_ip
-      root_encrypted                = var.eks_wg_root_vol_encrypted
-      root_volume_size              = var.eks_wg_root_volume_size
-      root_volume_type              = var.eks_wg_root_volume_type
-      key_name                      = module.app_eks_worker_nodes_key_pair_external.key_pair_name
-      subnet_ids                    = var.create_vpc ? tolist([module.vpc[0].private_subnets[1]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]])
-      #target_group_arns            = module.app_eks_nlb.target_group_arns
-      health_check_type             = var.eks_wg_health_check_type
-      ebs_optimized                 = var.wg_ebs_optimized
-      instance_refresh_enabled      = var.wg_instance_refresh_enabled
-      enable_monitoring             = true
-      iam_instance_profile_name     = aws_iam_instance_profile.eks_instance_profile["app-node-group"].name
-      metadata_http_tokens          = "required"
-      metadata_http_endpoint        = "enabled"
-      metadata_http_put_response_hop_limit = 5
-  }]
+    "${local.std_name}-app-worker-node-group-2" = {
+      ami_type         = "AL2_x86_64"
+      # ami_release_version = var.app_worker_nodes_ami_id == "" ? data.aws_ami.eks_app_worker_nodes_ami.id : var.app_worker_nodes_ami_id
+      capacity_type  = "ON_DEMAND"
+      create_launch_template = true
+      desired_capacity = var.wg_asg_desired_capacity
+      disk_size        = var.eks_wg_root_volume_size
+      enable_monitoring = true
+      public_ip         = var.eks_wg_public_ip
+      force_update_version = true
+      iam_role_arn     = aws_iam_role.eks_nodegroup_role["app-node-group"].arn
+      max_capacity     = var.wg_asg_max_size
+      min_capacity     = var.wg_asg_min_size
+      name_prefix      = "${local.std_name}-app-worker-node-group-2"
+      instance_types = ["${var.app_eks_worker_instance_type}"]
+      # instance_types = ["t3.large"]
+      subnets        = var.create_vpc ? tolist([module.vpc[0].private_subnets[1]]) : tolist([tolist(data.aws_subnet_ids.vpc_private_subnets.ids)[1]])
+      version        = var.app_cluster_version
+    }
+  }
 
   tags = merge(
     local.tags,
@@ -164,7 +151,7 @@ module "blk_eks_cluster" {
   subnets                                            = var.create_vpc ? module.vpc[0].private_subnets : data.aws_subnet_ids.vpc_private_subnets.ids
   vpc_id                                             = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
   write_kubeconfig                                   = false
-  #cluster_service_ipv4_cidr                          = var.blk_cluster_service_ipv4_cidr
+  #cluster_service_ipv4_cidr                         = var.blk_cluster_service_ipv4_cidr
   kubeconfig_output_path                             = var.kubeconfig_output_path
   cluster_endpoint_private_access                    = var.cluster_endpoint_private_access
   cluster_endpoint_public_access                     = var.cluster_endpoint_public_access
@@ -185,8 +172,8 @@ module "blk_eks_cluster" {
   worker_create_security_group                       = false
   worker_security_group_id                           = module.blk_eks_worker_node_group_sg.security_group_id
   worker_create_cluster_primary_security_group_rules = true
-  #map_roles                                          = concat(local.blk_cluster_map_roles, local.blk_cluster_map_roles_list)
-  #map_users                                          = concat(local.blk_cluster_map_users, local.blk_cluster_map_users_list)
+  #map_roles                                         = concat(local.blk_cluster_map_roles, local.blk_cluster_map_roles_list)
+  #map_users                                         = concat(local.blk_cluster_map_users, local.blk_cluster_map_users_list)
   cluster_encryption_config = [
     {
       provider_key_arn = var.create_kms_keys ? aws_kms_key.eks_kms_key[0].arn : var.eks_kms_key_arn

@@ -47,10 +47,12 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if .Values.global.datacallapp.ingressenabled }}
   tls:
   - hosts:
     - {{ .Values.global.datacallapp.publicingresshostname }}
     secretName: data-call-app-tls
+  {{- end }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
     - host: {{ .Values.global.datacallapp.publicingresshostname }}

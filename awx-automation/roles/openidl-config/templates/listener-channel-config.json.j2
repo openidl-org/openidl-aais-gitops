@@ -5,6 +5,16 @@
         "wallet": "&wallet"
     },
     "listenerChannels": [
+{% for channel in network.channels if org_name in channel.name %}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                }
+            ]
+        },
+{% endfor %}
         {
             "channelName": "defaultchannel",
             "events": [
@@ -12,18 +22,6 @@
                     "ExtractionPatternSpecified": "ExtractionPatternSpecified"
                 }
             ]
-        },
-{% for channel in network.channels %}
-{% if org_name in channel.name %}
-        {
-            "channelName": "anal-{{ network.org_name }}",
-            "events": [
-                {
-                    "ConsentedEvent": "ConsentedEvent"
-                }
-            ]
-        }{% if loop.last %}{% else %},{% endif %}
-{% endif %}
-{% endfor %}
+        }
     ]
 }

@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     {{- include "labels.custom" . | nindent 2 }}
 data:
-  CORE_VM_ENDPOINT: localhost:2375
+  CORE_VM_ENDPOINT: tcp://localhost:2375
   CORE_PEER_ID: {{ $.Values.peer.name }}.{{ $.Values.metadata.namespace }}
   FABRIC_LOGGING_SPEC: grpc=debug:{{ $.Values.peer.loglevel }}
   CORE_LEDGER_STATE_STATEDATABASE: CouchDB

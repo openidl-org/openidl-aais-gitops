@@ -1,0 +1,27 @@
+ordererorg_domain: "thetech.digital"
+domain: "ca01.thetech.digital"
+internal_domain: "ca01.internal.thetech.digital"
+node_type: "carrier"
+network:
+  org_name: "ca01"
+  ordererorg: "false"
+  ordererorg_name: "ordererorg"
+  organizations:
+    - name: "analytics"
+      domain: "analytics.thetech.digital"
+  channels:
+  - name: defaultchannel
+    chaincode:
+      name: openidl-cc-default
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: openidl-nd-poc-main
+      repo_path: openidl-chaincode/chaincode/openidl
+  - name: anal-ca01
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/openidl-org/openidl-main.git
+      repo_branch: openidl-nd-poc-main
+      repo_path: openidl-chaincode/chaincode/openidl
+      collectionconfig:
+        - name: "anal_ca01_pdc"
+          policy: "OR('analyticsMSP.member', 'ca01MSP.member')"

@@ -30,11 +30,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "reporting" {
       days = 365
     }
     noncurrent_version_transition {
-      noncurrent_days = 90
+      noncurrent_days = 0
       storage_class = "GLACIER"
     }
     noncurrent_version_expiration {
-      noncurrent_days = 180
+      noncurrent_days = 1
     }
   }
   depends_on = [aws_s3_bucket.reporting]
@@ -43,7 +43,7 @@ resource "aws_s3_bucket_versioning" "reporting" {
   count = local.org_name == "anal" ? 1 : 0
   bucket = aws_s3_bucket.reporting[count.index].id
   versioning_configuration {
-    status = "Enabled"
+    status = "Suspended"
   }
   depends_on = [aws_s3_bucket.reporting]
 }
@@ -156,6 +156,9 @@ resource "aws_s3_bucket_policy" "reporting" {
           },
           "Action": [
               "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
+              "s3:GetObject"
           ],
           "Resource": [
               "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_reporting}",
@@ -213,6 +216,8 @@ resource "aws_iam_policy" "reporting_lambda_role_policy" {
             "Action": [
               "s3:PutObject",
               "s3:GetObject",
+              "s3:DeleteObject",
+              "s3:ListBucket",
               "s3-object-lambda:*"
 			      ],
             "Resource": [
@@ -240,6 +245,11 @@ resource "local_file" "config_reporting_datacall" {
   content = local.config-reporting-processor-datacall
   filename = "./resources/openidl-reporting-processor/config/datacall-config.json"
 }
+resource "local_file" "config_reporting_default" {
+  count = local.org_name == "anal" ? 1 : 0
+  content = local.config-reporting-processor-default
+  filename = "./resources/openidl-reporting-processor/config/default.json"
+}
 resource "local_file" "config_reporting_s3" {
   count = local.org_name == "anal" ? 1 : 0
   content = local.config-reporting-processor-s3
@@ -250,7 +260,7 @@ resource "zipper_file" "reporting_processor_zip" {
   count = local.org_name == "anal" ? 1 : 0
   source      = "./resources/openidl-reporting-processor/"
   output_path = "./resources/openidl-reporting-processor.zip"
-  depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall]
+  depends_on = [local_file.config_reporting_s3, local_file.config_reporting_datacall, local_file.config_reporting_default]
 }
 resource "aws_lambda_function" "reporting-processor" {
   count = local.org_name == "anal" ? 1 : 0
@@ -268,7 +278,8 @@ resource "aws_lambda_function" "reporting-processor" {
   runtime = "nodejs16.x"
   handler = "index.handler"
   filename = "./resources/openidl-reporting-processor.zip"
-  timeout = "60"
+  timeout = "600"
+  memory_size = "8192"
   publish = "true"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-reporting-processor"})
   depends_on = [zipper_file.reporting_processor_zip]

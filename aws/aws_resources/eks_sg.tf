@@ -31,7 +31,7 @@ module "app_eks_worker_node_group_sg" {
   vpc_id                                                   = var.create_vpc ? module.vpc[0].vpc_id : data.aws_vpc.vpc[0].id
   ingress_cidr_blocks                                      = var.create_vpc ? [var.vpc_cidr] : [data.aws_vpc.vpc[0].cidr_block]
   ingress_rules                                            = ["ssh-tcp", "https-443-tcp", "http-80-tcp"]
-  number_of_computed_ingress_with_source_security_group_id = var.create_bastion_host ? 7 : 6
+  number_of_computed_ingress_with_source_security_group_id = var.create_bastion_host ? 8 : 7
   egress_rules                                             = ["all-all"]
   computed_ingress_with_source_security_group_id = local.app_eks_worker_node_group_sg_computed_ingress
   tags = merge(local.tags, {

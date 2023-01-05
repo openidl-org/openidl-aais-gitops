@@ -76,13 +76,10 @@ resource "aws_kms_alias" "s3_kms_key_alais" {
 }
 #Creating an s3 bucket for HDS data extract for analytics node
 resource "aws_s3_bucket" "s3_bucket_hds" {
-  count = var.org_name == "aais" ? 1 : 1 #update to 0 : 1
+  #count = var.org_name == "aais" ? 1 : 1 #update to 0 : 1
   bucket = "${local.std_name}-${var.s3_bucket_name_hds_analytics}"
   acl    = "private"
   force_destroy = true
-  versioning {
-    enabled = true
-  }
   tags = merge(
     local.tags,
     {
@@ -115,27 +112,34 @@ resource "aws_s3_bucket" "s3_bucket_hds" {
       days = "365" 
     }
     noncurrent_version_transition {
-      days = "90"
+      days = "0"
       storage_class = "GLACIER"
     }
     noncurrent_version_expiration {
-      days = "180"
+      days = "1"
     }
   }  
 }
+resource "aws_s3_bucket_versioning" "s3_bucket_hds" {
+  bucket = aws_s3_bucket.s3_bucket_hds.id
+  versioning_configuration {
+    status = "Suspended"
+  }
+  depends_on = [aws_s3_bucket.s3_bucket_hds]
+}
 #Blocking public access to s3 bucket used for HDS data extract for analytics node
 resource "aws_s3_bucket_public_access_block" "s3_bucket_public_access_block_hds" {
-  count = var.org_name == "aais" ? 0 : 1
+  #count = var.org_name == "aais" ? 0 : 1
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-  bucket                  = aws_s3_bucket.s3_bucket_hds[0].id
+  bucket                  = aws_s3_bucket.s3_bucket_hds.id
   depends_on              = [aws_s3_bucket.s3_bucket_hds, aws_s3_bucket_policy.s3_bucket_policy_hds]
 }
 #Setting up a bucket policy to restrict access to s3 bucket used for HDS data extract for analytics node
 resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
-  count = var.org_name == "aais" ? 0 : 1 #update to 0:1
+  #count = var.org_name == "aais" ? 0 : 1 #update to 0:1
   bucket     = "${local.std_name}-${var.s3_bucket_name_hds_analytics}"
   depends_on = [aws_s3_bucket.s3_bucket_hds]
   policy = jsonencode({
@@ -189,7 +193,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
 #			      "Sid": "DenyOthers",
 #			      "Effect": "Deny",
 #			      "Principal": "*",
-#            "Action": "*",
+#           "Action": "*",
 #			      "Resource": [
 #                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}",
 #                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_hds_analytics}/*"

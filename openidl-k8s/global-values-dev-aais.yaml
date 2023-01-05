@@ -1,62 +1,62 @@
 global:
-    clusterurl: aaisdemo.com
+    clusterurl: thetech.digital
     appsecret: apps-secret
-    configpath: config-local-aais
+    configpath: config-aais
     datacallapp:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-app-service
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: data-call-app-service.dev.internal.thetech.digital
         publicingresshostname: data-call-app-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-app
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-c4cf397-053120221932
+            tag: 19-npm-error-9b6d860-110820222048
     utilities:
         install: true
         port: 8080
         targetport: 8080
         servicename: utilities-service
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: utilities-service.dev.internal.thetech.digital
         publicingresshostname: utilities-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-utilities
+            repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 5-develop-jenkins-0edbace-053120221949
+            tag: 27-npm-error-9b6d860-110820222100
     ui:
         install: true
         servicename: ui-service
         port: 8080
         targetport: 8080
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: openidl.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-org/openidl-ui
+            repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 17-develop-jenkins-58b8788-062820221410
+            tag: 31-npm-error-9b6d860-110820222049
     insurancedatamanager:
         install: true
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: insurance-data-manager-service.dev.thetech.digital
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-insurance-data-manager
+            repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 7-develop-jenkins-0edbace-053120221949
+            tag: 24-npm-error-9b6d860-110820222049
     datacallprocessor:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-processor-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-processor
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 8-develop-jenkins-24f6b1e-071520222006
+            tag: 18-npm-error-9b6d860-110820222049
     upload:
         install: false
         port: 80
@@ -72,18 +72,18 @@ global:
         targetport: 8080
         servicename: data-call-mood-listener-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-data-call-mood-listener
+            repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-0edbace-053120221949
+            tag: 15-npm-error-9b6d860-110820222048
     transactionaldataeventlistener:
         install: false
         port: 8080
         targetport: 8080
         servicename: transactional-data-event-listener-service
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-transactional-data-event-listener
+            repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 10-develop-jenkins-5e5ec5c-071320222002
+            tag: 15-npm-error-9b6d860-110820222049
     carrierui:
         install: false
         servicename: carrier-ui-service
@@ -92,8 +92,8 @@ global:
         ingressenabled: false
         ingresshostname: openidl.dev.aais.openidl.aaisdirect.com
         image:
-            repository: ghcr.io/rajeshsanjeevi/openidl-main/openidl-carrier-ui
+            repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 17-develop-jenkins-58b8788-062820221410
+            tag: 31-npm-error-9b6d860-110820222049
     secrets:
         install: true

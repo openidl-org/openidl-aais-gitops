@@ -7,47 +7,47 @@ global:
         port: 8080
         targetport: 8080
         servicename: data-call-app-service
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: data-call-app-service.prod.ca09.internal.uim.openidl.org
         publicingresshostname: data-call-app-service.prod.ca09.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 14-openidl-nd-poc-main-634b183-092220221653
+            tag: 20-openidl-nd-poc-main-8c15132-010520230158
     utilities:
         install: true
         port: 8080
         targetport: 8080
         servicename: utilities-service
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: utilities-service.prod.ca09.internal.uim.openidl.org
         publicingresshostname: utilities-service.prod.ca09.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 20-openidl-nd-poc-main-634b183-092220221658
+            tag: 28-openidl-nd-poc-main-8c15132-010520230200
     carrierui:
         install: true
         servicename: ca09-ui-service
         port: 8080
         targetport: 8080
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: openidl.prod.ca09.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 16-openidl-nd-poc-main-634b183-092220221659
+            tag: 36-openidl-nd-poc-main-8c15132-010520230159
     insurancedatamanager:
         install: true
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
-        ingressenabled: true
+        ingressenabled: false
         ingresshostname: insurance-data-manager-service.prod.ca09.uim.openidl.org
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 11-openidl-nd-poc-main-634b183-092220221700
+            tag: 27-openidl-nd-poc-main-8c15132-010520230159
     datacallprocessor:
         install: true
         port: 8080
@@ -56,7 +56,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 8-openidl-nd-poc-main-634b183-092220221701
+            tag: 24-openidl-nd-poc-main-8c15132-010520230158
     upload:
         install: true
         port: 80
@@ -74,7 +74,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 14-prodelop-jenkins-0edbace-053120221949
+            tag: 17-openidl-nd-poc-main-8c15132-010520230158
     transactionaldataeventlistener:
         install: false
         port: 8080
@@ -83,7 +83,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 10-prodelop-jenkins-5e5ec5c-071320222002
+            tag: 27-openidl-nd-poc-main-8c15132-010520230159
     ui:
         install: false
         servicename: ui-service
@@ -94,6 +94,6 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 17-prodelop-jenkins-58b8788-062820221410
+            tag: 36-openidl-nd-poc-main-8c15132-010520230159
     secrets:
         install: true

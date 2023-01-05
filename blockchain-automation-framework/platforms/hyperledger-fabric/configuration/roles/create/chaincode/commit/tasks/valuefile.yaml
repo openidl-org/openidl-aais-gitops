@@ -67,7 +67,7 @@
   vars:    
     name: "{{ org.name | lower }}"
     type: "commit_chaincode_job"
-    component_name: "commit-{{item.channel_name|lower}}-{{peer.chaincode.name}}-{{peer.chaincode.version}}-{{ peer.chaincode.sequence | default('1') }}"
+    component_name: "commit-{{item.channel_name|lower}}-{{peer.chaincode.name}}"
     namespace: "{{ org.name |lower }}-net"
     peer_name: "{{ peer.name }}"
     peer_address: "{{ peer.name }}.{{ org.name |lower }}-net:{{ peer.grpc.port }}"

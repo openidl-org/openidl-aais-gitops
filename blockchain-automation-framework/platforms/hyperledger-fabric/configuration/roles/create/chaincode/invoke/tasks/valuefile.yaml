@@ -92,7 +92,7 @@
   vars:    
     name: "{{ org.name | lower }}"
     type: "invoke_chaincode_job"
-    component_name: "invoke-{{item.channel_name|lower}}-{{peer.chaincode.name}}-{{peer.chaincode.version}}"
+    component_name: "invoke-{{item.channel_name|lower}}-{{peer.chaincode.name}}"
     namespace: "{{ org.name |lower }}-net"
     peer_name: "{{ peer.name }}"
     peer_address: "{{ peer.name }}.{{ org.name |lower }}-net:{{ peer.grpc.port }}"
