@@ -1,0 +1,27 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: analytics-net-ca-tools
+  namespace: analytics-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: analytics-net-ca-tools
+  chart:
+    git: https://github.com/suryalanka-cy/openidl-aais-gitops
+    ref: anal-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/catools
+  values:
+    metadata:
+      namespace: analytics-net
+      name: ca-tools
+    replicaCount: 1
+
+    image:
+      repository: hyperledger/fabric-ca-tools
+      tag: 1.2.1
+      pullPolicy: IfNotPresent
+      
+    storage:
+      storageclassname: analyticssc
+      storagesize: 10Gi

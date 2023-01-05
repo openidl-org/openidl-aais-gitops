@@ -1,0 +1,50 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: channel-aais-anal-ca03
+  namespace: aais-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: channel-aais-anal-ca03
+  chart:
+    git: https://github.com/suryalanka-cy/openidl-aais-gitops
+    ref: aais-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/create_channel   
+  values:
+    metadata:
+      namespace: aais-net
+      network:
+        version 2.2.3
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+    peer:
+      name: peer0
+      address: peer0.aais-net:7051
+      localmspid: aaisMSP
+      loglevel: debug
+      tlsstatus: true
+
+    vault:
+      role: vault-role
+      address: http://vault.prod.aais.internal.uim.openidl.org
+      authpath: prodaais-net-auth
+      adminsecretprefix: aais/crypto/peerOrganizations/aais-net/users/admin
+      orderersecretprefix: aais/crypto/peerOrganizations/aais-net/orderer 
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+
+    channel:
+      name: anal-ca03
+    orderer:
+      address: orderer1.ordererorg.prod.aais.uim.openidl.org:8443
+    channeltx: |-
+      Cp0DChcKFQgCGgYIuMLCmgYiCWFuYWwtY2EwMxKBAwr+AgoJYW5hbC1jYTAzEi4SHAoLQXBwbGlj
+      YXRpb24SDRILCgdhYWlzTVNQEgAaDgoKQ29uc29ydGl1bRIAGsACEpgCCgtBcHBsaWNhdGlvbhKI
+      AggBEgsKB2FhaXNNU1ASABokCgxDYXBhYmlsaXRpZXMSFBIKCggKBFYyXzASABoGQWRtaW5zIiIK
+      B1dyaXRlcnMSFxINCAMSCQoHV3JpdGVycxoGQWRtaW5zIiAKBkFkbWlucxIWEgwIAxIICgZBZG1p
+      bnMaBkFkbWlucyIqCgtFbmRvcnNlbWVudBIbEhEIAxINCgtFbmRvcnNlbWVudBoGQWRtaW5zIjMK
+      FExpZmVjeWNsZUVuZG9yc2VtZW50EhsSEQgDEg0KC0VuZG9yc2VtZW50GgZBZG1pbnMiIgoHUmVh
+      ZGVycxIXEg0IAxIJCgdSZWFkZXJzGgZBZG1pbnMqBkFkbWlucxojCgpDb25zb3J0aXVtEhUSEwoR
+      T3BlbklETENvbnNvcnRpdW0=

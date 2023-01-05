@@ -1,0 +1,63 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: aais-peer0
+  namespace: aais-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: aais-peer0
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/peernode    
+  values:
+    metadata:
+      namespace: aais-net
+      images:
+        couchdb: couchdb:3.1
+        peer: hyperledger/fabric-peer:2.2.9
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+        
+    peer:
+      name: peer0
+      gossippeeraddress: peer0.aais-net.aais.prod.aais.uim.openidl.org:8443
+      gossipexternalendpoint: peer0.aais-net.aais.prod.aais.uim.openidl.org:8443
+      localmspid: aaisMSP
+      loglevel: info
+      tlsstatus: true
+      builder: hyperledger/fabric-ccenv:2.2.9
+      couchdb:
+        username: aais-user
+
+    storage:
+      peer:
+        storageclassname: aaissc
+        storagesize: 50Gi
+      couchdb:
+        storageclassname: aaissc
+        storagesize: 50Gi
+
+    vault:
+      role: vault-role
+      address: http://vault.prod.aais.internal.uim.openidl.org
+      authpath: prodaais-net-auth
+      secretprefix: aais/crypto/peerOrganizations/aais-net/peers/peer0.aais-net
+      secretambassador: aais/crypto/peerOrganizations/aais-net/ambassador
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      secretcouchdbpass: aais/credentials/aais-net/couchdb/aais?user
+
+    service:
+      servicetype: ClusterIP
+      ports:
+        grpc:
+          clusteripport: 7051
+        events:
+          clusteripport: 7053
+        couchdb:
+          clusteripport: 5984
+          
+    proxy:
+      provider: "nginx"
+      external_url_suffix: aais.prod.aais.uim.openidl.org
