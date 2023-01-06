@@ -1,0 +1,56 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: commit-anal-ca09-openidl-cc-aais-carriers
+  namespace: analytics-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: commit-anal-ca09-openidl-cc-aais-carriers
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/commit_chaincode
+  values:
+    metadata:
+      namespace: analytics-net
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+    peer:
+      name: peer0
+      address: peer0.analytics-net:7051
+      localmspid: analyticsMSP
+      loglevel: debug
+      tlsstatus: true
+    vault:
+      role: vault-role
+      address: http://vault.prod.analytics.internal.uim.openidl.org
+      authpath: prodanalytics-net-auth
+      adminsecretprefix: analytics/crypto/peerOrganizations/analytics-net/users/admin
+      secretpath: analytics
+      orderersecretprefix: analytics/crypto/peerOrganizations/analytics-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      tls: false
+    orderer:
+      address: orderer1.ordererorg.prod.aais.uim.openidl.org:8443
+    chaincode:
+      builder: hyperledger/fabric-ccenv:2.2.3
+      name: openidl-cc-aais-carriers
+      version: v74b53bb
+      sequence: 1
+      commitarguments: ''
+      endorsementpolicies:  ''
+      collectionconfig: |-
+        WwogIHsKICAgICJuYW1lIjogImFuYWxfY2EwOV9wZGMiLAogICAgInBvbGljeSI6ICJPUignYW5h
+        bHl0aWNzTVNQLm1lbWJlcicsICdjYTA5TVNQLm1lbWJlcicpIiwKICAgICJyZXF1aXJlZFBlZXJD
+        b3VudCI6IDAsCiAgICAibWF4UGVlckNvdW50IjogMCwKICAgICJibG9ja1RvTGl2ZSI6IDAKICB9
+        Cl0KCg==
+      usecollectionconfig: true
+    channel:
+      name: anal-ca09
+    endorsers:
+      creator: analytics-net
+      name:  analytics  
+      corepeeraddress:  peer0.analytics-net.analytics.prod.analytics.uim.openidl.org:8443 
