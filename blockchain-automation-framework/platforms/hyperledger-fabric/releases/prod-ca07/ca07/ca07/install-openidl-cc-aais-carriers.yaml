@@ -1,0 +1,52 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: install-openidl-cc-aais-carriers
+  namespace: ca07-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: install-openidl-cc-aais-carriers
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/install_chaincode
+  values:
+    metadata:
+      namespace: ca07-net
+      network:
+        version: 2.2.3
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+    peer:
+      name: peer0
+      address: peer0.ca07-net:7051
+      localmspid: ca07MSP
+      loglevel: debug
+      tlsstatus: true
+    vault:
+      role: vault-role
+      address: http://vault.prod.ca07.internal.uim.openidl.org
+      authpath: prodca07-net-auth
+      adminsecretprefix: ca07/crypto/peerOrganizations/ca07-net/users/admin 
+      orderersecretprefix: ca07/crypto/peerOrganizations/ca07-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      secretgitprivatekey: ca07/credentials/ca07-net/git?git_password
+      tls: false
+    orderer:
+      address: orderer5.ordererorg.prod.aais.uim.openidl.org:8443
+    chaincode:
+      builder: hyperledger/fabric-ccenv:2.2.3
+      name: openidl-cc-aais-carriers
+      version: v74b53bb
+      lang: golang
+      maindirectory: main
+      repository:
+        hostname: "github.com"
+        git_username: ""
+        url: github.com/openidl-org/openidl-main.git
+        branch: openidl-nd-poc-main
+        path: openidl-chaincode/chaincode/openidl
+      endorsementpolicies:  ''
