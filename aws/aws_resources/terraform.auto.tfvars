@@ -36,7 +36,7 @@ userpool_email_verification_subject              = "Your password"
 userpool_email_verification_message              = "Your username is {username} and password is {####}."
 #-------------------------------------------------------------------------------------------------------------------
 #EKS cluster default specifications
-app_eks_worker_instance_type         = "t3.large"
+app_eks_worker_instance_type         = "t3.xlarge"
 blk_eks_worker_instance_type         = "t3.large"
 kubeconfig_output_path               = "./kubeconfig_file/"
 manage_aws_auth                      = false
