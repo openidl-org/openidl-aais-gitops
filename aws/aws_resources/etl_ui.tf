@@ -3,14 +3,7 @@ resource "aws_s3_bucket" "upload_ui" {
   bucket = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
   force_destroy = true
   tags = merge( local.tags, {"name" = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"})
-  website {
-    index_document = "index.html"
-    error_document = "index.html"
-  }
-  acl    = "public-read"
-  versioning {
-    enabled = true
-  }
+  acl  = "public-read"
 }
 resource "aws_s3_bucket_lifecycle_configuration" "upload_ui" {
     bucket = aws_s3_bucket.upload_ui.id
@@ -39,11 +32,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "upload_ui" {
   depends_on = [aws_s3_bucket.upload_ui]
 }
 resource "aws_s3_bucket_versioning" "upload_ui" {
-      bucket = aws_s3_bucket.upload_ui.id
-      versioning_configuration {
-      status = "Enabled"
-      }
-    depends_on = [aws_s3_bucket.upload_ui]
+  bucket = aws_s3_bucket.upload_ui.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+  depends_on = [aws_s3_bucket.upload_ui]
 }
 #resource "aws_s3_bucket_logging" "upload_ui" {
 #    bucket = aws_s3_bucket.upload_ui.id
@@ -156,7 +149,7 @@ resource "aws_s3_bucket_website_configuration" "upload_ui" {
   error_document {
     key = "index.html"
   }
- }
+}
 #Lambda specifics related to openidl upload ui
 resource "aws_iam_role" "upload" {
   name = "${local.std_name}-openidl-upload"

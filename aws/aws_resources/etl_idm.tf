@@ -354,7 +354,8 @@ resource "aws_lambda_function" "etl_intake_processor" {
   handler = "index.handler"
   source_code_hash = "${zipper_file.etl_intake_processor_zip.output_sha}"
   filename = "./resources/openidl-etl-intake-processor.zip"
-  timeout = "60"
+  timeout = "600"
+  memory_size = "8192"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-etl-intake-processor"})
   depends_on = [zipper_file.etl_intake_processor_zip]
 }
@@ -373,7 +374,8 @@ resource "aws_lambda_function" "etl_success_processor" {
   handler = "index.handler"
   source_code_hash = "${zipper_file.etl_success_processor_zip.output_sha}"
   filename = "./resources/openidl-etl-success-processor.zip"
-  timeout = "60"
+  timeout = "600"
+  memory_size = "8192"
   tags = merge(local.tags,{ "name" = "${local.std_name}-openidl-etl-idm-loader"})
   depends_on = [zipper_file.etl_success_processor_zip]
 }

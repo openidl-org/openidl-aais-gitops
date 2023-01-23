@@ -51,6 +51,9 @@ spec:
         # for local development against minikube registry
         image: {{ .Values.global.transactionaldataeventlistener.image.repository | default .Values.image.repository }}:{{ .Values.global.transactionaldataeventlistener.image.tag | default .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.transactionaldataeventlistener.image.pullPolicy | default .Values.image.pullPolicy }}      
+        env:
+        - name: NODE_OPTIONS
+          value: --max_old_space_size=16384
         ports:
         - containerPort: {{ .Values.global.transactionaldataeventlistener.port }}
         volumeMounts:

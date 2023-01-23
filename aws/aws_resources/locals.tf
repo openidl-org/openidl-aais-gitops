@@ -40,8 +40,8 @@ locals {
 
   #cognito specifics
   client_app_name              = "${local.std_name}-${var.userpool_name}-app-client" #name of the application client
-  client_callback_urls         = ["https://openidl.${var.aws_env}.${local.public_domain}/callback", "https://openidl.${var.aws_env}.${local.public_domain}/redirect"]
-  client_default_redirect_url  = "https://openidl.${var.aws_env}.${local.public_domain}/redirect" #redirect url
+  client_callback_urls         = ["https://openidl.${var.aws_env}.${local.public_domain}/"]
+  client_default_redirect_url  = "https://openidl.${var.aws_env}.${local.public_domain}/" #redirect url
   client_logout_urls           = ["https://openidl.${var.aws_env}.${local.public_domain}/signout"] #logout url
   cognito_domain               = var.domain_info.sub_domain_name == "" ? local.temp_domain[0] : "${var.domain_info.sub_domain_name}-${local.temp_domain[0]}"
 
@@ -274,20 +274,27 @@ locals {
       protocol                 = "tcp"
       description              = "Inbound from node group sg to node group sg-1024-65535"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
-  },
-  {
+    },
+    {
       from_port                = 53
       to_port                  = 53
       protocol                 = "udp"
       description              = "Inbound from node group sg to node group sg-53"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
-  },
-  {
+    },
+    {
       from_port                = 22
       to_port                  = 22
       protocol                 = "tcp"
       description              = "Inbound from bastion hosts sg to node group sg-22"
       source_security_group_id = module.bastion_sg[0].security_group_id
+    },
+    {
+      from_port                = 53
+      to_port                  = 53
+      protocol                 = "tcp"
+      description              = "Inbound from node group sg to node group sg-53"
+      source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
   }] : [
     {
       from_port                = 10250
@@ -323,11 +330,18 @@ locals {
       protocol                 = "tcp"
       description              = "Inbound from node group sg to node group sg-1024-65535"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
-  },
-  {
+    },
+    {
       from_port                = 53
       to_port                  = 53
       protocol                 = "udp"
+      description              = "Inbound from node group sg to node group sg-53"
+      source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
+    },
+    {
+      from_port                = 53
+      to_port                  = 53
+      protocol                 = "tcp"
       description              = "Inbound from node group sg to node group sg-53"
       source_security_group_id = module.app_eks_worker_node_group_sg.security_group_id
   }]

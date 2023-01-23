@@ -1,53 +1,53 @@
 global:
-    clusterurl: aaisdemo.com
+    clusterurl: thetech.digital
     appsecret: apps-secret
-    configpath: config-local-aais
+    configpath: config-aais
     datacallapp:
         install: true
         port: 8080
         targetport: 8080
         servicename: data-call-app-service
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: data-call-app-service.dev.internal.thetech.digital
         publicingresshostname: data-call-app-service.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-app
             pullPolicy: IfNotPresent
-            tag: 17-openidl-nd-poc-main-db892de-110220221949
+            tag: 19-npm-error-9b6d860-110820222048
     utilities:
         install: true
         port: 8080
         targetport: 8080
         servicename: utilities-service
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: utilities-service.dev.internal.thetech.digital
         publicingresshostname: utilities-service.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-utilities
             pullPolicy: IfNotPresent
-            tag: 26-openidl-nd-poc-main-db892de-110220221951
+            tag: 27-npm-error-9b6d860-110820222100
     ui:
         install: true
         servicename: ui-service
         port: 8080
         targetport: 8080
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: openidl.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-org/openidl-ui
             pullPolicy: IfNotPresent
-            tag: 25-openidl-nd-poc-main-18b90d5-110120221447
+            tag: 31-npm-error-9b6d860-110820222049
     insurancedatamanager:
         install: true
         port: 8080
         targetport: 8080
         servicename: insurance-data-manager-service
-        ingressenabled: false
+        ingressenabled: true
         ingresshostname: insurance-data-manager-service.dev.thetech.digital
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-insurance-data-manager
             pullPolicy: IfNotPresent
-            tag: 16-openidl-nd-poc-main-db892de-110220221950
+            tag: 24-npm-error-9b6d860-110820222049
     datacallprocessor:
         install: true
         port: 8080
@@ -56,7 +56,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-processor
             pullPolicy: IfNotPresent
-            tag: 10-openidl-nd-poc-main-96800df-102520221613
+            tag: 18-npm-error-9b6d860-110820222049
     upload:
         install: false
         port: 80
@@ -74,7 +74,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-data-call-mood-listener
             pullPolicy: IfNotPresent
-            tag: 14-develop-jenkins-0edbace-053120221949
+            tag: 15-npm-error-9b6d860-110820222048
     transactionaldataeventlistener:
         install: false
         port: 8080
@@ -83,7 +83,7 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-transactional-data-event-listener
             pullPolicy: IfNotPresent
-            tag: 10-develop-jenkins-5e5ec5c-071320222002
+            tag: 15-npm-error-9b6d860-110820222049
     carrierui:
         install: false
         servicename: carrier-ui-service
@@ -94,6 +94,6 @@ global:
         image:
             repository: ghcr.io/openidl-org/openidl-main/openidl-carrier-ui
             pullPolicy: IfNotPresent
-            tag: 17-develop-jenkins-58b8788-062820221410
+            tag: 31-npm-error-9b6d860-110820222049
     secrets:
         install: true
