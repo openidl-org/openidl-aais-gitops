@@ -67,17 +67,17 @@ pullVaultConfig() {
 
     echo ${VAULT_URL}/v1/${ORG}/data/${APP_NAME}/${config}
 
-    CONFIG_DATA=$(curl \
+    HTTP_STATUS=$(curl \
       --header "X-Vault-Token: ${USER_TOKEN}" \
       --request GET \
-      ${VAULT_URL}/v1/${ORG}/data/${APP_NAME}/${config} | $JQ -r .data.data)
+      ${VAULT_URL}/v1/${ORG}/data/${APP_NAME}/${config})
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
       echo "Failed to execute curl command."
       exit 1
     fi
 
-    #CONFIG_DATA=$(echo $HTTP_STATUS | $JQ ".data.data")
+    CONFIG_DATA=$(echo "${HTTP_STATUS}" | $JQ ".data.data")
 
     if [ -z "${CONFIG_DATA}" ]; then
       echo "CONFIG_DATA is blank."

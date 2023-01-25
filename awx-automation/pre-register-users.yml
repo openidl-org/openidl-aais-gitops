@@ -19,48 +19,48 @@
         export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ blk_cluster_name }}
         
     - name: Get vault root token
-      no_log: true
+      no_log: false
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager get-secret-value --secret-id {{ network.org_name[:4] }}-{{ env }}-vault-unseal-key --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-vault-unseal-key --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
       register: vault
 
     - name: Get kvs user credentials from secrets manager
-      no_log: true
+      no_log: false
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager get-secret-value --secret-id {{ network.org_name[:4] }}-{{ env }}-kvs-vault  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r '.SecretString|fromjson'.username
+        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-kvs-vault  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r '.SecretString|fromjson'.username
       register: vault_user
 
     - name: Get kvs user credentials from secrets manager
-      no_log: true
+      no_log: false
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager get-secret-value --secret-id {{ network.org_name[:4] }}-{{ env }}-kvs-vault  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r '.SecretString|fromjson'.password
+        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-kvs-vault  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r '.SecretString|fromjson'.password
       register: vault_user_token
 
     - name: Check register-users action performed in the past
       shell : |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name[:4] }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
+        aws secretsmanager list-secrets --region {{ aws_region }} --filter Key="name",Values="{{ network.org_name }}-{{ env }}-ca-app-user-token" | jq .SecretList[0].Name
       register: ca_token_status
 
     - name: Get CA credentials from secrets manager
-      no_log: true
+      no_log: false
       shell: |
         export AWS_PROFILE=cicd-role
-        aws secretsmanager get-secret-value --secret-id {{ network.org_name[:4] }}-{{ env }}-ca-app-user-token  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+        aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token  --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
       register: ca_user_password_aws_sm
       when: ca_token_status.stdout != "null"
 
     - name: Setting ca-user-password to enroll-user only
-      no_log: true
+      no_log: false
       set_fact:
         ca_user_password: "{{ ca_user_password_aws_sm.stdout }}"
       when: ca_token_status.stdout != "null"
 
     - name: Setting ca-user-password to register and enroll-user
-      no_log: true
+      no_log: false
       set_fact:
         ca_user_password: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
       when: ca_token_status.stdout == "null"

@@ -2,8 +2,8 @@
 locals {
   terraform_user_name = split("/", var.aws_user_arn)
   terraform_role_name = split("/", var.aws_role_arn)
-  org_name = substr(var.org_name,0,4)
-  std_name          = "${substr(var.org_name,0,4)}-${var.aws_env}"
+  org_name            = var.org_name
+  std_name          = "${var.org_name}-${var.aws_env}"
   app_cluster_name  = "${local.std_name}-${var.app_cluster_name}"
   blk_cluster_name  = "${local.std_name}-${var.blk_cluster_name}"
   policy_arn_prefix = "arn:aws:iam::aws:policy"

@@ -17,6 +17,7 @@
     component_ns: "{{ peer.name | lower}}-net"
     peer_name: "{{ peer | json_query('peers[*].name') | first }}"
     git_url: "{{ org.gitops.git_url }}"
+    gitops: "{{ org.gitops }}"
     git_branch: "{{ org.gitops.branch }}"
     charts_dir: "{{ org.gitops.chart_source }}"
     vault: "{{ org.vault }}"

@@ -62,6 +62,13 @@ spec:
     {{- if $.Values.service.ports.tcp.nodeport }}
     nodePort: {{ $.Values.service.ports.tcp.nodeport }}
     {{- end }}
+  - name: ops
+    protocol: TCP
+    targetPort: 9096
+    port: {{ $.Values.service.ports.ops.clusteripport }}
+    {{- if $.Values.service.ports.ops.nodeport }}
+    nodePort: {{ $.Values.service.ports.ops.nodeport }}
+    {{- end }}
 
 {{- if eq $.Values.proxy.provider "nginx" }}
 ---

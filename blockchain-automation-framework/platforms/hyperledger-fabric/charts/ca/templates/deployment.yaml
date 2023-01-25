@@ -12,7 +12,7 @@ metadata:
     {{- include "labels.custom" . | nindent 2 }}
   annotations:
     {{- if $.Values.annotations }}
-    {{- range $key, $value := $.Values.deployment.annotations }}
+    {{- range $key, $value := $.Values.annotations.deployment }}
     {{- range $k, $v := $value }}
       {{ $k }}: {{ $v | quote }}
     {{- end }}
@@ -147,6 +147,7 @@ spec:
         command: ["sh", "-c", "sleep 1 && fabric-ca-server start -b {{ $.Values.server.admin }}:`cat /etc/hyperledger/fabric-ca-server-config/user_cred` -d"]
         ports:
         - containerPort: 7054
+        - containerPort: 9096
         env:
         - name: FABRIC_CA_HOME
           value: /etc/hyperledger/fabric-ca-server
@@ -166,6 +167,12 @@ spec:
           value: /etc/hyperledger/fabric-ca-server-config/server.key
         - name: FABRIC_CA_SERVER_DB_DATASOURCE
           value: /var/hyperledger/fabric-ca-server/db/fabric-ca-server.db
+        - name: FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS
+          value: ":9096"
+        - name: FABRIC_CA_SERVER_OPERATIONS_TLS_ENABLED
+          value: "false"
+        - name: FABRIC_CA_SERVER_METRICS_PROVIDER
+          value: "prometheus"
         volumeMounts:
         - name: certificates
           mountPath: /etc/hyperledger/fabric-ca-server-config

@@ -18,17 +18,17 @@
       shell: |
         export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
-    - no_log: true
+    - no_log: false
       set_fact:
         user_token: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
       when: deploy_action == "mongodb-deploy"
 
-    - no_log: true
+    - no_log: false
       set_fact:
         root_token: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
       when: deploy_action == "mongodb-deploy"
 
-    - no_log: true
+    - no_log: false
       set_fact:
         user: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=16') }}"
       when: deploy_action == "mongodb-deploy"

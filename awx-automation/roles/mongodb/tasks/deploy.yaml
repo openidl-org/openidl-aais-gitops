@@ -29,7 +29,7 @@
     - mongodb
 
 - name: Install mongodb helm chart
-  no_log: true
+  no_log: false
   shell: |
     helm --namespace database install {{ network.org_name }} bitnami/mongodb \
     --set architecture=replicaset \
@@ -58,29 +58,29 @@
     - mongodb-helm-repo
 
 - name: upload mongodb user to aws secrets manager
-  no_log: true
+  no_log: false
   shell: |
-    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
+    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
 
 - name: upload mongodb user token to aws secrets manager
-  no_log: true
+  no_log: false
   shell: |
-    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
+    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
 
 
 - name: upload mongodb root token to aws secrets manager
-  no_log: true
+  no_log: false
   shell: |
-    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
+    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
 
 - name: Add resource policy to the secret created {{ item }}
   shell: |
     export AWS_PROFILE=cicd-role
     aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
   with_items:
-  - "{{ network.org_name[:4] }}-{{ env }}-mongodb-user-token"
-  - "{{ network.org_name[:4] }}-{{ env }}-mongodb-root-token"
-  - "{{ network.org_name[:4] }}-{{ env }}-mongodb-user"
+  - "{{ network.org_name }}-{{ env }}-mongodb-user-token"
+  - "{{ network.org_name }}-{{ env }}-mongodb-root-token"
+  - "{{ network.org_name }}-{{ env }}-mongodb-user"
 
 - name: Delete aws resource policy file
   file:

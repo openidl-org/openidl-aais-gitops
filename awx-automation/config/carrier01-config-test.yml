@@ -1,16 +1,16 @@
-ordererorg_domain: "thetech.digital"
-domain: "cnd.thetech.digital"
-internal_domain: "cnd.internal.thetech.digital"
+ordererorg_domain: "testnet.openidl.org"
+domain: "testnet.openidl.org"
+internal_domain: "cnd.internal.testnet.openidl.org"
 node_type: "carrier"
 network:
   org_name: "cnd"
   ordererorg: "false"
   ordererorg_name: "ordererorg"
   organizations:
-    - name: "analytics"
-      domain: "analytics.thetech.digital"
+    - name: "analytics_test"
+      domain: "analytics_test.testnet.openidl.org"
     - name: "cnd"
-      domain: "cnd.thetech.digital"
+      domain: "cnd.testnet.openidl.org"
   channels:
   - name: defaultchannel
     chaincode:

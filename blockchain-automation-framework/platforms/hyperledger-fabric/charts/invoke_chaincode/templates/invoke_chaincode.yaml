@@ -186,7 +186,7 @@ spec:
         args:
         - |-
           #!/bin/bash sh
-          export ARGS='{"Args":'"'["${INVOKE_ARGUMENTS}"]'"'}'
+          export ARGS="${INVOKE_ARGUMENTS}"
           export qARGS="'${ARGS}'"
 
           touch ./invokeChaincode.sh	
@@ -197,7 +197,19 @@ spec:
             chmod 755 ./invokeChaincode.sh
             sh ./invokeChaincode.sh
           else
-            INVOKE_CMD="peer chaincode invoke -o ${ORDERER_URL} --tls ${CORE_PEER_TLS_ENABLED} --cafile $ORDERER_CA --channelID ${CHANNEL_NAME} --name ${CHAINCODE_NAME} --isInit -c $qARGS"
+            
+            if  $IS_INIT == "true"
+            then
+              export INIT_FLAG=--isInit
+            else
+              export INIT_FLAG=
+            fi
+            if [ "$qARGS" = "''" ]; then
+              export INV_ARGS_PARAM=
+            else
+              export INV_ARGS_PARAM="-c $qARGS"
+            fi
+            INVOKE_CMD="peer chaincode invoke -o ${ORDERER_URL} --tls ${CORE_PEER_TLS_ENABLED} --cafile $ORDERER_CA --channelID ${CHANNEL_NAME} $INIT_FLAG --name ${CHAINCODE_NAME} $INV_ARGS_PARAM"
             
             for item in $ENDORSERS_CORE_PEER_ADDR
             do
@@ -254,6 +266,8 @@ spec:
           value: "{{ $.Values.channel.name }}"
         - name: INVOKE_ARGUMENTS
           value: '{{ $.Values.chaincode.invokearguments }}'
+        - name: IS_INIT
+          value: '{{ $.Values.chaincode.cc_init }}'
         - name: CC_RUNTIME_LANGUAGE
           value: "{{ $.Values.chaincode.lang }}"
         - name: ENDORSEMENT_POLICIES

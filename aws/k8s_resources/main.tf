@@ -1,5 +1,9 @@
-#Active below code snippet when used S3 as backend
-#terraform {
-#  backend "s3" {}
-#}
+terraform {
+  cloud {
+    organization = "openIDL"
 
+    workspaces {
+      name = "testnet-openidl-k8s-resources"
+    }
+  }
+}

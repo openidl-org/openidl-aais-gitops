@@ -8,9 +8,9 @@ metadata:
 spec:
   releaseName: zkkafka-{{ org_name }}-orderer
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/zkkafka    
+    path: {{ charts_dir }}/zkkafka
   values:
     metadata: 
       namespace: {{ namespace }}

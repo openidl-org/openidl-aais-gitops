@@ -226,6 +226,8 @@ spec:
           containerPort: 7051
         - name: events
           containerPort: 7053
+        - name: ops
+          containerPort: 9096
         envFrom:
         - configMapRef:
             name: {{ $.Values.peer.name }}-config

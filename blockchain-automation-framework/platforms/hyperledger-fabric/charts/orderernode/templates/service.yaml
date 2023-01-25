@@ -64,7 +64,11 @@ spec:
     nodePort: {{ $.Values.service.ports.grpc.nodeport }}
     {{- end }}
     name: grpc
-  #{{- if (eq $.Values.service.servicetype "ClusterIP") }}
+  - protocol: TCP
+    targetPort: 7443
+    port: {{ $.Values.service.ports.grpc.web }}
+    name: grpcweb
+    #{{- if (eq $.Values.service.servicetype "ClusterIP") }}
   #clusterIP: None
   #{{- end }}
   
@@ -94,4 +98,26 @@ spec:
             name: {{ $.Values.orderer.name }}
             port:
               number: {{ $.Values.service.ports.grpc.clusteripport }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $.Values.orderer.name }}-grpc-web
+  namespace: {{ $.Values.metadata.namespace }}
+  annotations:
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/backend-protocol: GRPCS
+spec:
+  ingressClassName: nginx-external
+  rules:
+  - host: grpcw.{{ $.Values.orderer.name }}.{{ $.Values.proxy.external_url_suffix }}
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ $.Values.orderer.name }}
+            port:
+              number: {{ $.Values.service.ports.grpc.web }}
 {{ end }}

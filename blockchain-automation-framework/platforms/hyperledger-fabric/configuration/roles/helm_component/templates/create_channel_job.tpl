@@ -8,9 +8,9 @@ metadata:
 spec:
   releaseName: channel-{{ org.name | lower }}-{{ component_name }}
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/create_channel   
+    path: {{ charts_dir }}/create_channel
   values:
     metadata:
       namespace: {{ component_ns }}

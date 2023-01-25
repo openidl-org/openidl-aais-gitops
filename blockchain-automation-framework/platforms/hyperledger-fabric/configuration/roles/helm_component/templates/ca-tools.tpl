@@ -8,7 +8,7 @@ metadata:
 spec:
   releaseName: {{ component_name }}-ca-tools
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
     path: {{ charts_dir }}/catools
   values:

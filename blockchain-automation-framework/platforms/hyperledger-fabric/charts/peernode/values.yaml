@@ -129,6 +129,13 @@ service:
       #Provide a cluster IP port for grpc service to be exposed
       #Eg. clusteripport: 7051
       clusteripport: 7051
+    ops:
+      #Provide a nodeport for grpc service in the range of 30000-32767 (optional)
+      #Eg. nodeport: 30001
+      nodeport:
+      #Provide a cluster IP port for grpc service to be exposed
+      #Eg. clusteripport: 7051
+      clusteripport: 9096
     events:
       #Provide a nodeport for event service in the range of 30000-32767 (optional)
       #Eg. nodeport: 30002

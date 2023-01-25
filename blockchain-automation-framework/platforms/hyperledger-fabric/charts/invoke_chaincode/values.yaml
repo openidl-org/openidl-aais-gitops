@@ -90,6 +90,7 @@ chaincode:
   #Provide the endorsement policies for the chaincode
   #Eg.endorsementpolicies: "OR('Org1MSP.peer', 'Org2MSP.peer')"
   endorsementpolicies:
+  cc_init:
 
 
 channel:

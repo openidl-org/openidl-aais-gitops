@@ -1,0 +1,73 @@
+ordererorg_domain: "openidl.testnet.openidl.org"
+domain: "openidl.testnet.openidl.org"
+internal_domain: "internal.openidl.testnet.openidl.org"
+node_type: "carrier"
+network:
+  org_name: "openidl"
+  ordererorg: "true"
+  ordererorg_name: "ord"
+  organizations:
+    - name: "openidl"
+      domain: "openidl.testnet.openidl.org"
+    - name: "carr1"
+      domain: "carr1.testnet.openidl.org"
+    - name: "carr2"
+      domain: "carr2.testnet.openidl.org"
+    - name: "anlytcs"
+      domain: "anlytcs.testnet.openidl.org"
+    - name: "aais"
+      domain: "aais.testnet.openidl.org"
+  channels:
+  - name: defaultchannel
+    chaincode:
+      name: openidl-cc-default
+      repo_url: github.com/senofi/openidl-main.git
+      repo_branch: develop
+      arguments: '{"Args":[]}'
+      repo_path: openidl-chaincode/chaincode/openidl
+  - name: anlytcs-aais
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/senofi/openidl-main.git
+      repo_branch: develop
+      repo_path: openidl-chaincode/chaincode/openidl
+      arguments: '{"Args":[]}'
+      collectionconfig:
+        - name: "anlytcs_aais_pdc"
+          policy: "OR('anlytcsMSP.member', 'aaisMSP.member')"
+  - name: anlytcs-carr1
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: github.com/senofi/openidl-main.git
+      repo_branch: develop
+      repo_path: openidl-chaincode/chaincode/openidl
+      arguments: '{"Args":[]}'
+      collectionconfig:
+        - name: "anlytcs_carr1_pdc"
+          policy: "OR('anlytcsMSP.member', 'carr1MSP.member')"
+  - name: openidl-health
+    chaincode:
+      name: openidl-cc-aais-carriers
+      repo_url: bitbucket.org/senofi/openidl-openidl-main.git
+      repo_branch: testnet
+      repo_path: openidl-chaincode/chaincode/openidl
+      arguments: '{"Args":[]}'
+      collectionconfig:
+        - name: "anal_cnd_pdc"
+          policy: "OR('analyticsMSP.member', 'cndMSP.member')"
+
+  - name: openidl-playground
+    chaincode:
+      name: openidl-test-fabcar
+      repo_url: github.com/hyperledger/fabric-samples.git
+      repo_branch: release-2.2
+      repo_path: asset-transfer-basic/chaincode-go
+      arguments: '{"function":"CreateAsset","Args":["asset2","blue","12","Org1User1","120"]}'
+      
+  - name: test-carr1-anlytcs-private
+    chaincode:
+      name: openidl-test-fabcar
+      repo_url: github.com/hyperledger/fabric-samples.git
+      repo_branch: release-2.2
+      repo_path: asset-transfer-basic/chaincode-go
+      arguments: '{"function":"CreateAsset","Args":["asset2","blue","12","Org1User1","120"]}'

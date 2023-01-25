@@ -40,7 +40,7 @@
     kubectl -n vault create configmap pre-register-users-script --from-file=pre-register-users.sh=./pre-register-users.sh
 
 - name: Create secret for credentials
-  no_log: true
+  no_log: false
   community.kubernetes.k8s:
     state: present
     definition: 
@@ -57,7 +57,7 @@
         VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
 
 - name: Launch Pod for pre-register-users
-  no_log: true
+  no_log: false
   community.kubernetes.k8s:
     state: present
     definition:
@@ -146,20 +146,20 @@
 #- name: delete ca user token to aws secrets manager
 #  shell: |
 #    export AWS_PROFILE=cicd-role
-#    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-ca-app-user-token --region {{ aws_region }} --force-delete-without-recovery
+#    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token --region {{ aws_region }} --force-delete-without-recovery
 #  ignore_errors: yes
 
 - name: upload ca user token to aws secrets manager
-  no_log: true
+  no_log: false
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-ca-app-user-token --description "Ca App User token" --secret-string {{ ca_user_token }} --region {{ aws_region }}
+    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-ca-app-user-token --description "Ca App User token" --secret-string {{ ca_user_token }} --region {{ aws_region }}
   when: ca_user_token_status == "null"
 
-- name: Add resource policy to the secret created {{ network.org_name[:4] }}-{{ env }}-ca-app-user-token
+- name: Add resource policy to the secret created {{ network.org_name }}-{{ env }}-ca-app-user-token
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager put-resource-policy --secret-id {{ network.org_name[:4] }}-{{ env }}-ca-app-user-token --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
+    aws secretsmanager put-resource-policy --secret-id {{ network.org_name }}-{{ env }}-ca-app-user-token --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
   when: ca_user_token_status == "null"
 
 - name: Delete user script pod

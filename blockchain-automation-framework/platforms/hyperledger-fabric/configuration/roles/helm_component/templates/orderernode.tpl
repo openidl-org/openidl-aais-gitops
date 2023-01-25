@@ -8,7 +8,7 @@ metadata:
 spec:
   releaseName: {{ org_name }}-{{ orderer.name }}
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
     path: {{ charts_dir }}/orderernode
   values:

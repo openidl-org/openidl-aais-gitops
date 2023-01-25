@@ -67,6 +67,13 @@ spec:
   selector:
     app: {{ $.Values.peer.name }}
   ports:
+  - name: ops
+    protocol: TCP
+    targetPort: 9096
+    port: {{ $.Values.service.ports.ops.clusteripport }}
+    {{- if $.Values.service.ports.ops.nodeport }}
+    nodePort: {{ $.Values.service.ports.ops.nodeport }}
+    {{- end }}
   - name: grpc
     protocol: TCP
     targetPort: 7051

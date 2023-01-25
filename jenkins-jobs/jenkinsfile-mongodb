@@ -24,11 +24,6 @@ pipeline {
                     currentBuild.displayName = "${params.org_name} - ${params.env} - ${params.deploy_action}"
                     buildType = "${params.deploy_action}"
                     length = params.org_name.length()
-                    if( length <= 4) {
-                        org = params.org_name.substring(0,length)
-                    } else {
-                    org = params.org_name.substring(0,4)
-                    }
                     mongoDB(buildType)
                 }
             }
@@ -50,14 +45,14 @@ def mongoDB(thestage){
                 towerServer: 'AWX',
                 towerCredentialsId: 'AWX',
                 templateType: 'job',
-                jobTemplate: "${params.jobPrefix}${org}-${params.env}-openidl-mongodb",
+                jobTemplate: "${params.jobPrefix}${params.org_name}-${params.env}-openidl-mongodb",
                 jobType: "run",
                 towerLogLevel: 'full',
                 removeColor: false,
                 async: false,
                 importTowerLogs: true,
                 extraVars: """---
-                org_name: '${org}'
+                org_name: '${params.org_name}'
                 env: '${params.env}'
                 network:
                     org_name: '${params.org_name}'

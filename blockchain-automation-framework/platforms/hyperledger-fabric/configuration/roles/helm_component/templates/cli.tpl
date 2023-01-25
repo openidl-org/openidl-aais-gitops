@@ -8,9 +8,9 @@ metadata:
 spec:
   releaseName: {{ component_name }}
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/fabric_cli    
+    path: {{ charts_dir }}/fabric_cli
   values:
     metadata:
       namespace: {{ component_ns }}

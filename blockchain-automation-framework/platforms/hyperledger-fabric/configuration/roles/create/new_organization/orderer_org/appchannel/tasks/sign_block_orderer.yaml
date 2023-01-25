@@ -22,6 +22,7 @@
     component_name: "cli-{{ channel_name }}-{{ org.name }}-{{ orderer.name }}"
     orderer_name: "{{ orderer.name }}"
     git_url: "{{ org.gitops.git_url }}"
+    gitops: "{{ org.gitops }}"
     git_branch: "{{ org.gitops.branch }}"
     charts_dir: "{{ org.gitops.chart_source }}"
     vault: "{{ org.vault }}"    

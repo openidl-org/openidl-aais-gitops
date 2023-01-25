@@ -336,7 +336,7 @@ network:
               url: "{{ channellist.chaincode.repo_url }}"
               branch: "{{ channellist.chaincode.repo_branch }}"
               path: "{{ channellist.chaincode.repo_path }}"   #The path to the chaincode 
-            arguments: '' #Arguments to be passed along with the chaincode parameters
+            arguments: '{{ channellist.chaincode.arguments }}' #Arguments to be passed along with the chaincode parameters
             endorsements: "" #Endorsements (if any) provided along with the chaincode
 {% if channellist.chaincode.collectionconfig is defined %}
             collectionconfig:

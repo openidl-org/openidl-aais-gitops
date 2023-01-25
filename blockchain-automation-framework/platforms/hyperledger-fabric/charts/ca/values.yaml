@@ -82,6 +82,13 @@ service:
       #Provide tcp cluster IP port to be exposed for ca server
       #Eg. clusteripport: 7054
       clusteripport: 7054
+    ops:
+      #Provide ops node port to be exposed for ca server
+      #Eg. nodeport: 30007
+      nodeport:
+      #Provide ops cluster IP port to be exposed for ca server
+      #Eg. clusteripport: 9096
+      clusteripport: 9096
 
 annotations:
   #Extra annotations wanted

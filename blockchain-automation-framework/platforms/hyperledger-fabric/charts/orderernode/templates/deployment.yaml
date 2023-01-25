@@ -229,6 +229,50 @@ spec:
         - name: certificates
           mountPath: /var/hyperledger/orderer/crypto
           readOnly: true
+      - name: proxy
+        image: ghcr.io/hyperledger-labs/grpc-web:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 7443
+          name: https
+        volumeMounts:
+        - name: certificates
+          mountPath: /certs
+          readOnly: true
+        env:
+        - name: LICENSE
+          value: accept
+        - name: BACKEND_ADDRESS
+          value: 127.0.0.1:7050
+        - name: SERVER_TLS_CERT_FILE
+          value: /certs/tls/server.crt
+        - name: SERVER_TLS_KEY_FILE
+          value: /certs/tls/server.key
+        - name: SERVER_TLS_CLIENT_CA_FILES
+          value: /certs/msp/ca.crt
+        - name: SERVER_BIND_ADDRESS
+          value: 0.0.0.0
+        - name: SERVER_HTTP_DEBUG_PORT
+          value: "8080"
+        - name: SERVER_HTTP_TLS_PORT
+          value: "7443"
+        - name: BACKEND_TLS
+          value: "true"
+        - name: SERVER_HTTP_MAX_WRITE_TIMEOUT
+          value: 5m
+        - name: SERVER_HTTP_MAX_READ_TIMEOUT
+          value: 5m
+        - name: USE_WEBSOCKETS
+          value: "true"
+        - name: EXTERNAL_ADDRESS
+          value: {{ $.Values.orderer.name }}.{{ $.Values.metadata.namespace }}:8443
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 26
+          periodSeconds: 5
+          timeoutSeconds: 5
   volumeClaimTemplates:
   #Lables are not being taken by Kubernetes as it dynamically creates PVC
   - metadata:

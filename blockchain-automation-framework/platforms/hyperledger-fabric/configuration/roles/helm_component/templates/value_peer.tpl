@@ -8,9 +8,9 @@ metadata:
 spec:
   releaseName: {{ name }}-{{ peer_name }}
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/peernode    
+    path: {{ charts_dir }}/peernode
   values:
     metadata:
       namespace: {{ peer_ns }}

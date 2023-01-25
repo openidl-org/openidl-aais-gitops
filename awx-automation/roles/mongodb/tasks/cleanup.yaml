@@ -2,9 +2,9 @@
 - name: delete vault secrets from aws secret manager
   shell: |
     export AWS_PROFILE=cicd-role
-    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-mongodb-user --force-delete-without-recovery
-    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-mongodb-user-token --force-delete-without-recovery
-    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-mongodb-root-token --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-user --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-user-token --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-root-token --force-delete-without-recovery
   register: output
   ignore_errors: yes
 

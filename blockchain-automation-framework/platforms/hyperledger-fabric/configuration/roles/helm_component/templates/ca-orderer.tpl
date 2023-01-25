@@ -8,9 +8,9 @@ metadata:
 spec:
   releaseName: {{ component_name }}-ca
   chart:
-    git: {{ git_url }}
+    git: {{ git_flux_url }}
     ref: {{ git_branch }}
-    path: {{ charts_dir }}/ca    
+    path: {{ charts_dir }}/ca
   values:
 {% if network.env.annotations is defined %}
     deployment:

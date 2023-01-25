@@ -70,6 +70,21 @@
     when: add_new_org == 'false' and '2.2.' in network.version    
     tags:
       - commit
+
+  # This task invokes chaincode after the chaincode has been commited in v2 and
+  # after chaincode installation for the new organization to be added in existing network
+  - name: Initialize the chaincode
+    include_role:
+      name: "create/chaincode/invoke"
+    vars:
+      participants: "{{ item.participants }}"
+      docker_url: "{{ network.docker.url }}"
+      approvers: "{{ item.endorsers | default(' ', true) }}"
+      cc_init: "true"
+    loop: "{{ network['channels'] }}"
+    when: add_new_org == 'true' or '2.2.' in network.version    
+    tags:
+      - initialize
       
   # This task invokes chaincode after the chaincode has been commited in v2 and
   # after chaincode installation for the new organization to be added in existing network
@@ -80,6 +95,7 @@
       participants: "{{ item.participants }}"
       docker_url: "{{ network.docker.url }}"
       approvers: "{{ item.endorsers | default(' ', true) }}"
+      cc_init: "false"
     loop: "{{ network['channels'] }}"
     when: add_new_org == 'true' or '2.2.' in network.version    
     tags:

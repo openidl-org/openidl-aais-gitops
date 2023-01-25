@@ -28,7 +28,7 @@
 
 - name: Install vault helm chart
   shell: |
-    helm --namespace=vault install vault hashicorp/vault -f ./vault-values.yaml \
+    helm upgrade --install --namespace=vault vault hashicorp/vault -f ./vault-values.yaml \
     --set server.ha.enabled=true \
     --set server.ha.raft.enabled=true \
     --set tlsDisable=false \
@@ -47,12 +47,12 @@
     sleep 60
 
 - name: Initialize and unseal the vault
-  no_log: true
+  no_log: false
   shell: |
     kubectl -n vault exec vault-0 -- vault operator init > ./vault-unseal-keys.txt
 
 - name: Get the vault-unseal-key from the server
-  no_log: true
+  no_log: false
   slurp:
     src: "./vault-unseal-keys.txt"
   register: unsealkey
@@ -63,7 +63,7 @@
 #   ignore_errors: yes
 
 - name: upload Vault unseal keys to aws secrets manager
-  no_log: true
+  no_log: false
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-vault-unseal-key --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
 
@@ -80,13 +80,13 @@
   shell: sleep 120
 
 - name: Create secret path for org
-  no_log: true
+  no_log: false
   shell: |
     kubectl -n vault exec vault-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
     kubectl -n vault exec vault-0 -- vault secrets enable -version=1 -path={{ network.org_name }} kv
 
 - name: Create secret path for orderer org
-  no_log: true
+  no_log: false
   shell: |
     kubectl -n vault exec vault-0 -- vault secrets enable -version=1 -path={{ network.ordererorg_name }} kv
   when: network.ordererorg == "true"
@@ -110,7 +110,7 @@
     kubectl -n vault create configmap add-vault-user-script --from-file=add-vault-user.sh=./add-vault-user.sh
 
 - name: Create secret for credentials
-  no_log: true
+  no_log: false
   community.kubernetes.k8s:
     state: present
     definition: 
@@ -128,7 +128,7 @@
         VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
 
 - name: Launch Pod for vault user
-  no_log: true
+  no_log: false
   community.kubernetes.k8s:
     state: present
     definition:
@@ -216,7 +216,7 @@
     msg: '{{ baf_logs.stdout_lines }}'
 
 - name: Generate user credentials json
-  no_log: true
+  no_log: false
   template:
     src: templates/creds.json.j2
     dest: ./creds.json
@@ -232,7 +232,7 @@
 #   ignore_errors: yes
 
 - name: Upload config user credentials to secrets manager
-  no_log: true
+  no_log: false
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-config-vault --description "Vault Credentials for config user" --secret-string file://creds.json
 
@@ -246,7 +246,7 @@
     path: ./creds.json
 
 - name: Generate user credentials json
-  no_log: true
+  no_log: false
   template:
     src: templates/creds.json.j2
     dest: ./creds.json
@@ -262,7 +262,7 @@
 #   ignore_errors: yes
 
 - name: Upload kvs user credentials to secrets manager
-  no_log: true
+  no_log: false
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-kvs-vault --description "Vault Credentials for kvs user" --secret-string file://creds.json
 

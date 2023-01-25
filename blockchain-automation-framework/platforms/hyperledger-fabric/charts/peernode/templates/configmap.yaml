@@ -36,6 +36,9 @@ data:
   CORE_PEER_GOSSIP_SKIPHANDSHAKE: "true"
   CORE_CHAINCODE_BUILDER: "{{ $.Values.peer.builder }}"
   CORE_VM_DOCKER_ATTACHSTDOUT: "true"
+  CORE_METRICS_PROVIDER: "prometheus"
+  CORE_OPERATIONS_LISTENADDRESS: ":9096"
+  CORE_OPERATIONS_TLS_ENABLED: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

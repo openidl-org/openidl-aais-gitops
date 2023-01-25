@@ -3,7 +3,7 @@ locals {
   terraform_user_name = split("/", var.aws_user_arn)
   terraform_role_name = split("/", var.aws_role_arn)
 
-  std_name          = "${substr(var.org_name,0,4)}-${var.aws_env}"
+  std_name          = "${var.org_name}-${var.aws_env}"
   policy_arn_prefix = "arn:aws:iam::aws:policy"
 
   tags = merge(var.custom_tags, {

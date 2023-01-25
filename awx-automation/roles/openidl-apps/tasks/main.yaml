@@ -17,7 +17,7 @@
     state: present
 
 - name: Download git repository content
-  no_log: true
+  no_log: false
   shell: |
     git clone https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl-code
   # git:
