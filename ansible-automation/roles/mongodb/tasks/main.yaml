@@ -1,4 +1,10 @@
 ---
+- name: Generate aws resource policy from template aws_resource_policy.json.j2
+  template:
+    src: templates/aws_resource_policy.json.j2
+    dest: "./aws_resource_policy.json"
+    mode: 0755
+
 - name: Create a k8s namespace
   community.kubernetes.k8s:
     name: database
@@ -23,6 +29,7 @@
     - mongodb
 
 - name: Install mongodb helm chart
+  no_log: true
   shell: |
     helm --namespace database install {{ network.org_name }} bitnami/mongodb \
     --set architecture=replicaset \
@@ -66,13 +73,29 @@
 #   ignore_errors: yes
 
 - name: upload mongodb user to aws secrets manager
+  no_log: true
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
 
 - name: upload mongodb user token to aws secrets manager
+  no_log: true
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
 
 - name: upload mongodb root token to aws secrets manager
+  no_log: true
   shell: |
     aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
+
+- name: Add resource policy to the secret created {{ item }}
+  shell: |
+    aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --block-public-policy
+  with_items:
+  - "{{ network.org_name }}-{{ env }}-mongodb-user-token"
+  - "{{ network.org_name }}-{{ env }}-mongodb-root-token"
+  - "{{ network.org_name }}-{{ env }}-mongodb-user"
+
+- name: Delete aws resource policy file
+  file:
+    state: absent
+    path: ./aws_resources_policy.json

@@ -1,4 +1,4 @@
-#aws environment definition variables
+#AWS environment definition variables
 variable "aws_region" {
   default     = "us-east-2"
   type        = string
@@ -28,7 +28,7 @@ variable "aws_role_arn" {
   type        = string
   description = "The iam role which will have access to s3 bucket and kms key"
 }
-#variables related to VPC
+#Variables related to VPC
 variable "default_nacl_rules" {
   type        = map(any)
   description = "The list of default access rules to be allowed"
@@ -39,131 +39,54 @@ variable "default_sg_rules" {
   description = "The list of default traffic flow to be opened in security group"
   default = {ingress=[{}],egress=[{}]}
 }
-variable "app_vpc_cidr" {
+variable "vpc_cidr" {
   description = "The VPC network CIDR Block to be created"
+  default = ""
+  validation {
+    condition = var.vpc_cidr != "172.17.0.0/16"
+    error_message = "Docker runs in the 172.17.0.0/16 CIDR range in Amazon EKS clusters. We recommend that your cluster's VPC subnets do not overlap this range to avoid network traffic routing issues."
+  }
 }
-variable "app_availability_zones" {
+variable "availability_zones" {
   type        = list(string)
   description = "The list of availability zones aligning to the numbers with public/private subnets defined"
+  default = []
 }
-variable "app_private_subnets" {
+variable "private_subnets" {
   type        = list(string)
   description = "The list of private subnet cidrs to be created"
+  default = []
 }
-variable "app_public_subnets" {
+variable "public_subnets" {
   type        = list(string)
   description = "The list of public subnet cidrs to be created"
+  default = []
 }
-variable "app_public_nacl_rules" {
+variable "public_nacl_rules" {
   type        = map(any)
   description = "The list of network access rules to be allowed for public subnets"
   default     = { inbound = [{}], outbound = [{}] }
 }
-variable "app_private_nacl_rules" {
+variable "private_nacl_rules" {
   type        = map(any)
   description = "The list of network access rules to be allowed for private subnets"
   default     = { inbound = [{}], outbound = [{}] }
 }
-variable "blk_vpc_cidr" {
-  description = "The VPC network CIDR Block to be created"
-}
-variable "blk_availability_zones" {
-  type        = list(string)
-  description = "The list of availability zones aligning to the numbers with public/private subnets defined"
-}
-variable "blk_private_subnets" {
-  type        = list(string)
-  description = "The list of private subnet cidrs to be created"
-}
-variable "blk_public_subnets" {
-  type        = list(string)
-  description = "The list of public subnet cidrs to be created"
-}
-variable "blk_public_nacl_rules" {
-  type        = map(any)
-  description = "The list of network access rules to be allowed for public subnets"
-  default     = { inbound = [{}], outbound = [{}] }
-}
-variable "blk_private_nacl_rules" {
-  type        = map(any)
-  description = "The list of network access rules to be allowed for private subnets"
-  default     = { inbound = [{}], outbound = [{}] }
-}
-#variables related to transit gateway
-variable "app_tgw_routes" {
-  type        = list(any)
-  description = "The list of network routes to be allowed/blocked in the transit gateway route table"
-  default     = []
-}
-variable "blk_tgw_routes" {
-  type        = list(any)
-  description = "The list of network routes to be allowed/blocked in the transit gateway route table"
-  default     = []
-}
-variable "app_tgw_destination_cidr" {
-  type        = list(any)
-  default     = []
-  description = "The list of network routes to route via transit gateway"
-}
-variable "blk_tgw_destination_cidr" {
-  type        = list(any)
-  default     = []
-  description = "The list of network routes to route via transit gateway"
-}
-variable "tgw_amazon_side_asn" {
-  type        = string
-  description = "The amazon side asn for the transit gateway"
-}
-#bastion host related
-variable "app_bastion_sg_ingress" {
+#Bastion host related
+variable "bastion_sg_ingress" {
   type        = list(any)
   default     = []
   description = "The list of traffic rules to be allowed for ingress"
 }
-variable "app_bastion_sg_egress" {
+variable "bastion_sg_egress" {
   type        = list(any)
   default     = []
   description = "The list of traffic rules to be allowed for egress"
 }
-variable "blk_bastion_sg_ingress" {
-  type        = list(any)
-  default     = []
-  description = "The list of traffic rules to be allowed for ingress"
-}
-variable "blk_bastion_sg_egress" {
-  type        = list(any)
-  default     = []
-  description = "The list of traffic rules to be allowed for egress"
-}
-variable "app_bastion_ssh_key" {
+variable "bastion_ssh_key" {
   type        = string
   description = "The public ssh key to setup on the bastion host for remote ssh access"
-}
-variable "blk_bastion_ssh_key" {
-  type        = string
-  description = "The public ssh key to setup on the bastion host for remote ssh access"
-}
-variable "bastion_host_nlb_external" {
-  type = bool
-  description = "Do you want to set nlb for the bastion hosts in autoscaling group to be external"
-}
-#app cluster (eks) worker nodes application traffic specific SG
-variable "app_eks_workers_app_sg_ingress" {
-  type        = list(any)
-  description = "The ingress rules of the application specific traffic to be allowed to worker nodes of app cluster"
-}
-variable "app_eks_workers_app_sg_egress" {
-  type        = list(any)
-  description = "The egress rules of the application specific traffic to be allowed to worker nodes of app cluster"
-}
-#blk cluster (eks) worker nodes application traffic specific SG
-variable "blk_eks_workers_app_sg_ingress" {
-  type        = list(any)
-  description = "The ingress rules of the application specific traffic to be allowed to worker nodes of blk cluster"
-}
-variable "blk_eks_workers_app_sg_egress" {
-  type        = list(any)
-  description = "The egress rules of the application specific traffic to be allowed to worker nodes of blk cluster"
+  default = ""
 }
 variable "instance_type" {
   description = "The instance type of the bastion host"
@@ -196,8 +119,8 @@ variable "root_block_device_volume_type" {
 variable "root_block_device_volume_size" {
   description = "root_block_device volume Size"
 }
-#aws cognito variables
-#aws cognito application client specific variables
+#AWS cognito variables
+#AWS cognito application client specific variables
 variable "client_app_name" {
   type        = string
   description = "The name of the application client"
@@ -294,7 +217,7 @@ variable "email_sending_account" {
   type        = string
   description = "The email sending account type. COGNITO_DEFAULT | DEVELOPER"
 }
-#aws cognito domain (default/custom) specific variables
+#AWS cognito domain (default/custom) specific variables
 variable "cognito_domain" {
   type        = string
   description = "The cognito or custom domain to be used"
@@ -305,7 +228,7 @@ variable "acm_cert_arn" {
   description = "The acm certificate arn of the custom domain"
   default     = ""
 }
-#aws cognito user pool specific variables
+#AWS cognito user pool specific variables
 variable "userpool_recovery_mechanisms" {
   description = "The list of Account Recovery Options"
   type        = list(any)
@@ -314,7 +237,7 @@ variable "userpool_recovery_mechanisms" {
 variable "userpool_allow_admin_create_user_only" {
   type        = bool
   description = "Is the administrator allowed to create user profiles or users can sign themselves via app"
-  default     = false
+  default     = true
 }
 variable "userpool_alais_attributes" {
   type        = list(string)
@@ -429,6 +352,7 @@ variable "domain_info" {
   default     = {}
 }
 #-------------------------------------------------------------------------------------------------------------------
+#EKS cluster related
 variable "app_cluster_name" {
   description = "The name of application cluster (eks)"
   type        = string
@@ -447,8 +371,12 @@ variable "blk_cluster_version" {
   type        = string
   default     = "1.19"
 }
-variable "eks_worker_instance_type" {
-  description = "The eks cluster worker node instance type"
+variable "app_eks_worker_instance_type" {
+  description = "The app eks cluster worker node instance type"
+  type        = string
+}
+variable "blk_eks_worker_instance_type" {
+  description = "The blk eks cluster worker node instance type"
   type        = string
 }
 variable "tenancy" {
@@ -566,28 +494,18 @@ variable "eks_wg_root_volume_size" {
 variable "eks_wg_root_volume_type" {
   description = "Type of root volume"
 }
-variable "eks_wg_block_device_name" {
-  description = "EBS volume device name"
-}
-variable "eks_wg_ebs_volume_size" {
-  description = "Whether to enable pubic IP address for worker groups"
-}
-variable "eks_wg_ebs_volume_type" {
-  description = "Type of EBS volume"
-}
-variable "eks_wg_ebs_vol_encrypted" {
-  description = "Whether to enable encryption for EBS volume"
-}
 variable "eks_wg_health_check_type" {
   description = "Type of Health check for worker group"
 }
 variable "app_eks_worker_nodes_ssh_key" {
   type        = string
   description = "The ssh public key to setup on worker nodes in app cluster eks for remote access"
+  default = ""
 }
 variable "blk_eks_worker_nodes_ssh_key" {
   type        = string
   description = "The ssh public key to setup on worker nodes in blk cluster eks for remote access"
+  default = ""
 }
 variable "app_cluster_map_roles" {
   type        = list(any)
@@ -610,25 +528,47 @@ variable "blk_cluster_map_users" {
   default     = []
 }
 #-------------------------------------------------------------------------------------------------------------------
-#cloudtrail related
+#Logs retention related
 variable "cw_logs_retention_period" {
   type        = number
   description = "The number of days to retain cloudwatch logs related to cloudtrail events"
+  default = 90
 }
+#-------------------------------------------------------------------------------------------------------------------
+#Cloudtrail related
 variable "s3_bucket_name_cloudtrail" {
   type        = string
   description = "The name of s3 bucket to store the cloudtrail logs"
+  default = ""
 }
+#-------------------------------------------------------------------------------------------------------------------
+#Org name related
 variable "org_name" {
   type = string
   description = "The name of the organization"
   default = ""
 }
+#-------------------------------------------------------------------------------------------------------------------
+#S3 as backend related 
 variable "terraform_state_s3_bucket_name" {
   type = string
   description = "The name of the s3 bucket will manage terraform state files"
   default = ""
 }
+#-------------------------------------------------------------------------------------------------------------------
+#Terraform cloud/enterprise as backend related 
+variable "tfc_workspace_name_aws_resources" {
+  type = string
+  description = "The terraform cloud workspace of AWS resources provisioned"
+  default = ""
+}
+variable "tfc_org_name" {
+  type = string
+  description = "The terraform cloud organisation name"
+  default = ""
+}
+#-------------------------------------------------------------------------------------------------------------------
+#EKS related 
 variable "app_worker_nodes_ami_id" {
   type = string
   description = "The AMI id of the app cluster worker nodes"
@@ -639,11 +579,153 @@ variable "blk_worker_nodes_ami_id" {
   description = "The AMI id of the blk cluster worker nodes"
   default = ""
 }
+#-------------------------------------------------------------------------------------------------------------------
+#AWS access related 
+variable "aws_access_key" {
+  type = string
+  default = ""
+  description = "IAM user access key"
+}
+variable "aws_secret_key" {
+  type = string
+  default = ""
+  description = "IAM user secret key"
+}
+variable "aws_external_id" {
+  type = string
+  default = "terraform"
+  description = "External Id setup while setting up IAM user and and its relevant roles"
+}
+#-------------------------------------------------------------------------------------------------------------------
+#S3 related 
 variable "s3_bucket_name_hds_analytics" {
   type = string
   description = "The name of s3 bucket for reporting relevant only to carrier and analytics node"
+  default = ""
 }
 variable "s3_bucket_name_logos" {
   type = string
   description = "The name of s3 bucket used to manage logos (public s3 bucket)"
+  default = ""
+}
+variable "s3_bucket_name_access_logs" {
+  type = string
+  description = "The name of s3 bucket used to access logs of s3 buckets"
+  default = ""
+}
+variable "s3_bucket_names_etl" {
+  type = map(any)
+  description = "The name of s3 buckets used for IDM-ETL functions"
+  default = {idm-loader: "", intake: "", failure: ""}
+}
+#-------------------------------------------------------------------------------------------------------------------
+#Resource choice related
+variable "create_bastion_host" {
+  type = bool
+  default = true
+  description = "Determines whether to create bastion host in the VPC network"
+}
+variable "create_cloudtrail" {
+  type = bool
+  default = true
+  description = "Determines whether to enable cloudtrial"
+}
+variable "create_cognito_userpool" {
+  type = bool
+  default = true
+  description = "Determines whether to create cognito userpool"
+}
+variable "create_s3_bucket_public" {
+  type = bool
+  default = true
+  description = "Determines whether to create public s3 bucket to manage logos"
+}
+variable "create_vpc" {
+  type = bool
+  default = true
+  description = "Determines whether to create vpc or use existing vpc"
+}
+variable "create_kms_keys" {
+  type = bool
+  default = "true"
+  description = "Determine whether KMS keys are required to create"
+}
+#-------------------------------------------------------------------------------------------------------------------
+#KMS key related 
+variable "s3_kms_key_arn" {
+  type = string
+  default = ""
+  description ="KMS Key arn to be used for S3 buckets"
+}
+variable "eks_kms_key_arn" {
+  type = string
+  default = ""
+  description = "KMS Key arn to be used for EKS related cloudwatch logs group"
+}
+variable "cloudtrail_cw_logs_kms_key_arn" {
+  type = string
+  default = ""
+  description = "KMS Key arn to be used for EKS related cloudwatch logs group"
+}
+variable "vpc_flow_logs_kms_key_arn" {
+  type = string
+  default = ""
+  description = "KMS Key arn to be used for VPC flow logs related cloudwatch logs group"
+}
+variable "secrets_manager_kms_key_arn" {
+  type = string
+  default = ""
+  description = "KMS Key arn to be used for VPC flow logs related cloudwatch logs group"
+}
+variable "dynamodb_kms_key_arn" {
+  type = string
+  default = ""
+  description = "KMS key arnt o be used to encrypt DynamoDB table related to ETL function"
+}
+#-------------------------------------------------------------------------------------------------------------------
+#Existing VPC related 
+variable "vpc_id" {
+  type = string
+  default = ""
+  description = "Existing VPC ID to use"
+}
+#-------------------------------------------------------------------------------------------------------------------
+#Custom tags related 
+variable "custom_tags" {
+  type = map
+  default = {}
+  description ="List of custom tags to include"
+}
+#-------------------------------------------------------------------------------------------------------------------
+#SNS notification subscription - email list
+variable "sns_subscription_email_ids" {
+  type=list
+  description = "The list of email ids to subscribe for SNS notifications related to ETL-IDM"
+  default = []
+}
+variable "api_username" {
+  type = string
+  description = "The OpenIDL API username that will be used by lambda function to run ETL-IDM"
+}
+variable "api_user_password" {
+  type = string
+  description = "The OpenIDL API user password that will be used by lambda function to run ETL-IDM"
+}
+variable "carrier_id" {
+  type = string
+  description = "The Carrier ID of the node"
+}
+variable "state" {
+  type = string
+  description = "The state that this node belongs to"
+}
+variable "s3_bucket_name_upload_ui" {
+  type = string
+  description = "S3 bucket name to be used to host openidl UI static web content"
+}
+#-----------------------------------------------------------------------------------
+variable "s3_bucket_name_reporting" {
+  type = string
+  default = ""
+  description = "S3 bucket name to be used for reporting"
 }

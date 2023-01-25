@@ -1,5 +1,0 @@
-{
-  "accessKeyId": "${AWS_COGNITO_ACCESS_KEY_ID}",
-  "secretAccessKey": "${AWS_COGNITO_SECRET_ACCESS_KEY}",
-  "region": "${AWS_COGNITO_REGION}"
-}

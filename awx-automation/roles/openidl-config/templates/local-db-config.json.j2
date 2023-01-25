@@ -1,0 +1,5 @@
+{
+    "mongodb": "openidl-offchain-db",
+    "persistentStore": "mongo",
+    "simpleURI": "mongodb://{{ mongo_user }}:{{ mongo_user_token }}@{{ network.org_name }}-mongodb-0.{{ network.org_name }}-mongodb-headless.database.svc.cluster.local:27017,{{ network.org_name }}-mongodb-1.{{ network.org_name }}-mongodb-headless.database.svc.cluster.local:27017,{{ network.org_name }}-mongodb-2.{{ network.org_name }}-mongodb-headless.database.svc.cluster.local:27017/openidl-offchain-db?authSource=openidl-offchain-db"
+}

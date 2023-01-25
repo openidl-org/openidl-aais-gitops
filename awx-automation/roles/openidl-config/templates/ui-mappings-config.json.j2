@@ -1,0 +1,22 @@
+{
+    "data-call-app-url": {
+        "env": "DATA_CALL_APP_URL",
+        "value": "https://data-call-app-service.{{ env }}.{{ domain }}/openidl/api"
+    },
+    "idp-credentials": {
+        "env": "IDP_CONFIG",
+        "file": "local-cognito-config.json"
+    },
+    "log-level": {
+        "env": "LOG_LEVEL",
+        "value": "debug"
+    },
+    "port": {
+        "env": "PORT",
+        "value": "8080"
+    },
+    "icon-bucket-url": {
+		"value": "https://{{ org_name }}-{{ env }}-openidl-publicicons.s3.{{ aws_region }}.amazonaws.com/",
+		"env": "ICON_BUCKET_URL"
+	}
+}

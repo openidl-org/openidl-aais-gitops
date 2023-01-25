@@ -1,0 +1,25 @@
+---
+- name: delete vault secrets from aws secret manager
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-vault-unseal-key --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-config-vault --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name[:4] }}-{{ env }}-kvs-vault --force-delete-without-recovery
+  register: output
+  ignore_errors: yes
+    
+- name: delete vault helm install
+  shell: |
+    helm -n vault delete vault
+  register: vault
+
+- debug:
+    msg: "{{ vault }}"
+
+- name: delete vault namespace
+  community.kubernetes.k8s:
+   name: vault
+   api_version: v1
+   kind: Namespace
+   state: absent
+   wait: yes

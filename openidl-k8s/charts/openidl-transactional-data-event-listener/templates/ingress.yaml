@@ -1,15 +1,15 @@
 {{- if .Values.global.transactionaldataeventlistener.install }}
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.global.transactionaldataeventlistener.ingressenabled -}}
 {{- $fullName := include "openidl-transactional-data-event-listener.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 {{- else -}}
 apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: transactional-data-event-listener-ingress
   labels:
     {{- include "openidl-transactional-data-event-listener.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -17,27 +17,23 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.ingress.tls }}
+  {{- if .Values.global.transactionaldataeventlistener.ingressenabled }}
   tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
+  - hosts:
+    - {{ .Values.global.transactionaldataeventlistener.ingresshostname }}
+    secretName: transactional-data-event-listener-tls
   {{- end }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ .Values.global.transactionaldataeventlistener.ingresshostname }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
+          - path: /
+            pathType: Prefix
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ $svcPort }}
-          {{- end }}
-    {{- end }}
-  {{- end }}
+              service:
+                name: {{ .Values.global.transactionaldataeventlistener.servicename }}
+                port:
+                  number: {{ .Values.global.transactionaldataeventlistener.port }}
+{{- end }}
 {{- end }}

@@ -1,0 +1,88 @@
+---
+- name: Generate aws resource policy from template aws_resource_policy.json.j2
+  template:
+    src: templates/aws_resource_policy.json.j2
+    dest: ./aws_resource_policy.json
+    mode: 0755
+
+- name: Create a k8s namespace
+  community.kubernetes.k8s:
+    name: database
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Create a openidl k8s namespace
+  community.kubernetes.k8s:
+    name: openidl
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: mongodb Helm chart repo
+  shell: |
+    helm repo add bitnami https://charts.bitnami.com/bitnami
+    helm repo update
+  tags:
+    - mongodb
+    - mongodb-helm
+    - mongodb
+
+- name: Install mongodb helm chart
+  no_log: true
+  shell: |
+    helm --namespace database install {{ network.org_name }} bitnami/mongodb \
+    --set architecture=replicaset \
+    --set useStatefulSet=true \
+    --set auth.enabled=true \
+    --set auth.rootPassword="{{ mongodb_root_token }}" \
+    --set auth.username="{{ mongodb_user }}" \
+    --set auth.password="{{ mongodb_user_token }}" \
+    --set auth.database="{{ mongodb_database }}" \
+    --set persistence.enabled=true \
+    --set persistence.size=20Gi \
+    --set persistence.mountPath="/bitnami/mongodb" \
+    --set persistence.storageClass="openidl-sc" \
+    --set serviceAccount.create=true \
+    --set serviceAccount.name="{{ network.org_name }}mongodbsvcuser" \
+    --set externalAccess.enabled=false \
+    --set externalAccess.service.type=ClusterIP \
+    --set replicaSetHostnames=true \
+    --set replicaCount=3 \
+    --set tls.enabled=false \
+    --set readinessProbe.enabled=false \
+    --set arbiter.livenessProbe.enabled=false \
+    --set global.namespaceOverride=database
+  tags:
+    - mongodb
+    - mongodb-helm-repo
+
+- name: upload mongodb user to aws secrets manager
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
+
+- name: upload mongodb user token to aws secrets manager
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
+
+
+- name: upload mongodb root token to aws secrets manager
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role; aws secretsmanager create-secret --name {{ network.org_name[:4] }}-{{ env }}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
+
+- name: Add resource policy to the secret created {{ item }}
+  shell: |
+    export AWS_PROFILE=cicd-role
+    aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
+  with_items:
+  - "{{ network.org_name[:4] }}-{{ env }}-mongodb-user-token"
+  - "{{ network.org_name[:4] }}-{{ env }}-mongodb-root-token"
+  - "{{ network.org_name[:4] }}-{{ env }}-mongodb-user"
+
+- name: Delete aws resource policy file
+  file:
+    state: absent
+    path: ./aws_resources_policy.json

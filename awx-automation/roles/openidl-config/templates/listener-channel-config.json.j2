@@ -1,0 +1,27 @@
+{
+    "applicationName": "openidl-carrier-data-call-processor",
+    "identity": {
+        "user": "openidl-{{ network.org_name }}-data-call-processor-ibp-2.0",
+        "wallet": "&wallet"
+    },
+    "listenerChannels": [
+{% for channel in network.channels if org_name in channel.name %}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                }
+            ]
+        },
+{% endfor %}
+        {
+            "channelName": "defaultchannel",
+            "events": [
+                {
+                    "ExtractionPatternSpecified": "ExtractionPatternSpecified"
+                }
+            ]
+        }
+    ]
+}

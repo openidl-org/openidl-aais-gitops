@@ -5,7 +5,7 @@ provider "aws" {
   secret_key = var.aws_secret_key
   assume_role {
     role_arn     = var.aws_role_arn
-    session_name = "terraform-session"
+    session_name = "terraform"
     external_id  = var.aws_external_id
   }
 }

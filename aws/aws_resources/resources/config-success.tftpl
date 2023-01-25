@@ -1,0 +1,24 @@
+{
+  "Dynamo": { "etlControlTable": "${dynamoDB}" },
+  "sns": {
+    "successETLARN": "${successTopicARN}",
+    "failureETLARN": "${failureTopicARN}"
+  },
+  "sourceId": "1",
+  "batchId": "1",
+  "chunkId": "1",
+  "username": "${apiUsername}",
+  "password": "${apiPassword}",
+  "carrierId": "${carrierId}",
+  "region": "${region}",
+  "carrier": {
+    "utilities": {
+      "url": "${utilitiesAPIUrl}"
+    },
+    "insurance-data-manager": {
+      "url": "${idmAPIUrl}"
+    }
+  }
+}
+
+

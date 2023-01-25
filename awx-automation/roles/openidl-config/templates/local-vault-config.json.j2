@@ -1,0 +1,12 @@
+{
+    "accessKeyId": "{{ aws_access_id }}",
+    "region": "{{ aws_region }}",
+    "secretAccessKey": "{{ aws_access_secret_key }}",
+    "roleParams": {
+        "ExternalId": "apps-user",
+        "RoleArn": "arn:aws:iam::{{ aws_account_number }}:role/{{ org_name }}-{{ env }}-openidl-apps",
+        "RoleSessionName": "openidl"
+    },
+    "secretName": "{{ org_name }}-{{ env }}-kvs-vault",
+    "walletType": "hashicorp_vault"
+}

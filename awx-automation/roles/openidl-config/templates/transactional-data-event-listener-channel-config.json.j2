@@ -1,0 +1,19 @@
+{
+    "listenerChannels": [
+{% for channel in network.channels if org_name in channel.name %}
+    {
+        "channelName": "{{ channel.name }}",
+        "events": [
+            {
+                "TransactionalDataAvailable": "processTransactionalDataAvailableEvent"
+            }
+        ]
+    }{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ],
+    "identity": {
+        "user": "openidl-{{ network.org_name }}-transactional-data-event-listener-ibp-2.0",
+        "wallet": "&wallet"
+    },
+    "applicationName": "openidl-transactional-data-event-listener"
+}

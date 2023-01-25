@@ -88,30 +88,37 @@ spec:
     {{- if $.Values.service.ports.couchdb.nodeport }}
     nodePort: {{ $.Values.service.ports.couchdb.nodeport }}
     {{- end }}
-  {{- if (eq $.Values.service.servicetype "ClusterIP") }}
-  clusterIP: None
-  {{- end }}
+  #{{- if (eq $.Values.service.servicetype "ClusterIP") }}
+  #clusterIP: None
+  #{{- end }}
   {{- if $.Values.service.loadBalancerIP }}
   loadBalancerIP: {{ $.Values.service.loadBalancerIP }}
   {{- end }}
 
-{{- if eq $.Values.proxy.provider "haproxy" }}
+{{- if eq $.Values.proxy.provider "nginx" }}
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $.Values.peer.name }}
   namespace:  {{ $.Values.metadata.namespace }}
   annotations:
-    kubernetes.io/ingress.class: "haproxy"
-    ingress.kubernetes.io/ssl-passthrough: "true"  
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/rewrite-target: /
+      nginx.ingress.kubernetes.io/backend-protocol: GRPCS
 spec:
+  ingressClassName: nginx-external
   rules:
   - host: {{ $.Values.peer.name }}.{{ $.Values.metadata.namespace }}.{{ $.Values.proxy.external_url_suffix }}
     http:
       paths:
       - path: /
+        pathType: ImplementationSpecific
         backend:
-          serviceName: {{ $.Values.peer.name }}
-          servicePort: {{ $.Values.service.ports.grpc.clusteripport }}
+          service:
+            name: {{ $.Values.peer.name }}
+            port: 
+              number: {{ $.Values.service.ports.grpc.clusteripport }}
 {{- end }}

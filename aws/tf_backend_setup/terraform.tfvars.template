@@ -5,6 +5,15 @@ aws_secret_key = "<aws_iam_user_secret_key>"
 aws_user_arn = "<aws_iam_user_arn>"
 aws_role_arn = "<aws_iam_role_arn>"
 
+#set org name as below
+#when nodetype is aais set org_name="aais"
+#when nodetype is analytics set org_name="analytics"
+#when nodetype is aais's dummy carrier set org_name="carrier" and for other carriers refer to next line.
+#when nodetype is other carrier set org_name="<carrier_org_name>" , example: org_name = "travelers" etc.,
+
+org_name = "<aais | analytics | carrier | travelers | hartford etc>"
+aws_env = "<dev | test | prod>"
+
 #aws region to setup terraform background?
 aws_region = "<aws_region>"
 aws_external_id = "<external_id_setup>"
@@ -21,3 +30,13 @@ tf_backend_dynamodb_table_aws_resources = "<table_name_state_lock_AWS_RESOURCES>
 #Name of the dynamoDB table to manage terraform state files for K8S resource provisioning module
 tf_backend_dynamodb_table_k8s_resources = "<table_name_state_lock_K8S_RESOURCES>"
 
+#KMS Key arn to be used when create_kms_keys is set to false
+create_kms_keys = "false"
+s3_kms_key_arn = "<KMS_Key_ARN>"
+dynamodb_kms_key_arn = "<KMS_Key_ARN>"
+
+#Custom tags - any set of key:value pairs to be included part of tags.
+custom_tags = {
+  custom_key1 = "custom_value1"
+  custom_key2 = "custom_value2"
+}

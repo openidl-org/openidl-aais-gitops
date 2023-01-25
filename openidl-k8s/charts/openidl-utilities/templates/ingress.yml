@@ -2,10 +2,11 @@
 {{- if .Values.global.utilities.ingressenabled }}
 {{- $fullName := include "openidl-utilities.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: utilities-ingress
+  name: utilities-ingress-internal
   labels:
     {{- include "openidl-utilities.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -23,6 +24,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
   rules:
     - host: {{ .Values.global.utilities.ingresshostname }}
       http:
@@ -34,6 +36,26 @@ spec:
                 name: {{ .Values.global.utilities.servicename }}
                 port: 
                   number: {{ .Values.global.utilities.port }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: utilities-ingress
+  labels:
+    {{- include "openidl-utilities.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.global.utilities.ingressenabled }}
+  tls:
+  - hosts:
+    - {{ .Values.global.utilities.publicingresshostname }}
+    secretName: utilities-tls
+  {{- end }}
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  rules:
     - host: {{ .Values.global.utilities.publicingresshostname }}
       http:
         paths:
