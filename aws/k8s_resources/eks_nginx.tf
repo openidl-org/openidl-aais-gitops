@@ -6,7 +6,9 @@ resource "helm_release" "app_nginx_external" {
   create_namespace = true
   cleanup_on_fail = true
   name = "nginx-external"
-  chart ="resources/nginx-app-cluster"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart ="ingress-nginx"
+  version = "4.4.2"
   timeout = 900
   force_update = true
   wait = true
@@ -21,7 +23,9 @@ resource "helm_release" "blk_nginx_external" {
   create_namespace = true
   cleanup_on_fail = true
   name = "nginx-external"
-  chart ="resources/nginx-blk-cluster"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart ="ingress-nginx"
+  version = "4.4.2"
   timeout = 900
   force_update = true
   wait = true
