@@ -58,6 +58,10 @@ eks_wg_root_vol_encrypted   = true
 eks_wg_root_volume_size     = "40"
 eks_wg_root_volume_type     = "gp2"
 eks_wg_health_check_type    = "EC2"
+blk_cluster_version         = "1.22"
+app_cluster_version         = "1.22"
+app_cluster_map_roles       = []
+app_cluster_map_users       = []
+blk_cluster_map_roles       = []
+blk_cluster_map_users       = []
 #-------------------------------------------------------------------------------------------------------------------
-
-
