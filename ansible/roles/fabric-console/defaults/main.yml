@@ -1,0 +1,52 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+image_pull_secret: ghcr-pull-secret
+
+service_account: default
+
+couchdb_image: couchdb
+couchdb_image_label: 3.2.1
+
+image_registry: hyperledger
+# image_registry_username: cp
+# image_registry_email: user@example.org
+# image_registry_password: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+tools_image: "{{ image_registry }}/fabric-tools"
+tools_image_label: "{{ fabric_version }}"
+
+console_versions:
+  ca:
+    1.5.3-1:
+      default: true
+      version: 1.5.3-1
+      image:
+        caInitImage: registry.access.redhat.com/ubi8/ubi-minimal
+        caInitTag: latest
+        caImage: hyperledger/fabric-ca
+        caTag: 1.5.3
+  peer:
+    2.4.3-1:
+      default: true
+      version: 2.4.3-1
+      image:
+        peerInitImage: registry.access.redhat.com/ubi8/ubi-minimal
+        peerInitTag: latest
+        peerImage: ghcr.io/hyperledger-labs/k8s-fabric-peer
+        peerTag: v0.7.2
+        couchdbImage: couchdb
+        couchdbTag: 3.1.2
+        grpcwebImage: ghcr.io/hyperledger-labs/grpc-web
+        grpcwebTag: latest
+  orderer:
+    2.4.3-1:
+      default: true
+      version: 2.4.3-1
+      image:
+        ordererInitImage: registry.access.redhat.com/ubi8/ubi-minimal
+        ordererInitTag: latest
+        ordererImage: hyperledger/fabric-orderer
+        ordererTag: 2.4.3
+        grpcwebImage: ghcr.io/hyperledger-labs/grpc-web
+        grpcwebTag: latest
