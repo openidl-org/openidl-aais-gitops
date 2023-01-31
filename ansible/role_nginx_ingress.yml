@@ -1,0 +1,19 @@
+# Usage:
+#   ansible-playbook role_nginx_ingress.yml -e do=create -e cluster=app-cluster -e type=external
+#   ansible-playbook role_nginx_ingress.yml -e do=delete -e cluster=app-cluster -e type=external
+#
+# VARS:
+#   cluster= [app-cluster/blk-cluster] - default: app-cluster
+#   type= [external/internal] - default: external
+---
+- name: Nginx Ingress Controller
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  vars:
+    do: create
+    wait_timeout: 3600
+  roles:
+    - role: nginx-ingress
