@@ -1,0 +1,51 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: approve-anal-ca01-openidl-cc-aais-carriers
+  namespace: ca01-net
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: approve-anal-ca01-openidl-cc-aais-carriers
+  chart:
+    git: https://github.com/openidl-org/openidl-aais-gitops
+    ref: carrier-nd-poc
+    path: blockchain-automation-framework/platforms/hyperledger-fabric/charts/approve_chaincode
+  values:
+    metadata:
+      namespace: ca01-net
+      images:
+        fabrictools: hyperledger/fabric-tools:2.2.3
+        alpineutils: index.docker.io/hyperledgerlabs/alpine-utils:1.0
+    peer:
+      name: peer0
+      address: peer0.ca01-net:7051
+      localmspid: ca01MSP
+      loglevel: debug
+      tlsstatus: true
+    vault:
+      role: vault-role
+      address: http://vault.dev.ca01.internal.thetech.digital
+      authpath: devca01-net-auth
+      adminsecretprefix: ca01/crypto/peerOrganizations/ca01-net/users/admin 
+      orderersecretprefix: ca01/crypto/peerOrganizations/ca01-net/orderer
+      serviceaccountname: vault-auth
+      imagesecretname: regcred
+      tls: false
+    orderer:
+      address: orderer1.ordererorg.dev.thetech.digital:8443
+    chaincode:
+      builder: hyperledger/fabric-ccenv:2.2.3
+      name: openidl-cc-aais-carriers
+      version: v012723
+      sequence: 1
+      commitarguments: ''
+      endorsementpolicies:  ''
+      collectionconfig: |-
+        WwogIHsKICAgICJuYW1lIjogImFuYWxfY2EwMV9wZGMiLAogICAgInBvbGljeSI6ICJPUignYW5h
+        bHl0aWNzTVNQLm1lbWJlcicsICdjYTAxTVNQLm1lbWJlcicpIiwKICAgICJyZXF1aXJlZFBlZXJD
+        b3VudCI6IDAsCiAgICAibWF4UGVlckNvdW50IjogMCwKICAgICJibG9ja1RvTGl2ZSI6IDAKICB9
+        Cl0KCg==
+      usecollectionconfig: true
+    channel:
+      name: anal-ca01
