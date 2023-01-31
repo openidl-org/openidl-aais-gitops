@@ -1,0 +1,11 @@
+- name: "Verify CRD gitrepositories.source.toolkit.fluxcd.io"
+  kubernetes.core.k8s_info:
+    kind: CustomResourceDefinition
+    name: gitrepositories.source.toolkit.fluxcd.io
+  register: gitrepositories_crd
+
+- name: "Verify CRD kustomizations.kustomize.toolkit.fluxcd.io"
+  kubernetes.core.k8s_info:
+    kind: CustomResourceDefinition
+    name: kustomizations.kustomize.toolkit.fluxcd.io
+  register: kustomization_crd
