@@ -15,7 +15,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
-                    deployBAF(buildType)
+                    deployBAF()
                 }
             }
         }
@@ -30,8 +30,8 @@ pipeline {
     }
 }
 
-def deployBAF(thestage){
-    stage(thestage){
+def deployBAF(){
+    stage('deploy-operator'){
         wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
             ansibleTower(
                 towerServer: 'AWX',
