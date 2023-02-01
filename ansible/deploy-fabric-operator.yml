@@ -1,0 +1,19 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Usage:
+# Create: ansible-playbook role_fabric_console.yml --extra-vars "state=present"
+# Delete: ansible-playbook role_fabric_console.yml --extra-vars "state=absent"
+---
+- name: Deploy Fabric Operator
+  hosts: localhost
+  vars_files:
+    - deploy-fabric-operator-vars.yml
+  vars:
+    state: present
+    wait_timeout: 3600
+  roles:
+    - fabric-operator
+    - fabric-console
+    - flux2
+

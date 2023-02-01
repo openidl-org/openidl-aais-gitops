@@ -1,0 +1,56 @@
+def buildType
+pipeline {
+    agent {
+        node {
+            label 'openidl'
+        }
+    }
+    parameters {
+        string description: 'Organization name of the node', name: 'org_name', trim: true
+        string description: 'Environment (dev | test | prod)', name: 'env', trim: true
+        string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
+        string description: 'ExtraVars', name: 'extra_vars', trim: true
+        }
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    deployBAF(buildType)
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "The BAF action: ${params.deploy_action} is successful. Review logs"
+        }
+        failure {
+            echo "The BAF action: ${params.deploy_action} is failed, Please investigate"
+        }
+    }
+}
+
+def deployBAF(thestage){
+    stage(thestage){
+        wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+            ansibleTower(
+                towerServer: 'AWX',
+                towerCredentialsId: 'AWX',
+                templateType: 'job',
+                jobTemplate: "${params.jobPrefix}${params.org_name}-${params.env}-openidl-operator",
+                jobType: "run",
+                towerLogLevel: 'full',
+                removeColor: false,
+                async: false,
+                importTowerLogs: true,
+                extraVars: """---
+                org_name: '${params.org_name}'
+                env: '${params.env}'
+                extra_vars: '${params.extra_vars}'
+                """
+            )
+        }
+    }
+}
+
+

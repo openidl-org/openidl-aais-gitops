@@ -1,2 +1,3 @@
 cluster: app-cluster
 type: external
+do: create
