@@ -1,0 +1,17 @@
+---
+- name: "Register temporary directory"
+  tempfile:
+    state: directory
+  register: tmp_directory
+
+- include: set-facts.yml
+- include: packages.yml
+- include: aws-cli.yml
+- include: kubectl.yml
+
+- name: "Ensures bin dir exists"
+  file:
+    path: "{{ defaults.bin_directory }}"
+    recurse: yes
+    mode: '0755'
+    state: directory
