@@ -2,7 +2,7 @@
 environment, it requires updates here*/
 #-------------------------------------------------------------------------------------------------------------------
 #Bastion host default configuration
-instance_type                 = "t2.micro"
+instance_type                 = "t3.small"
 root_block_device_volume_type = "gp2"
 root_block_device_volume_size = "40"
 
