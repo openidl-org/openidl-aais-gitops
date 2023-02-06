@@ -7,8 +7,7 @@
 #   type= [external/internal] - default: external
 ---
 - name: Nginx Ingress Controller
-  hosts: localhost
-  connection: local
+  hosts: all
   gather_facts: no
   vars_files:
     - vars.yml

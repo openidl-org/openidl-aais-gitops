@@ -1,0 +1,8 @@
+---
+common_packages:
+  - git
+  - jq
+
+
+is_apt: false
+is_yum: false

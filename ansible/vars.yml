@@ -62,10 +62,25 @@ product_version: 2.5.0
 ############
 
 fluxcd:
-  git_username: user
-  git_password: pass
-  git_repo: repo
-  git_branch: master
+  git_username: git
+  # Configure git password or github PAT in the following format: ':patstring'
+  # e.g. :superSecretPassword
+  # configure git password field ONLY if protocol is https
+  git_password: ""
+  git_protocol: ssh
+  # base64 encoded string:
+  #   cat sshkey.pem | base64
+  git_sshkey: LS0tLS1CRUd...
+  # Needed in order to achieve successfull handshake when using ssh protocol. Needed algorithm is ecdsa-sha2-nistp256
+  # this can be generated with:
+  #   ssh-keyscan -f sshkey.pem github.com 2>&1 | grep ecdsa-sha2 | base64
+  git_ssh_known_hosts: Z2l0aHViLmNvb...
+  # possible options:
+  #   if https protocol in use: git-auth
+  #   if ssh protocol in use: git-ssh-key
+  git_use_secret: git-ssh-key
+  git_repo: github.com/organisation/repo.git
+  git_branch: main
   network_docker_url: docker_url
   flux_namespace: flux
 
@@ -88,8 +103,10 @@ fluxcd:
     gitRepository:
       spec:
         secretRef:
-          # the secret that is created by the role
+          # the secret that is created by the helm
           name: "git-auth"
+          # the secret that is created by the role
+          nameSSH: "git-ssh-key"
         timeout: "200s"
         interval: "2m"
     secret:

@@ -2,10 +2,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 ---
+- name: configuring aws
+  shell: |
+    export AWS_PROFILE=baf-role
+  changed_when: false
+  tags:
+    - notest
+
+- name: Lookup CRD
+  set_fact:
+    crdurl: "{{ crd_url + '/?ref=v' + tag_version }}"
+
 - name: Creating CRDs
-  k8s:
-    definition: "{{ lookup('kubernetes.core.kustomize',dir=crd_url+'/?ref=v'+tag_version) }}"
+  shell: |
+    kubectl kustomize {{crdurl}}
   register: resultcrds
+
+- name: CRDs created
+  shell: |
+    echo "CRDs created"
 
 # Create the namespace for the operator
 - name: Fail if namespace not specified

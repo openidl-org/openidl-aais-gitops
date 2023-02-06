@@ -6,7 +6,7 @@
 # Delete: ansible-playbook role_fabric_operator.yml --extra-vars "state=absent"
 ---
 - name: Deploy Opensource custom resource definitions and operator
-  hosts: localhost
+  hosts: all
   vars_files:
     - vars.yml
   vars:

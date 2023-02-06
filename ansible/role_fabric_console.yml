@@ -6,7 +6,7 @@
 # Delete: ansible-playbook role_fabric_console.yml --extra-vars "state=absent"
 ---
 - name: Deploy Fabric Operations Console
-  hosts: localhost
+  hosts: all
   vars_files:
     - vars.yml
   vars:

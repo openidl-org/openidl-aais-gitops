@@ -1,0 +1,4 @@
+---
+
+default:
+  bin_directory: "{{ bin_install_dir | default('/usr/local/bin') }}"  #Default to ~/bin install directory for binaries

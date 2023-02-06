@@ -21,6 +21,7 @@
       stringData:
         GIT_AUTHUSER: "{{ fluxcd.git_username }}" 
         GIT_AUTHKEY: "{{ fluxcd.git_password }}"
+        GIT_SSHKEY: "{{ fluxcd.git_sshkey }}"
 
 - name: "Deploy Flux2 CD"
   kubernetes.core.helm:
@@ -56,10 +57,12 @@
       gitRepository:
         spec:
           secretRef:
-            name: "{{fluxcd.sync.gitRepository.spec.secretRef.name}}"
+            #name: "{{fluxcd.sync.gitRepository.spec.secretRef.name}}"
+            name: "{{ fluxcd.git_use_secret }}"
           timeout: "{{fluxcd.sync.gitRepository.spec.timeout}}"
           interval: "{{fluxcd.sync.gitRepository.spec.interval}}"
-          url: "https://{{ fluxcd.git_username }}:{{ fluxcd.git_password }}@{{ fluxcd.git_repo }}"
+          #url: "https://{{ fluxcd.git_username }}:{{ fluxcd.git_password }}@{{ fluxcd.git_repo }}"
+          url: "{{ fluxcd.git_protocol }}://{{ fluxcd.git_username }}{{ fluxcd.git_password }}@{{ fluxcd.git_repo }}"
           ref:
             branch: "{{ fluxcd.git_branch }}"
       secret:
@@ -68,6 +71,21 @@
         generate:
           sshKeyAlgorithm: "{{fluxcd.sync.secret.generate.sshKeyAlgorithm}}"
           sshEcdsaCurve: "{{fluxcd.sync.secret.generate.sshEcdsaCurve}}"
+
+- name: "Create GIT SSH secret"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "{{fluxcd.sync.gitRepository.spec.secretRef.nameSSH}}"
+        namespace: "{{ fluxcd.flux_namespace }}"
+      data:
+        identity: "{{ fluxcd.git_sshkey }}"
+        known_hosts: "{{ fluxcd.git_ssh_known_hosts }}"
+  when: fluxcd.git_protocol == 'ssh'
 
 - name: "Deploy Flux2 CD Notifications"
   kubernetes.core.helm:

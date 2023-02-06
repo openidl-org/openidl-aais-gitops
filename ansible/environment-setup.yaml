@@ -1,34 +1,19 @@
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-# Usage:
-# Create: ansible-playbook role_fabric_console.yml --extra-vars "state=present"
-# Delete: ansible-playbook role_fabric_console.yml --extra-vars "state=absent"
 ---
-- name: Deploy Fabric Operator
-  hosts: ansible_provisioners
-  collections:
-    - kubernetes.core.k8s
-    - kubernetes.core.k8s_info
-  vars_files:
-    - deploy-fabric-operator-vars.yml
-  vars:
-    state: present
-    wait_timeout: 3600
-    k8s:
-      cluster_name: "d1-test-blk-cluster"
-    aws:
-      access_id: "{{aws_access_key}}"
-      access_key: "{{aws_secret_key}}"
-      region: "us-east-2"
-      external_id: "{{aws_external_id}}"
-      assume_role_arn: "{{aws_assume_role_arn}}"
-    privilege_escalate: false           #Default to NOT escalate to root privledges
-    install_os: "linux"                 #Default to linux OS
-    install_arch:  "amd64"              #Default to amd64 architecture
-    bin_install_dir:  "~/bin"           #Default to ~/bin install directory for binaries
-
-  tasks:
+#######################################
+# Playbook to setup the environment for running the Blockchain Automation Framework configurations
+#  - checks and installs kubectl, helm and vault clients
+#  - If cloud platform is AWS, checks and installs aws-cli and aws-authenticator
+#######################################
+  - hosts: all
+    gather_facts: yes
+    no_log: "{{ no_ansible_log | default(false) }}"
+    tasks:
+    - include_role:
+        name: setup/common-packages
+      vars:
+        common_packages:
+          - git
+          - jq
     - include_role:
         name:  setup/kubectl
       vars:
@@ -58,6 +43,10 @@
       vars:
         aws_access_key: "{{ aws.access_key }}"
         aws_secret_key: "{{ aws.secret_key }}"
+        aws_external_id: "{{ aws_external_id }}"
+        aws_assume_role_arn: "{{ aws_assume_role_arn }}"
+        eks_cluster: "{{ eks_cluster }}"
+        region: "{{ region }}"
       with_items: "{{ network.organizations }}"
       when: "item.cloud_provider == 'aws' or item.cloud_provider == 'aws-baremetal'"
     - include_role:
@@ -71,9 +60,8 @@
         kubecontext: "{{ item.k8s.context }}"
       with_items: "{{ network.organizations }}"
       when: "item.cloud_provider == 'aws'"
-
-  roles:
-    - fabric-operator
-    - fabric-console
-    - flux2
-    - kubectl-config
+    vars: #These variables can be overriden from the command line
+      privilege_escalate: false           #Default to NOT escalate to root privledges
+      install_os: "linux"                 #Default to linux OS
+      install_arch:  "amd64"              #Default to amd64 architecture
+      bin_install_dir:  "/usr/local/bin"           #Default to ~/bin install directory for binaries

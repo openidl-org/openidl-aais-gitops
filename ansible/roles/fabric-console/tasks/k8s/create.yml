@@ -2,6 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 ---
+- name: configuring aws
+  shell: |
+    export AWS_PROFILE=baf-role
+  changed_when: false
+  tags:
+    - notest
+
 - name: Fail if namespace not specified
   fail:
     msg: namespace not specified or is empty

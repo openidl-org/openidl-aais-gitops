@@ -57,10 +57,19 @@ fabric_version: 2.4.4
 fabric_ca_version: 1.5.4
 product_version: 2.5.0
 
+aws:
+  access_id:
+  access_key:
+  region: us-east-2
+  external_id: baf-user
+  assume_role_arn:
+
+k8s:
+  cluster_name: ""
+
 ############
 # Flux2 vars
 ############
-
 fluxcd:
   git_username: tbd
   git_password: tbd

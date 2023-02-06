@@ -1,0 +1,82 @@
+---
+  - name: register temporary directory
+    tempfile:
+      state: directory
+    register: tmp_directory
+    tags:
+      - molecule-idempotence-notest
+
+  - name: Ensures bin dir exists
+    become: true
+    file:
+      path: "{{ kubectl.bin_directory | default(default.bin_directory) }}"
+      recurse: yes
+      mode: '0755'
+      state: directory
+
+  - name: check kubectl
+    stat:
+      path: "{{ kubectl.bin_directory | default(default.bin_directory) }}/kubectl"
+    register: kubectl_stat_result
+    tags:
+      - kubectl
+
+  - name: "Get kubectl stable version"
+    set_fact:
+      kubectl_stable_version: "{{ lookup('url', 'https://dl.k8s.io/release/stable.txt')}}"
+    when: not kubectl_stat_result.stat.exists
+    tags:
+      - kubectl
+
+  - name: Download kubectl binary
+    become: true
+    get_url:
+      url: "https://dl.k8s.io/release/{{kubectl_stable_version}}/bin/{{install_os}}/{{install_arch}}/kubectl"
+      dest: "{{ kubectl.bin_directory | default(default.bin_directory) }}/kubectl"
+      checksum: ""
+    when: not kubectl_stat_result.stat.exists
+    tags:
+      - kubectl
+
+  - name: Test kubectl installation
+    command: "{{ kubectl.bin_directory | default(default.bin_directory) }}/kubectl version --client --short"
+    changed_when: false
+    tags:
+      - molecule-idempotence-notest
+
+  - name: Changing the current context namespace to default
+    shell: |
+      KUBECONFIG={{ item.k8s.config_file }} kubectl config set-context --current --namespace=default
+    when: item is defined and item.k8s is defined
+    tags:
+      - molecule-idempotence-notest
+
+  - name: Install pip dependencies
+    become: true
+    pip:
+      name: "{{ item.pkg_name }}"
+      executable: "{{ item.exec }}"
+      extra_args: "{{ item.args }}"
+    loop:
+      - { pkg_name: "pyyaml", exec: "pip3", args: "" }
+      - { pkg_name: "kubernetes", exec: "pip3", args: "" }
+      - { pkg_name: "requests-oauthlib", exec: "pip3", args: "" }
+      - { pkg_name: "ansible==2.9.11", exec: "pip3", args: "" }
+      - { pkg_name: "docker", exec: "pip3", args: "" }
+
+  - name: Check kustomize
+    stat:
+      path: "{{ kubectl.bin_directory | default(default.bin_directory) }}/kustomize"
+    register: kustomize_stat_result
+    tags:
+      - kubectl
+
+  - name: Install kustomize
+    become: true
+    shell: |
+      cd {{ kubectl.bin_directory | default(default.bin_directory) }}
+      curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+    changed_when: false
+    when: not kustomize_stat_result.stat.exists
+    tags:
+      - notest

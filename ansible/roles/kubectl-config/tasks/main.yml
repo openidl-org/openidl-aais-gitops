@@ -1,0 +1,13 @@
+- name: "Update kubectl config"
+  shell: |-
+    #!/bin/bash -e
+    aws configure set aws_access_key_id {{ aws.access_id }} --profile baf-user
+    aws configure set aws_secret_access_key {{ aws.access_key }} --profile baf-user
+    aws configure set region {{ aws.region }} --profile baf-user
+    aws configure set external_id {{ aws.external_id }} --profile baf-user
+    aws configure set external_id {{ aws.external_id }} --profile baf-role
+    aws configure set source_profile baf-user --profile baf-role
+    aws configure set role_arn {{ aws.assume_role_arn }} --profile baf-role
+    export AWS_PROFILE=baf-role
+    aws sts get-caller-identity
+    aws eks --region {{ aws.region }} update-kubeconfig --name {{ k8s.cluster_name }}

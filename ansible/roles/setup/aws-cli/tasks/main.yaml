@@ -1,0 +1,65 @@
+---
+  - name: register temporary directory
+    tempfile:
+      state: directory
+    register: tmp_directory
+    tags:
+      - molecule-idempotence-notest
+
+  - name: check aws cli
+    stat:
+      path: "{{ aws_cli.bin_directory }}/aws"
+    register: aws_cli_stat_result
+    tags:
+      - aws_cli
+
+  - name: download aws cli
+    get_url:
+      url: "https://awscli.amazonaws.com/awscli-exe-linux-{{ aws_cli.install_arch }}.zip"
+      dest: "{{ tmp_directory.path }}"
+      checksum: ""
+    when: not aws_cli_stat_result.stat.exists
+    tags:
+      - aws_cli
+
+  - name: extract aws cli
+    unarchive:
+      src: "{{ tmp_directory.path }}/awscli-exe-linux-{{ aws_cli.install_arch }}.zip"
+      dest: "{{ tmp_directory.path }}"
+      remote_src: yes
+    when: not aws_cli_stat_result.stat.exists
+    tags:
+      - aws_cli
+
+  - name: Ensures bin dir exists
+    become: true
+    file:
+      path: "{{ aws_cli.bin_directory | default(default.bin_directory) }}"
+      recurse: yes
+      mode: '0755'
+      state: directory
+
+  - name: install aws cli
+    become: true
+    shell: |
+      cd "{{ tmp_directory.path }}"
+      ./aws/install -i {{ aws_cli.bin_directory }}/aws-cli -b {{ aws_cli.bin_directory }}
+    when: not aws_cli_stat_result.stat.exists
+    tags:
+      - aws_cli
+
+  - name: configuring aws
+    shell: |
+      aws configure set aws_access_key_id {{ aws_access_key }} --profile baf-user
+      aws configure set aws_secret_access_key {{ aws_secret_key }} --profile baf-user
+      aws configure set region {{ region }} --profile baf-user
+      aws configure set external_id {{ aws_external_id }} --profile baf-user
+      aws configure set external_id {{ aws_external_id }} --profile baf-role
+      aws configure set source_profile baf-user --profile baf-role
+      aws configure set role_arn {{ aws_assume_role_arn }} --profile baf-role
+      export AWS_PROFILE=baf-role
+      aws sts get-caller-identity
+      aws eks update-kubeconfig --name {{ eks_cluster }}
+    changed_when: false
+    tags:
+      - notest
