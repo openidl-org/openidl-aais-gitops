@@ -6,10 +6,6 @@ resource "kubernetes_config_map_v1_data" "app_config_map" {
   metadata {
     name = "aws-auth"
     namespace = "kube-system"
-    labels = {
-      "app.kubernetes.io/managed-by" = "Terraform"
-      "terraform.io/module" = "terraform-aws-modules.eks.aws"
-    }
   }
   data = {
       mapRoles = yamlencode(distinct(concat(local.app_cluster_map_roles, local.app_cluster_map_roles_list)))
@@ -24,10 +20,6 @@ resource "kubernetes_config_map_v1_data" "blk_config_map" {
   metadata {
     name = "aws-auth"
     namespace = "kube-system"
-    labels = {
-      "app.kubernetes.io/managed-by" = "Terraform"
-      "terraform.io/module" = "terraform-aws-modules.eks.aws"
-    }
   }
   data = {
       mapRoles = yamlencode(distinct(concat(local.blk_cluster_map_roles, local.blk_cluster_map_roles_list)))
