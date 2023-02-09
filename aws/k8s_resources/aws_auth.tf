@@ -1,7 +1,8 @@
  #Setting up configmap/aws-auth for app cluster
-resource "kubernetes_config_map" "app_config_map" {
+resource "kubernetes_config_map_v1_data" "app_config_map" {
   provider = kubernetes.app_cluster
   depends_on = [data.aws_eks_cluster.app_eks_cluster]
+  force = true
   metadata {
     name = "aws-auth"
     namespace = "kube-system"
@@ -16,9 +17,10 @@ resource "kubernetes_config_map" "app_config_map" {
   }
 }
 #Setting up configmap/aws-auth for blk cluster
-resource "kubernetes_config_map" "blk_config_map" {
+resource "kubernetes_config_map_v1_data" "blk_config_map" {
   provider = kubernetes.blk_cluster
   depends_on = [data.aws_eks_cluster.blk_eks_cluster]
+  force = true
   metadata {
     name = "aws-auth"
     namespace = "kube-system"
