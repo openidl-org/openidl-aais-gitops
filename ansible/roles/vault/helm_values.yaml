@@ -1,0 +1,15 @@
+---
+tlsDisable: false
+server:
+  ha:
+    enabled: true
+    raft:
+      enabled: true
+  ingress:
+    enabled: true
+    hosts[0]:
+      host: vault.{{ internal_domain }} \
+    annotations:
+      "kubernetes\.io/ingress\.class": nginx
+  dataStorage:
+    storageClass: openidl-sc

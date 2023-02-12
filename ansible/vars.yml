@@ -194,3 +194,24 @@ fluxcd:
 nginx:
   nginx_chart_version: 4.4.2
   cert_manager_chart_version: 1.10.0
+
+###############################
+# Vault vars
+###############################
+vault:
+  name: vault
+  vault_namespace: vault
+  vault_chart_version: 0.23.0
+  vault_chart_repo: helm.releases.hashicorp.com
+  internal_domain: vault.d1.test.senofi.net
+  ingress_class: nginx-external
+  env: test
+  region: us-east-2
+  network:
+    org_name: d1
+    ordererorg: false
+    ordererorg_name: org_name
+  aws_account_number: XXXXXXXXXXXX
+  registry: ghcr.io/openidl-org/openidl-aais-gitops
+  registry_version: latest
+  aws_profile: git-actions-role
