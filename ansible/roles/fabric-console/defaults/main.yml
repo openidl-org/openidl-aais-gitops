@@ -16,6 +16,8 @@ image_registry: hyperledger
 tools_image: "{{ image_registry }}/fabric-tools"
 tools_image_label: "{{ fabric_version }}"
 
+console_ingress_class: nginx
+
 console_versions:
   ca:
     1.5.3-1:

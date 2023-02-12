@@ -59,6 +59,22 @@
     wait_timeout: "{{ wait_timeout }}"
   changed_when: False
 
+- name: "Patch ingress"
+  k8s:
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: "{{ console_name }}"
+        namespace: "{{ namespace }}"
+        annotations:
+          kubernetes.io/ingress.class: "{{console_ingress_class}}"
+          nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
+          nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      spec:
+        ingressClassName: "{{console_ingress_class}}"
+    merge_type: merge
+
 - name: Print console URL
   debug:
     msg: IBM Blockchain Platform console available at "https://{{ namespace }}-{{ console_name }}-console.{{ console_domain }}"

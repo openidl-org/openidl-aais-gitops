@@ -13,9 +13,14 @@
   set_fact:
     crdurl: "{{ crd_url + '/?ref=v' + tag_version }}"
 
+- debug:
+    var: crdurl
+
 - name: Creating CRDs
   shell: |
-    kubectl kustomize {{crdurl}}
+    kubectl kustomize {{crdurl}} > ./crds.yml
+    kubectl apply -f ./crds.yml
+    rm ./crds.yml
   register: resultcrds
 
 - name: CRDs created

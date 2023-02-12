@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 ---
+- name: "Include vars from git"
+  include_vars:
+    file: "./roles_configs/ansible_roles_vars.yml"
+
 - name: Fail if target not specified
   fail:
     msg: target not specified or is not one of "k8s" or "openshift"

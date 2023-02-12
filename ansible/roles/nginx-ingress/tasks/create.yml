@@ -40,7 +40,7 @@
     update_repo_cache: True
     disable_hook: True
     values_files:
-      - roles/nginx-ingress/nginx-{{cluster}}/values-{{type}}.yaml
+      - roles_configs/nginx-{{cluster}}-cluster/values-{{type}}.yaml
 
 - name: "Install Jetstack certificate manager"
   kubernetes.core.helm:

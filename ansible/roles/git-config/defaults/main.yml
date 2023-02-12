@@ -1,0 +1,3 @@
+---
+# either pass it as extra var if run local or create and attach to the template secret 'github_ssh_key' in AWX
+ssh_key: "base64 encoded string"
