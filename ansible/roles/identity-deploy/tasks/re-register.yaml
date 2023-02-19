@@ -1,0 +1,28 @@
+- set_fact:
+    seed: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+
+- set_fact:
+    seed_attr: "{ \"name\": \"seed\", \"value\": \"{{seed}}\" ,  \"ecert\" : \"true\" }"
+
+- set_fact:
+    identity_cert_attributes: "{{ identity.cert_attrs + [ seed_attr ] }}"
+
+- debug:
+    msg: "{{ identity_cert_attributes }}"
+
+- name: Re register the idenity if already registered
+  ibm.blockchain_platform.registered_identity:
+    state: "present"
+    api_endpoint: "{{ console.api_endpoint }}"
+    api_authtype: "{{ console.api_authtype }}"
+    api_key: "{{ console.username }}"
+    api_secret: "{{ console.password }}"
+    api_timeout: "{{ api_timeout | default(omit) }}"
+    certificate_authority: "{{ network.ca_name }}"
+    registrar: "{{ wallet_fetched_identity.data.data.data | b64decode | from_json }}"
+    enrollment_id: "{{ identity.id }}"
+    enrollment_secret: "{{ identity.enrolment_secret }}"
+    max_enrollments: -1
+    attributes: "{{ identity_cert_attributes }}"
+    type: "{{ identity.type }}"
+  register: registered_identity

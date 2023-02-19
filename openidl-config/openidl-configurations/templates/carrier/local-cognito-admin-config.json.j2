@@ -1,0 +1,10 @@
+{
+    "accessKeyId": "{{ aws.accessKeyId }}",
+    "region": "{{ aws.region }}",
+    "secretAccessKey": "{{ aws.secretAccessKey }}",
+    "roleParams": {
+       "ExternalId": "{{ aws.assumeRoleExternalId}}",
+       "RoleArn": "{{ aws.assumeRoleArn }}",
+       "RoleSessionName": "appsUserVaultAssumeRoleSession"
+    }
+}

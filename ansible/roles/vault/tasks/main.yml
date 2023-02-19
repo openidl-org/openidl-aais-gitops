@@ -1,4 +1,10 @@
 ---
+- name: "Include vars from git"
+  include_vars:
+    file: "./roles_configs/ansible_roles_vars.yml"
+
+- include_tasks: set_facts.yml
+
 - name: "Create a k8s namespace"
   k8s:
     name: "{{ vault.vault_namespace }}"
@@ -246,6 +252,18 @@
 - name: Pod logs
   debug:
     msg: "{{ baf_logs.stdout_lines }}"
+
+- name: "Add missing ingress annotation"
+  k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        name: "{{ vault.name }}"
+        namespace: "{{ vault.vault_namespace }}"
 
 - name: "Generate unseal keys json"
   no_log: false

@@ -1,0 +1,17 @@
+{
+    "targetChannels": [
+        {
+            "channelName": "defaultchannel",
+            "chaincodeName": "openidl-cc-default"
+        },
+        {
+            "channelName": "{{ targetChannelName }}",
+            "chaincodeName": "openidl-cc-aais-carriers"
+        }
+    ],
+    "users": [{
+        "org": "{{ organizationName }}",
+        "user": "openidl-transactional-data-event-listener-ibp-2.0",
+        "mspId": "{{ organizationName }}MSP"
+    }]
+}

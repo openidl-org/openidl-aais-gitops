@@ -1,0 +1,22 @@
+---
+- name: delete vault secrets from aws secret manager
+  shell: |
+    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-user --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-user-token --force-delete-without-recovery
+    aws secretsmanager delete-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-root-token --force-delete-without-recovery
+  register: output
+  ignore_errors: yes
+
+- name: delete mongodb helm install
+  kubernetes.core.helm:
+    name: "{{ network.org_name }}"
+    state: absent
+    wait: true
+    release_name: "{{ network.org_name }}"
+    release_state: absent
+    release_namespace: "{{ namespace }}"
+
+  register: mongodb
+
+- debug:
+    msg: "{{ mongodb }}"

@@ -2,6 +2,7 @@
 common_packages:
   - git
   - jq
+  - gcc
 
 
 is_apt: false

@@ -14,6 +14,7 @@
         common_packages:
           - git
           - jq
+          - gcc
     - include_role:
         name:  setup/kubectl
       vars:
@@ -60,6 +61,15 @@
         kubecontext: "{{ item.k8s.context }}"
       with_items: "{{ network.organizations }}"
       when: "item.cloud_provider == 'aws'"
+    - include_role:
+        name: setup/fabric
+      vars:
+        aws_access_key: "{{ cicd_aws.access_key }}"
+        aws_secret_key: "{{ cicd_aws.secret_key }}"
+        aws_external_id: "{{ cicd_aws_external_id }}"
+        aws_assume_role_arn: "{{ cicd_aws_assume_role_arn }}"
+        region: "{{ region }}"
+        default_aws_profile: cicd-role
     vars: #These variables can be overriden from the command line
       privilege_escalate: false           #Default to NOT escalate to root privledges
       install_os: "linux"                 #Default to linux OS

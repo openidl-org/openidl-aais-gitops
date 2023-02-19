@@ -1,0 +1,11 @@
+{
+    "accessKeyId": "{{ aws.accessKeyId }}",
+    "bucketName": "openidl-{{ organizationName }}-analytics-{{ environment }}-output",
+    "region": "{{ aws.region }}",
+    "secretAccessKey": "{{ aws.secretAccessKey }}",
+    "roleParams": {
+       "ExternalId": "{{ aws.assumeRoleExternalId}}",
+       "RoleArn": "{{ aws.assumeRoleArn }}",
+       "RoleSessionName": "appsUserS3AssumeRoleSession"
+    }
+}

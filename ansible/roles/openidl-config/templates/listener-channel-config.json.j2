@@ -1,0 +1,29 @@
+{
+    "applicationName": "openidl-carrier-data-call-processor",
+    "identity": {
+        "user": "openidl-{{ network.org_name }}-data-call-processor-ibp-2.0",
+        "wallet": "&wallet"
+    },
+    "listenerChannels": [
+{% for channel in network.channels if not channel.common %}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                }
+            ]
+        },
+{% endfor %}
+{% for channel in network.channels if channel.common %}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ExtractionPatternSpecified": "ExtractionPatternSpecified"
+                }
+            ]
+        }{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ]
+}

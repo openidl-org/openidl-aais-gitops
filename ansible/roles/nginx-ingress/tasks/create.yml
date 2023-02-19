@@ -56,3 +56,27 @@
     disable_hook: True
     release_values:
       installCRDs: true
+
+- name: "Create cluster issuers"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        generation: 1
+        name: "{{ item.name }}"
+      spec:
+        acme:
+          email: "{{ nginx.cert_manager_email }}"
+          preferredChain: ""
+          privateKeySecretRef:
+            name: "{{ item.name }}"
+          server: "{{ item.url }}"
+          solvers:
+            - http01:
+                ingress:
+                  class: "{{ item.controller_name }}"
+  loop:
+    - { name: "letsencrypt-staging", controller_name: "{{ nginx.controller_name }}", url: "https://acme-staging-v02.api.letsencrypt.org/directory" }
+    - { name: "letsencrypt-prod", controller_name: "{{ nginx.controller_name }}", url: "https://acme-v02.api.letsencrypt.org/directory" }

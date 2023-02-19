@@ -1,0 +1,42 @@
+---
+- name: "Check if var file exist"
+  become: true
+  stat:
+    path: "/etc/profile.d/aws_profile.sh"
+  register: aws_profile_file
+
+- name: "Create var file"
+  become: true
+  file:
+    path: "/etc/profile.d/aws_profile.sh"
+    state: touch
+  when: not aws_profile_file.stat.exists
+
+- name: "Check if AWS_PROFILE environment var is defined"
+  become: true
+  lineinfile:
+    state: absent
+    path: "/etc/profile.d/aws_profile.sh"
+    regexp: "^export AWS_PROFILE="
+  check_mode: true
+  changed_when: false
+  register: default_aws_profile_var
+
+- name: "Set default AWS_PROFILE environment var"
+  become: true
+  lineinfile:
+    state: present
+    path: "/etc/profile.d/aws_profile.sh"
+    line: "export AWS_PROFILE={{ default_aws_profile }}"
+  when: default_aws_profile_var.found == 0
+
+- name: "Update default AWS_PROFILE environment var"
+  become: true
+  lineinfile:
+    path: "/etc/profile.d/aws_profile.sh"
+    regexp: "^(export AWS_PROFILE=).*"
+    line: \g<1>{{ default_aws_profile }}
+    backrefs: yes
+  when:
+    - default_aws_profile_var.found == 1
+    - ansible_env.AWS_PROFILE != default_aws_profile

@@ -1,0 +1,5 @@
+---
+- name: configuring aws
+  shell: |
+    aws eks update-kubeconfig --name {{ cluster }}
+  register: aws_conf
