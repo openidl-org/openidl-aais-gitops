@@ -42,6 +42,31 @@
     values_files:
       - roles_configs/nginx-{{cluster}}-cluster/values-{{type}}.yaml
 
+- name: "Create nginx IngressClass"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: IngressClass
+      metadata:
+        annotations:
+          ingressclass.kubernetes.io/is-default-class: "false"
+          meta.helm.sh/release-name: "nginx-{{type}}"
+          meta.helm.sh/release-namespace: "nginx-{{type}}"
+        labels:
+          app.kubernetes.io/component: controller
+          app.kubernetes.io/instance: "nginx-{{type}}"
+          app.kubernetes.io/name: ingress-nginx
+          app.kubernetes.io/part-of: ingress-nginx
+          cluster: "{{cluster}}-cluster"
+          component: nginx-ingress-controller
+        name: nginx
+      spec:
+        controller: "k8s.io/ingress-nginx-{{type}}"
+  when:
+    - cluster == "blk"
+    - type == "internal" or type == "external"
+
 - name: "Install Jetstack certificate manager"
   kubernetes.core.helm:
     chart_ref: cert-manager/cert-manager

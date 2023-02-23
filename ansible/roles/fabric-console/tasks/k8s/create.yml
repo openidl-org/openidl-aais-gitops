@@ -70,7 +70,8 @@
         annotations:
           kubernetes.io/ingress.class: "{{console_ingress_class}}"
           nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
-          nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+          nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       spec:
         ingressClassName: "{{console_ingress_class}}"
     merge_type: merge
