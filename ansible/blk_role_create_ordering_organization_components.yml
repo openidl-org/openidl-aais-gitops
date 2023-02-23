@@ -1,0 +1,25 @@
+---
+- name: "Create components for an ordering organization"
+  hosts: all
+  vars:
+    state: present
+    organization_name: "{{ ordering_org_name }}"
+    organization_msp_id: "{{ ordering_service_msp }}"
+  tasks:
+    - include_role:
+        name: git-config
+
+    - name: "Install blockchain platform"
+      shell: |
+        ansible-galaxy collection install roles_configs/bin/ibm-blockchain_platform-2.0.0-beta.tar.gz --force
+      when: blockchain_install | default('False') | bool
+
+    - name: "Include vars from git"
+      include_vars:
+        file: "./roles_configs/blockchain_configs/{{item}}"
+      loop:
+        - common-vars.yml
+        - ordering-org-vars.yml
+
+    - include_role:
+        name: ibm.blockchain_platform.ordering_organization

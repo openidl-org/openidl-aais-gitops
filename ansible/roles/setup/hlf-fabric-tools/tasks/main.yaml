@@ -1,0 +1,56 @@
+---
+
+#- name: Install required Ansible collections
+#  delegate_to: localhost
+#  shell: |
+#    ansible-galaxy collection install ibm.blockchain_platform
+#    ansible-galaxy collection install kubernetes.core
+
+- name: register temporary directory
+  tempfile:
+    state: directory
+  register: tmp_directory
+
+#- name: "Install package dependencies - yum"
+#  become: true
+#  yum:
+#    name: "{{ item }}"
+#    state: present
+#    update_cache: yes
+#  retries: 5
+#  loop:
+#    - python38-devel
+#  until: result is success
+
+- name: Create HLF home folder to extract the tools
+  file:
+    path: "{{ fabric.tools.home_folder }}"
+    state: directory
+    mode: "u=rwx,g=rx,o=rwx"
+  become: true
+
+- name: Download Fabric Tools archive (configtx, crypto etc)
+  get_url:
+    url: "{{ fabric.tools.url }}"
+    dest: "{{ fabric.tools.home_folder }}/{{ fabric.tools.archive }}"
+    mode: 0755
+
+- name: Extract HLF tools archive
+  unarchive:
+    src: "{{ fabric.tools.home_folder }}/{{ fabric.tools.archive }}"
+    dest: "{{ fabric.tools.home_folder }}"
+    remote_src: yes
+
+- name: Create symlink to HLF peer CLI
+  file:
+    src: "{{ fabric.tools.home_folder }}/bin/peer"
+    dest: "/usr/local/bin/peer"
+    state: link
+  become: true
+
+- name: Create symlink to HLF configtxlator CLI
+  file:
+    src: "{{ fabric.tools.home_folder }}/bin/configtxlator"
+    dest: "/usr/local/bin/configtxlator"
+    state: link
+  become: true

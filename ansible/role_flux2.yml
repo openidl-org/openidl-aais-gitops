@@ -1,0 +1,14 @@
+---
+- name: Manage local Flux2
+  hosts: all
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  vars:
+    do: create
+    wait_timeout: 3600
+  roles:
+      - role: flux2
+
+# ansible-playbook -i inventory  role_flux2.yml -e do=create
+# ansible-playbook -i inventory  role_flux2.yml -e do=delete

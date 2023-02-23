@@ -1,0 +1,89 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+- name: configuring aws
+  shell: |
+    export AWS_PROFILE=baf-role
+  changed_when: false
+  tags:
+    - notest
+
+- name: Lookup CRD
+  set_fact:
+    crdurl: "{{ crd_url + '/?ref=v' + tag_version }}"
+
+- debug:
+    var: crdurl
+
+- name: Creating CRDs
+  shell: |
+    kubectl kustomize {{crdurl}} > ./crds.yml
+    kubectl apply -f ./crds.yml
+    rm ./crds.yml
+  register: resultcrds
+
+- name: CRDs created
+  shell: |
+    echo "CRDs created"
+
+# Create the namespace for the operator
+- name: Fail if namespace not specified
+  fail:
+    msg: namespace not specified or is empty
+  when: not namespace is defined or not namespace
+
+- name: Determine if namespace exists
+  k8s_info:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+  register: namespace_info
+
+- name: Create namespace
+  k8s:
+    state: present
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{ namespace }}"
+        labels:
+          'pod-security.kubernetes.io/enforce': baseline
+  when: not namespace_info.resources
+
+# Create the Role based Access Control
+- name: Create Role Based Access Control
+  k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition: "{{ lookup('template', 'templates/'+target+'/rbac/'+item) }}"
+    apply: yes
+  loop:
+    - hlf-operator-clusterrole.yaml
+    - hlf-operator-clusterrolebinding.yaml.j2
+    - hlf-operator-serviceaccount.yaml
+
+# create the manager
+- name: Create Operator
+  k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition: "{{ lookup('template', 'templates/'+target+'/manager/'+item) }}"
+    apply: yes
+  loop:
+    - hlf-operator-manager.yaml.j2
+
+- name: Wait for operator
+  shell: |
+    kubectl -n {{ namespace }} rollout status deploy fabric-operator
+  changed_when: false
+
+- name: Expose Operator as service
+  k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition: "{{ lookup('template', 'templates/'+target+'/service/'+item) }}"
+    apply: yes
+  loop:
+    - hlf-operator-service.yaml

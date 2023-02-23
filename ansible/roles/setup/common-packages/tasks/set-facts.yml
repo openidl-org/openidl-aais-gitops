@@ -1,0 +1,15 @@
+---
+- name: "Set fact is_apt?"
+  set_fact:
+    is_apt: true
+  when:
+    - ansible_distribution == "Ubuntu" or
+      ansible_distribution == "Debian"
+
+- name: "Set fact is_yum"
+  set_fact:
+    is_yum: true
+  when:
+    - ansible_distribution == "Amazon" or
+      ansible_distribution == "CentOS" or
+      ansible_distribution == "RedHat"

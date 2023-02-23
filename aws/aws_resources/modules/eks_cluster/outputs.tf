@@ -34,7 +34,7 @@ output "cluster_security_group_id" {
 
 output "config_map_aws_auth" {
   description = "A kubernetes configuration to authenticate to this EKS cluster."
-  value       = kubernetes_config_map.aws_auth.*
+  value       = kubernetes_config_map_v1_data.aws_auth.*
 }
 
 output "cluster_iam_role_name" {

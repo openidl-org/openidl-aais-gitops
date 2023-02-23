@@ -91,7 +91,7 @@ variable "bastion_ssh_key" {
 variable "instance_type" {
   description = "The instance type of the bastion host"
   type        = string
-  default     = "t2.small"
+  default     = "t3.small"
 }
 variable "instance_ami_id" {
   description = "The ami id for the ec2 instance"

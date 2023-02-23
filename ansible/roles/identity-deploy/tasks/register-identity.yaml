@@ -1,0 +1,39 @@
+
+- name: "Fetch the CA admin user from Wallet"
+  include_role: 
+    name: wallet
+  vars:
+    wallet_ops: "get"
+    wallet_path: "{{ network.org_name }}/ca-admin"
+
+- set_fact:
+    identity_cert_attributes: "{{ identity.cert_attrs }}"
+
+- name: Register the idenity
+  ibm.blockchain_platform.registered_identity:
+    state: "present"
+    api_endpoint: "{{ console.api_endpoint }}"
+    api_authtype: "{{ console.api_authtype }}"
+    api_key: "{{ console.username }}"
+    api_secret: "{{ console.password }}"
+    api_timeout: "{{ api_timeout | default(omit) }}"
+    certificate_authority: "{{ network.ca_name }}"
+    registrar: "{{ wallet_fetched_identity.data.data.data | b64decode | from_json }}"
+    enrollment_id: "{{ identity.id }}"
+    enrollment_secret: "{{ identity.enrolment_secret }}"
+    max_enrollments: -1
+    attributes: "{{ identity_cert_attributes }}"
+    type: "{{ identity.type }}"
+  register: registered_identity
+
+- name: "Enroll the identity"
+  include_tasks: "re-register.yaml"
+  when: identity_force_registration == true and registered_identity.changed == false
+
+- set_fact:
+    identity_registered:
+      success: "{{registered_identity.changed}}"
+      identity: "{{registered_identity.registered_identity}}"
+
+- debug:
+    msg: "Registered {{ identity_registered }}"

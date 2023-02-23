@@ -1,0 +1,81 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+- name: configuring aws
+  shell: |
+    export AWS_PROFILE=baf-role
+  changed_when: false
+  tags:
+    - notest
+
+- name: Fail if namespace not specified
+  fail:
+    msg: namespace not specified or is empty
+  when: not namespace is defined or not namespace
+
+- name: Determine if namespace exists
+  k8s_info:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+  register: namespace_info
+
+- name: Determine if console exists
+  k8s_info:
+    namespace: "{{ namespace }}"
+    api_version: "ibp.com/v1alpha2"
+    kind: IBPConsole
+    name: "{{ console_name }}"
+  register: existing_console
+
+- name: Create console
+  k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition: "{{ lookup('template', 'k8s/hlf-operations-console.yaml.j2') }}"
+    apply: yes
+  register: create_console
+
+- name: Wait for console deployment to exist
+  k8s_info:
+    namespace: "{{ namespace }}"
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ console_name }}"
+  register: console_deployment
+  until: console_deployment.resources
+  retries: "{{ wait_timeout }}"
+  delay: 1
+
+- name: Wait for console deployment to start
+  k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    api_version: apps/v1
+    kind: Deployment
+    name: "{{ console_name }}"
+    wait: yes
+    wait_timeout: "{{ wait_timeout }}"
+  changed_when: False
+
+- name: "Patch ingress"
+  k8s:
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: "{{ console_name }}"
+        namespace: "{{ namespace }}"
+        annotations:
+          kubernetes.io/ingress.class: "{{console_ingress_class}}"
+          nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
+          nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      spec:
+        ingressClassName: "{{console_ingress_class}}"
+    merge_type: merge
+
+- name: Print console URL
+  debug:
+    msg: IBM Blockchain Platform console available at "https://{{ namespace }}-{{ console_name }}-console.{{ console_domain }}"

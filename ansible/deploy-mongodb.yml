@@ -1,0 +1,38 @@
+- hosts: ansible_provisioners
+  gather_facts: yes
+  no_log: "{{ no_ansible_log | default(false) }}"
+
+  tasks:
+#    - include_role:
+#        name: "prerun-job"
+
+    - name: Update kubeconfig and set context to openidl EKS cluster
+      shell: |
+        export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
+
+    - no_log: false
+      set_fact:
+        user_token: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
+      when: deploy_action == "mongodb-deploy"
+
+    - no_log: false
+      set_fact:
+        root_token: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
+      when: deploy_action == "mongodb-deploy"
+
+    - no_log: false
+      set_fact:
+        user: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=16') }}"
+      when: deploy_action == "mongodb-deploy"
+
+    - include_role:
+        name: "mongodb"
+      vars:
+        mongodb_user_token: "{{ user_token }}"
+        mongodb_user: "{{ network.org_name }}-{{ env }}-{{ user }}"
+        mongodb_root_token: "{{ root_token }}"
+        mongodb_database: "openidl-offchain-db"
+        deploy_action: "{{ deploy_action }}"
+        aws_account_number: "{{ aws_account_number }}"
+
+

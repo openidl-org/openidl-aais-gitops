@@ -1,0 +1,37 @@
+---
+- name: "Creates directory if missing"
+  delegate_to: "{{ item }}"
+  file:
+    path: "~/.ssh"
+    state: directory
+    mode: 0700
+  with_items: "{{delegate_to}}"
+
+- name: "Setup git configuration provisioning"
+  delegate_to: "{{ item }}"
+  copy:
+    src: "ssh_config"
+    dest: "~/.ssh/config"
+    mode: 0644
+  with_items: "{{delegate_to}}"
+
+- name: "Create ssh key"
+  delegate_to: "{{ item }}"
+  copy:
+    dest: "~/.ssh/openidl-d1-config"
+    mode: 0600
+    content: |
+      {{ ssh_key | b64decode }}
+  with_items: "{{delegate_to}}"
+
+- name: "Pull configs"
+  delegate_to: "{{ item }}"
+  git:
+    repo: "git@github_roles_configs:{{ git_configs_repo_url }}"
+    dest: "./roles_configs"
+    clone: yes
+    update: yes
+    version: main
+    accept_hostkey: true
+  register: pull_result
+  with_items: "{{delegate_to}}"

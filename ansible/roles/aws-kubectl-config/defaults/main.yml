@@ -1,0 +1,9 @@
+---
+tmp_directory: "{{ lookup('env', 'TMPDIR') | default('/tmp',true) }}"
+
+defaults:
+  bin_directory: "{{ bin_install_dir | default('/usr/local/bin') }}" # Default to ~/bin install directory for binaries
+  install_arch: "x86_64"  # Use aarch64 for Linux ARM
+
+is_apt: false
+is_yum: false

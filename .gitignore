@@ -38,3 +38,5 @@ openidl-config/k8s/*
 ansible-automation/orderer.pem
 ansible-automation/orderer.base64.pem
 config.zip
+test_role.yml
+roles_configs

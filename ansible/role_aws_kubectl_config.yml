@@ -1,0 +1,14 @@
+---
+- name: Setup AWS CLI and kubectl
+  hosts: all # change to localhost if connection: local is configured
+  # enable this to run locally
+  #connection: local
+  gather_facts: yes
+  vars_files:
+    - vars.yml
+  roles:
+    - role: aws-kubectl-config
+
+
+# Usage:
+# ansible-playbook -i bastion-host, role_aws_kubectl_config.yml

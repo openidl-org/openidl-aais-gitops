@@ -1,0 +1,128 @@
+---
+ Used for older versions of amazon linux
+- name: "Enable epel repo"
+  yum_repository:
+    name: epel
+    description: "Extra Packages for Enterprise Linux 6 - $basearch"
+    enabled: 1
+    mirrorlist: "https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch"
+    gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6"
+    gpgcheck: 1
+    failovermethod: priority
+  become: yes
+  when: is_yum
+  register: epel_enabled
+  tags:
+    - packages
+
+- name: "Install package dependencies - apt"
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - unzip
+    - python3
+    - python3-pip
+    - curl
+    - python3-requests-oauthlib
+    - python3-yaml
+    - jq
+  retries: 5
+  when: is_apt
+  until: result is success
+  register: result
+  tags:
+    - packages
+
+- name: "Install package dependencies - yum"
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  retries: 5
+  loop:
+    - unzip
+    - python38
+    - python38-pip
+    - curl
+    - jq
+    - ansible
+  when:
+    - is_yum
+    - epel_enabled.state == "present"
+  until: result is success
+  register: result
+  tags:
+    - packages
+
+- name: "Install pip dependencies"
+  become: true
+  pip:
+    name: "{{ item.pkg_name }}"
+    executable: "{{ item.exec }}"
+    extra_args: "{{ item.args }}"
+  loop:
+    - { pkg_name: "pyyaml", exec: "pip3", args: "" }
+    - { pkg_name: "kubernetes", exec: "pip3", args: "" }
+    - { pkg_name: "requests-oauthlib", exec: "pip3", args: "" }
+    - { pkg_name: "ansible==2.9.11", exec: "pip3", args: "" }
+    - { pkg_name: "docker", exec: "pip3", args: "" }
+
+- name: "Download aws cli"
+  get_url:
+    url: "https://awscli.amazonaws.com/awscli-exe-linux-{{ defaults.install_arch }}.zip"
+    dest: "{{ tmp_directory.path }}"
+    checksum: ""
+  when: not aws_cli_installed
+
+- name: "Extract aws cli"
+  unarchive:
+    src: "{{ tmp_directory.path }}/awscli-exe-linux-{{ defaults.install_arch }}.zip"
+    dest: "{{ tmp_directory.path }}"
+    remote_src: yes
+  when: not aws_cli_installed
+
+- name: install aws cli
+  shell: |
+    cd "{{ tmp_directory.path }}"
+    ./aws/install -i {{ defaults.bin_directory }}/aws-cli -b {{ defaults.bin_directory }}
+  when: not aws_cli_installed
+
+- name: "Install kubectl utility"
+  become: true
+  get_url:
+    url: "https://dl.k8s.io/release/{{kubectl_stable_version}}/bin/linux/amd64/kubectl"
+    dest: "{{ defaults.bin_directory }}"
+    checksum: ""
+  register: kubectl_download
+  when: not kubectl_installed
+
+- name: "Download the helm bundle"
+  get_url:
+    url: "https://get.helm.sh/helm-v3.4.1-linux-amd64.tar.gz"
+    dest: "{{ tmp_directory.path }}/helm-bundle.zip"
+  register: helm_bundle_download
+  when: not helm_installed
+
+- name: "Unarchive the helm installer"
+  unarchive:
+    src: "{{ tmp_directory.path }}/helm-bundle.zip"
+    dest: "{{ tmp_directory.path }}"
+    copy: no
+    creates: "{{ tmp_directory.path }}/linux-amd64/helm"
+  register: helm_installer_unarchive
+  when:
+    - helm_bundle_download.changed
+    - not helm_installed
+
+- name: "Install helm"
+  become: true
+  copy:
+    src: "{{ tmp_directory.path }}/linux-amd64/helm"
+    dest: "{{ defaults.bin_directory }}"
+    mode: '0755'
+  when:
+    - helm_installer_unarchive.changed
+    - not helm_installed

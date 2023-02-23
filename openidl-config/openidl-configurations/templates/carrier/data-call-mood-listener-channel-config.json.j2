@@ -1,0 +1,22 @@
+{
+    "listenerChannels": [
+{% for channel in listenerChannels -%}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                },
+                {
+                    "ToggleLikeEvent": "ToggleLikeEvent"
+                }
+            ]
+    }{% if loop.last %}{% else %},{% endif %}
+    {%- endfor %}
+    ],
+    "identity": {
+        "user": "openidl-data-call-mood-listener-ibp-2.0",
+        "wallet": "&wallet"
+    },
+    "applicationName": "openidl-data-call-mood-listener"
+}

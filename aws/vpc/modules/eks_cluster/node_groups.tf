@@ -17,7 +17,7 @@ module "node_groups" {
   # Will be removed in Terraform 0.13
   ng_depends_on = [
     aws_eks_cluster.this,
-    kubernetes_config_map.aws_auth,
+    kubernetes_config_map_v1_data.aws_auth,
     aws_iam_role_policy_attachment.workers_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.workers_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.workers_AmazonEC2ContainerRegistryReadOnly

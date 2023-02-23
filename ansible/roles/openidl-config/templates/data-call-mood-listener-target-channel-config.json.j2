@@ -1,0 +1,15 @@
+{
+    "targetChannels": [
+{% for channel in network.channels %}
+        {
+            "channelName": "{{ channel.name }}",
+            "chaincodeName": "{{ channel.chaincode.name }}"
+        }{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ],
+    "users": [{
+        "org": "{{ network.org_name }}",
+        "user": "openidl-{{ network.org_name }}-data-call-mood-listener-ibp-2.0",
+        "mspId": "{{ network.msp_id }}"
+    }]
+}

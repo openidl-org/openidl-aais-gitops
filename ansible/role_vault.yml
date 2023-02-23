@@ -1,0 +1,11 @@
+---
+- name: Deploy Vault
+  hosts: all
+  vars_files:
+    - vars.yml
+  vars:
+    state: present
+    wait_timeout: 3600
+  tasks:
+    - include_role:
+        name: "vault"

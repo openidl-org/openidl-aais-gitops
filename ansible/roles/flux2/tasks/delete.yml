@@ -1,0 +1,86 @@
+---
+- name: "Delete Flux2 CD"
+  kubernetes.core.helm:
+    chart_ref: https://github.com/fluxcd-community/helm-charts/releases/download/flux2-{{fluxcd.versions.flux2}}/flux2-{{fluxcd.versions.flux2}}.tgz
+    release_name: flux2
+    release_state: absent
+    release_namespace: "{{ fluxcd.flux_namespace }}"
+    force: True
+    wait: True
+    wait_timeout: "300s"
+    update_repo_cache: True
+    disable_hook: True
+
+- name: "Delete Flux2 CD Sync"
+  kubernetes.core.helm:
+    chart_ref: https://github.com/fluxcd-community/helm-charts/releases/download/flux2-sync-{{fluxcd.versions.sync}}/flux2-sync-{{fluxcd.versions.sync}}.tgz
+    release_name: flux2-sync
+    release_state: absent
+    release_namespace: "{{ fluxcd.flux_namespace }}"
+    force: True
+    wait: True
+    wait_timeout: "300s"
+    update_repo_cache: True
+    disable_hook: True
+
+- name: "Delete Flux2 CD Notifications"
+  kubernetes.core.helm:
+    chart_ref: https://github.com/fluxcd-community/helm-charts/releases/download/flux2-notification-{{fluxcd.versions.notification}}/flux2-notification-{{fluxcd.versions.notification}}.tgz
+    release_name: flux2-notification
+    release_state: absent
+    release_namespace: "{{ fluxcd.flux_namespace }}"
+    force: True
+    wait: True
+    wait_timeout: "300s"
+    update_repo_cache: True
+    disable_hook: True
+
+- name: Deleting git repo credentials
+  k8s:
+    state: absent
+    definition:
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: git-auth
+        namespace: "{{ fluxcd.flux_namespace }}"
+        label: flux
+
+# Patch CRDs since Custom resources with finalizers can "deadlock" and cannot be deleted.
+- include_tasks: crd_info.yml
+
+- name: "Patch CRD gitrepositories.source.toolkit.fluxcd.io"
+  k8s:
+    definition:
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: gitrepositories.source.toolkit.fluxcd.io
+        finalizers: []
+    merge_type: merge
+  when: gitrepositories_crd.resources |length > 0
+
+- name: "Patch CRD kustomizations.kustomize.toolkit.fluxcd.io"
+  k8s:
+    definition:
+      apiVersion: apiextensions.k8s.io/v1
+      kind: CustomResourceDefinition
+      metadata:
+        name: kustomizations.kustomize.toolkit.fluxcd.io
+        finalizers: []
+    merge_type: merge
+  when: kustomization_crd.resources |length > 0
+
+- include_tasks: crd_info.yml
+
+- name: "Deleting Flux2 namespace '{{ fluxcd.flux_namespace }}'"
+  k8s:
+    name: "{{ fluxcd.flux_namespace }}"
+    kind: Namespace
+    state: absent
+    wait: true
+    wait_sleep: 2
+    wait_timeout: 60
+  when:
+    - gitrepositories_crd.resources |length == 0
+    - kustomization_crd.resources |length == 0

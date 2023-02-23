@@ -50,7 +50,7 @@ ingress:
     ingressClassName: nginx-external
     enabled: false
     annotations:
-        cert-manager.io/issuer: letsencrypt-issuer
+        cert-manager.io/cluster-issuer: letsencrypt-prod
         nginx.ingress.kubernetes.io/backend-protocol: HTTP
         nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
         nginx.ingress.kubernetes.io/rewrite-target: /

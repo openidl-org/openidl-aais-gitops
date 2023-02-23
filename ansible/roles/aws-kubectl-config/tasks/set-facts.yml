@@ -1,0 +1,46 @@
+---
+- name: "check aws cli"
+  stat:
+    path: "{{ aws_cli.bin_directory }}/aws"
+  register: aws_cli_stat_result
+
+- name: "Set fact aws_cli_installed"
+  set_fact:
+    aws_cli_installed: "{{ aws_cli_stat_result.stat.exists }}"
+
+- name: "Checking kubectl exists"
+  stat:
+    path: "{{ aws_cli.bin_directory }}/kubectl"
+  register: kubectl_stat_result
+
+- name: "Set fact kubectl_installed"
+  set_fact:
+    kubectl_installed: "{{ kubectl_stat_result.stat.exists }}"
+
+- name: "Checking helm exists"
+  stat:
+    path: "{{ aws_cli.bin_directory }}/helm"
+  register: helm_stat_result
+
+- name: "Set fact helm_installed"
+  set_fact:
+    helm_installed: "{{ helm_stat_result.stat.exists }}"
+
+- name: "Set fact is_apt?"
+  set_fact:
+    is_apt: true
+  when:
+    - ansible_distribution == "Ubuntu" or
+      ansible_distribution == "Debian"
+
+- name: "Set fact is_yum"
+  set_fact:
+    is_yum: true
+  when:
+    - ansible_distribution == "Amazon" or
+      ansible_distribution == "CentOS" or
+      ansible_distribution == "RedHat"
+
+- name: "Get kubectl stable version"
+  set_fact:
+    kubectl_stable_version: "{{ lookup('url', 'https://dl.k8s.io/release/stable.txt')}}"

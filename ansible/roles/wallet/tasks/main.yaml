@@ -1,0 +1,6 @@
+
+- name: "Read Wallet Config"
+  include_tasks: "read-wallet-config-{{ cloud_deployment }}.yaml"
+
+- name: "Perform Wallet Operation {{wallet_ops}} on wallet {{ wallet_kind }}"
+  include_tasks: "{{wallet_ops}}-{{ wallet_kind }}.yaml"

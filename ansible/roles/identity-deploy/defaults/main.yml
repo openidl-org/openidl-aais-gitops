@@ -1,0 +1,2 @@
+cloud_deployment: "aws"
+identity_force_registration: true

@@ -1,0 +1,24 @@
+
+
+- set_fact:
+    en_secret: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+
+- set_fact:
+    identity:
+      id: "{{ app_identity.id }}"
+      cert_attrs: "[ { \"name\" : \"orgType\" ,  \"value\" : \"{{app_identity.org_type}}\" ,  \"ecert\" : \"true\"} ]"
+      type: "client"
+      enrolment_secret: "{{en_secret}}"
+  when: app_identity.cert_attrs is not defined
+
+- set_fact:
+    identity:
+      id: "{{ app_identity.id }}"
+      cert_attrs: "{{ app_identity.cert_attrs }}"
+      type: "client"
+      enrolment_secret: "{{en_secret}}"
+  when: app_identity.cert_attrs is defined
+
+- name: Register and enroll the openIDL application identites, push it to a wallet
+  include_role:
+    name: identity-deploy

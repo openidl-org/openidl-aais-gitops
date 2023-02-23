@@ -1,0 +1,12 @@
+{
+    "accessKeyId": "{{ aws.accessKeyId }}",
+    "region": "{{ aws.region }}",
+    "secretAccessKey": "{{ aws.secretAccessKey }}",
+    "secretName": "{{ organizationName }}-{{ environment }}-kvs-vault",
+    "walletType": "hashicorp_vault",
+    "roleParams": {
+       "ExternalId": "{{ aws.assumeRoleExternalId}}",
+       "RoleArn": "{{ aws.assumeRoleArn }}",
+       "RoleSessionName": "appsUserVaultAssumeRoleSession"
+    }
+}

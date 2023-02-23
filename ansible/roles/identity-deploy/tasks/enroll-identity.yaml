@@ -1,0 +1,38 @@
+
+- name: Delete the json enrolment file
+  file:
+    path: "enrl-{{ identity.id }}.json"
+    state: absent
+
+- name: Enroll the identity
+  ibm.blockchain_platform.enrolled_identity:
+    state: "present"
+    api_endpoint: "{{ console.api_endpoint }}"
+    api_authtype: "{{ console.api_authtype }}"
+    api_key: "{{ console.username }}"
+    api_secret: "{{ console.password }}"
+    api_timeout: "{{ api_timeout | default(omit) }}"
+    certificate_authority: "{{ network.ca_name }}"
+    name: "{{ identity.id }}"
+    enrollment_id: "{{ identity.id }}"
+    path: "enrl-{{ identity.id }}.json"
+    enrollment_secret: "{{ identity.enrolment_secret }}"
+  register: enrolled_identity
+
+- set_fact:
+    identity_wallet:
+      data:
+        credentials:
+          certificate: "{{enrolled_identity.enrolled_identity.cert | b64decode | regex_replace('\n' , '\\n') }}"
+          privateKey: "{{ enrolled_identity.enrolled_identity.private_key | b64decode | regex_replace('\r\n' , '\\r\\n') }}"
+        mspId: "{{network.org_name}}"
+        type: "X.509"
+      id: "{{identity.id}}"
+
+- name: "Put the enrolled identity to Wallet"
+  include_role: 
+    name: wallet
+  vars:
+    wallet_ops: "put"
+    wallet_path: "{{ identity_wallet.id }}"
+    wallet_identity: "{{ identity_wallet }}"

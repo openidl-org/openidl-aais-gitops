@@ -1,0 +1,17 @@
+{
+    "channels": [
+{% for channel in network.channels if not channel.common %}
+    {
+      "chaincodeName": "{{ channel.chaincode.name }}",
+      "channelName": "{{ channel.name }}"
+    }{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ],
+    "users": [
+        {
+            "mspId": "{{ network.msp_id }}",
+            "org": "{{ network.org_name }}",
+            "user": "openidl-{{ network.org_name }}-insurance-data-manager-ibp-2.0"
+        }
+    ]
+}

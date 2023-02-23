@@ -1,0 +1,170 @@
+---
+- name: Update kubeconfig and set context to openidl EKS cluster
+  shell: |
+    export AWS_PROFILE=cicd-role; /usr/local/bin/aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
+
+- name: Delete the config directory
+  file:
+    path: /tmp/openidl-code/{{ env_id }}-config
+    state: absent
+
+- name: Create org config directory
+  file:
+    path: /tmp/openidl-code/{{ env_id }}-config
+    state: directory
+    mode: 0755
+
+- name: Get Mongodb User
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-mongodb-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: mongodb_user
+
+- name: Get Mongodb User Token
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ network.org_name }}-{{ env }}-mongodb-user-token --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: mongodb_user_token
+
+- name: Get Apps User
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .access_id
+  register: apps_user_access_id
+
+- name: Get Apps User token
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .secret_key
+  register: apps_user_secret_key
+
+- name: Get Cognito User-Pool ID
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws cognito-idp list-user-pools --region {{ aws_region }} --max-results 20 | jq -r ".UserPools[] | select(.Name | contains(\"{{ env_id }}\")) | .Id"
+  register: cognito_user_pool_id
+
+- name: Get Cognito App Client ID
+  no_log: false
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ network.org_name }}-{{ env }}\")) | .ClientId"
+  register: cognito_app_client_id
+
+- name: Get Organizations and IDs
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-organization-ids --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .organizations
+  register: organizations
+
+#- name: Create a openidl k8s namespace
+#  k8s:
+#    name: openidl
+#    api_version: v1
+#    kind: Namespace
+#    state: present
+
+- name: Create a connection profile
+  ibm.blockchain_platform.connection_profile:
+    api_endpoint: "{{ console.api_endpoint }}"
+    api_authtype: "{{ console.api_authtype }}"
+    api_key: "{{ console.username }}"
+    api_secret: "{{ console.password }}"
+    name: "{{ network.org_name }} Gateway"
+    path: "/tmp/openidl-code/{{ env_id }}-config/connection-profile.json"
+    organization: "{{ network.org_name }}"
+    certificate_authority: "{{ network.ca_name }}"
+    peers:
+      - "{{ console.peer }}"
+
+- name: Generate configuration files
+  template:
+    src: templates/{{ item }}.j2
+    dest: '/tmp/openidl-code/{{ env_id }}-config/{{ item }}'
+    mode: 0755
+  vars:
+    organization_ids: "{{ organizations.stdout }}"
+    aws_access_id: "{{ apps_user_access_id.stdout }}"
+    aws_access_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
+    mongo_user: "{{ mongodb_user.stdout }}"
+    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    s3_hds_bucket: "{{ network.org_name }}-{{ env }}-openidl-hdsdatastore"
+  with_items:
+    - channel-config.json
+#    - connection-profile.json
+    - data-call-app-default-config.json
+    - data-call-app-mappings-config.json
+    - default-config.json
+    - email-config.json
+    - insurance-data-manager-channel-config.json
+    - insurance-data-manager-default-config.json
+    - insurance-data-manager-mappings-config.json
+    - insurance-data-manager-metadata-config.json
+    - local-cognito-admin-config.json
+    - local-cognito-config.json
+    - local-db-config.json
+    - local-kvs-config.json
+    - local-vault-config.json
+    - s3-bucket-config.json
+    - ui-mappings-config.json
+    - unique-identifiers-config.json
+    - utilities-admin-config.json
+    - utilities-fabric-config.json
+    - utilities-mappings-config.json
+
+- name: Generate configuration files
+  template:
+    src: templates/{{ item }}.j2
+    dest: '/tmp/openidl-code/{{ env_id }}-config/{{ item }}'
+    mode: 0755
+  vars:
+    organization_ids: "{{ organizations.stdout }}"
+    aws_access_id: "{{ apps_user_access_id.stdout }}"
+    aws_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
+    mongo_user: "{{ mongodb_user.stdout }}"
+    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    s3_hds_bucket: "{{ network.org_name }}-{{ env }}-openidl-hdsdatastore"
+  with_items:
+    - transactional-data-event-listener-channel-config.json
+    - transactional-data-event-listener-default-config.json
+    - transactional-data-event-listener-mappings-config.json
+    - transactional-data-event-listener-metadata-config.json
+    - transactional-data-event-listener-target-channel-config.json
+    - data-call-mood-listener-channel-config.json
+    - data-call-mood-listener-default-config.json
+    - data-call-mood-listener-mappings-config.json
+    - data-call-mood-listener-metadata-config.json
+    - data-call-mood-listener-target-channel-config.json
+  when: node_type == "analytics"
+
+- name: Generate configuration files
+  template:
+    src: templates/{{ item }}.j2
+    dest: '/tmp/openidl-code/{{ env_id }}-config/{{ item }}'
+    mode: 0755
+  vars:
+    organization_ids: "{{ organizations.stdout }}"
+    aws_access_id: "{{ apps_user_access_id.stdout }}"
+    aws_access_secret_key: "{{ apps_user_secret_key.stdout }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
+    mongo_user: "{{ mongodb_user.stdout }}"
+    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    s3_hds_bucket: "{{ network.org_name }}-{{ env }}-openidl-hdsdatastore"
+  with_items:
+    - data-call-processor-default-config.json
+    - data-call-processor-mappings-config.json
+    - data-call-processor-metadata-config.json
+    - listener-channel-config.json
+    - target-channel-config.json
+  when: node_type != "analytics"

@@ -1,0 +1,85 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+- name: Fail if namespace not specified
+  fail:
+    msg: namespace not specified or is empty
+  when: not namespace is defined or not namespace
+
+- name: Determine if namespace exists
+  k8s_info:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+  register: namespace_info
+
+- name: Delete custom resource definitions
+  k8s:
+    state: absent
+    namespace: "{{ namespace }}"
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: "{{ item }}"
+  loop:
+    - ibpcas.ibp.com
+    - ibpconsoles.ibp.com
+    - ibporderers.ibp.com
+    - ibppeers.ibp.com
+  when: namespace_info.resources
+
+- name: Delete service
+  k8s:
+    state: absent
+    namespace: "{{ namespace }}"
+    api_version: v1
+    kind: Service
+    name: "{{ webhook }}"
+    wait: yes
+    wait_timeout: "{{ wait_timeout }}"
+  when: namespace_info.resources
+
+- name: Delete deployment
+  k8s:
+    state: absent
+    namespace: "{{ namespace }}"
+    api_version: v1
+    kind: Deployment
+    name: "{{ webhook }}"
+    wait: yes
+    wait_timeout: "{{ wait_timeout }}"
+  when: namespace_info.resources
+
+- name: Delete secrets
+  k8s:
+    state: absent
+    namespace: "{{ namespace }}"
+    api_version: v1
+    kind: Secret
+    name: "{{ item }}"
+    wait: yes
+    wait_timeout: "{{ wait_timeout }}"
+  loop:
+    - webhook-tls-cert
+    - webhook-tls-key
+  when: namespace_info.resources
+
+- name: Delete Role Based Access Control
+  k8s:
+    state: absent
+    namespace: "{{ namespace }}"
+    resource_definition: "{{ lookup('template', 'templates/'+target+'/rbac/'+item) }}"
+    apply: yes
+  loop:
+    - hlf-operator-clusterrole.yaml
+    - hlf-operator-clusterrolebinding.yaml.j2
+    - hlf-operator-serviceaccount.yaml
+
+- name: Expose Operator as service
+  k8s:
+    state: absent
+    namespace: "{{ namespace }}"
+    resource_definition: "{{ lookup('template', 'templates/'+target+'/service/'+item) }}"
+    apply: yes
+  loop:
+    - hlf-operator-service.yaml

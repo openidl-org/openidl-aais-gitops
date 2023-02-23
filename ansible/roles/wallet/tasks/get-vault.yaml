@@ -1,0 +1,13 @@
+- set_fact:
+    wallet_resource_path: "{{vault_config.vaultPath}}/{{wallet_path}}"
+
+- name: Fetch identity certs from Vault {{ vault_config.url }} with path {{ wallet_resource_path }}
+  community.hashi_vault.vault_kv2_get:
+    url: "{{ vault_config.url }}"
+    path: "{{ wallet_resource_path }}"
+    engine_mount_point: "{{vault_engine_mount}}"
+    auth_method: userpass
+    username: "{{ vault_config.username }}"
+    password: "{{ vault_config.password }}"
+    validate_certs: false
+  register: wallet_fetched_identity
