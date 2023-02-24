@@ -13,13 +13,16 @@ resource "kubernetes_config_map_v1_data" "app_config_map" {
   }
 }
 #Setting up configmap/aws-auth for blk cluster
-resource "kubernetes_config_map_v1_data" "blk_config_map" {
+resource "kubernetes_config_map" "blk_config_map" {
   provider = kubernetes.blk_cluster
   depends_on = [data.aws_eks_cluster.blk_eks_cluster]
-  force = true
   metadata {
     name = "aws-auth"
     namespace = "kube-system"
+    labels = {
+      "app.kubernetes.io/managed-by" = "Terraform"
+      "terraform.io/module" = "terraform-aws-modules.eks.aws"
+    }
   }
   data = {
       mapRoles = yamlencode(distinct(concat(local.blk_cluster_map_roles, local.blk_cluster_map_roles_list)))
