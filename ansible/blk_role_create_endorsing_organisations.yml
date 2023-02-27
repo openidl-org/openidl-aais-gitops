@@ -3,8 +3,6 @@
   hosts: all
   vars:
     state: present
-    git_configs_repo_branch: main
-    organization_id: endorsing_org
   tasks:
     - include_role:
         name: git-config
