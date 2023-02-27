@@ -5,28 +5,28 @@ metadata:
   name: "{{ console_name }}"
 spec:
   arch:
-    - "{{arch}}"
+    - "{{console_arch}}"
   license:
     accept: true
-  serviceAccountName: "{{ service_account }}"
-  email: "{{ console_email }}"
-  password: "{{ console_default_password }}"
+  serviceAccountName: "{{ console_service_account }}"
+  email: "{{ console_username }}"
+  password: "{{ console_password }}"
   allowDefaultPassword: true
   imagePullSecrets:
-  - "{{ image_pull_secret }}"
+  - "{{ console_image_pull_secret }}"
   networkinfo:
     domain: "{{ console_domain }}"
   images:
-    deployerImage: "{{deployer_image}}"
-    deployerTag: "{{deployer_image_label}}"
-    consoleInitImage: "{{init_image}}"
-    consoleInitTag: "{{init_image_label}}"
+    deployerImage: "{{console_deployer_image}}"
+    deployerTag: "{{console_deployer_image_label}}"
+    consoleInitImage: "{{console_init_image}}"
+    consoleInitTag: "{{console_init_image_label}}"
     consoleImage: "{{console_image}}"
     consoleTag: "{{console_image_label}}"
-    configtxlatorImage: "{{tools_image}}"
-    configtxlatorTag: "{{tools_image_label}}"
-    couchdbImage: "{{couchdb_image}}"
-    couchdbTag: "{{couchdb_image_label}}"
+    configtxlatorImage: "{{console_hlf_tools_image}}"
+    configtxlatorTag: "{{console_hlf_tools_image_label}}"
+    couchdbImage: "{{console_couchdb_image}}"
+    couchdbTag: "{{console_couchdb_image_label}}"
 {%+ if console_versions is defined %}
   versions:
     {{ console_versions | to_nice_yaml(indent=2, width=1024) | indent(4, false) }}
@@ -40,10 +40,10 @@ spec:
 {%+ if console_tls_secret is defined %}
   tlsSecretName: "{{ console_tls_secret }}"
 {% endif %}
-{%+ if zones is defined %}
+{%+ if console_zones is defined %}
   clusterdata:
     zones:
-{%+ for zone in zones %}
+{%+ for zone in console_zones %}
     - "{{ zone }}"
 {% endfor %}
 {% endif %}

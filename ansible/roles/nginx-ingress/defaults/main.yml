@@ -1,3 +1,12 @@
-cluster: app-cluster
-type: external
 do: create
+nginx_cluster: blk
+nginx_type: external
+nginx_tls_cert_prod_url: "https://acme-v02.api.letsencrypt.org/directory"
+nginx_tls_cert_stage_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+nginx_nginx_chart_version: 4.4.2
+nginx_cert_manager_chart_version: 1.10.0
+nginx_cert_manager_email: ""
+nginx_controller_name: nginx-external
+
+git_config_path: "/tmp/roles_configs"

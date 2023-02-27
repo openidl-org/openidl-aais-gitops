@@ -2,22 +2,34 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 ---
-image_pull_secret: ghcr-pull-secret
+state: present
+wait_timeout: 3600
 
-service_account: default
-
-couchdb_image: couchdb
-couchdb_image_label: 3.2.1
-
-image_registry: hyperledger
-# image_registry_username: cp
-# image_registry_email: user@example.org
-# image_registry_password: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-tools_image: "{{ image_registry }}/fabric-tools"
-tools_image_label: "{{ fabric_version }}"
-
+console_image_pull_secret: ghcr-pull-secret
+console_namespace: hlf
+console_service_account: default
+console_couchdb_image: couchdb
+console_couchdb_image_label: 3.2.1
+console_hlf_tools_image: "hyperledger/fabric-tools"
+console_hlf_tools_image_label: "2.4.4"
 console_ingress_class: nginx
+console_deployer_image: ghcr.io/ibm-blockchain/fabric-deployer
+console_deployer_image_label: latest-amd64
+console_init_image: registry.access.redhat.com/ubi8/ubi-minimal
+console_init_image_label: latest
+console_image: ghcr.io/hyperledger-labs/fabric-console
+console_image_label: latest
+console_name: operator
+console_arch: amd64
+console_storage_class: gp2
+console_storage_size: 5Gi
+console_target: k8s
+console_cluster_issuer: letsencrypt-prod
 
+# Must be custom defined
+  # console_domain: "example.com"
+  # console_password: ""
+  # console_username: ""
 console_versions:
   ca:
     1.5.3-1:

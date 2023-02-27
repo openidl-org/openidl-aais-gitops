@@ -1,1 +1,11 @@
 ---
+state: present
+
+operator_arch: amd64
+operator_namespace: hlf
+operator_crd_url: https://github.com/hyperledger-labs/fabric-operator.git/config/crd
+operator_tag_version: 1.0.4
+operator_webhook: fabric-operator
+operator_wait_timeout: 3600
+operator_target: k8s
+operator_fabric_operator_image: ghcr.io/hyperledger-labs/fabric-operator

@@ -1,6 +1,7 @@
 ---
 # either pass it as extra var if run local or create and attach to the template secret 'github_ssh_key' in AWX
 ssh_key: "base64 encoded string"
+git_config_path: "/tmp/roles_configs"
 git_configs_repo_url: "senofi/openidl-d1-config.git"
 delegate_to:
   - localhost

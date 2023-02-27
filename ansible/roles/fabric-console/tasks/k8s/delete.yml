@@ -5,13 +5,13 @@
 - name: Fail if namespace not specified
   fail:
     msg: namespace not specified or is empty
-  when: not namespace is defined or not namespace
+  when: not console_namespace is defined or not console_namespace
 
 - name: Determine if namespace exists
   k8s_info:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
+    name: "{{ console_namespace }}"
   register: namespace_info
 
 - name: Determine if custom resource definitions exist
@@ -24,7 +24,7 @@
 - name: Delete console
   k8s:
     state: absent
-    namespace: "{{ namespace }}"
+    namespace: "{{ console_namespace }}"
     api_version: "{{ 'ibp.com/v1beta1' if product_version is version('2.5.0', '>=') else 'ibp.com/v1alpha2' }}"
     kind: IBPConsole
     name: "{{ console_name }}"
@@ -33,8 +33,8 @@
 - name: Delete image secret
   k8s:
     state: absent
-    namespace: "{{ namespace }}"
+    namespace: "{{ console_namespace }}"
     api_version: v1
     kind: Secret
-    name: "{{ image_pull_secret }}"
+    name: "{{ console_image_pull_secret }}"
   when: namespace_info.resources

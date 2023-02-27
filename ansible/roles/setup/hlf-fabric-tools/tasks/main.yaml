@@ -1,26 +1,8 @@
 ---
-
-#- name: Install required Ansible collections
-#  delegate_to: localhost
-#  shell: |
-#    ansible-galaxy collection install ibm.blockchain_platform
-#    ansible-galaxy collection install kubernetes.core
-
 - name: register temporary directory
   tempfile:
     state: directory
   register: tmp_directory
-
-#- name: "Install package dependencies - yum"
-#  become: true
-#  yum:
-#    name: "{{ item }}"
-#    state: present
-#    update_cache: yes
-#  retries: 5
-#  loop:
-#    - python38-devel
-#  until: result is success
 
 - name: Create HLF home folder to extract the tools
   file:

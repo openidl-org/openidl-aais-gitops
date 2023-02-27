@@ -1,0 +1,11 @@
+---
+- name: "Install blockchain platform collection"
+  shell: |
+    ansible-galaxy collection install {{ collection_file }} --force
+  when: blockchain_collection_install | bool
+
+- name: "Install blockchain platform collection on localhost"
+  delegate_to: localhost
+  shell: |
+    ansible-galaxy collection install {{ collection_file }} --force
+  when: blockchain_collection_install | bool

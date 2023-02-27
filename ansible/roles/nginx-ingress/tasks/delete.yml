@@ -2,22 +2,23 @@
 - name: "Uninstall Nginx Ingress Controller"
   kubernetes.core.helm:
     chart_ref: nginx/ingress-nginx
-    chart_version: "{{nginx.nginx_chart_version}}"
-    release_name: "nginx-{{type}}"
+    chart_version: "{{nginx_nginx_chart_version}}"
+    release_name: "nginx-{{nginx_type}}"
     release_state: absent
-    release_namespace: "nginx-{{type}}"
+    release_namespace: "nginx-{{nginx_type}}"
     force: True
     wait: True
     wait_timeout: "300s"
     update_repo_cache: True
     disable_hook: True
     values_files:
-      - roles_configs/nginx-{{cluster}}-cluster/values-{{type}}.yaml
+      - "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"
+  tags: ingress_controller
 
 - name: "Uninstall Jetstack certificate manager"
   kubernetes.core.helm:
     chart_ref: cert-manager/cert-manager
-    chart_version: "{{nginx.cert_manager_chart_version}}"
+    chart_version: "{{nginx_cert_manager_chart_version}}"
     release_name: cert-manager
     release_state: absent
     release_namespace: cert-manager
@@ -29,12 +30,13 @@
 
 - name: "Deleting Nginx ingress controller namespace"
   k8s:
-    name: "nginx-{{ type }}"
+    name: "nginx-{{ nginx_type }}"
     kind: Namespace
     state: absent
     wait: true
     wait_sleep: 2
     wait_timeout: 240
+  tags: ingress_controller
 
 - name: "Deleting cert-manager namespace"
   k8s:
@@ -44,3 +46,13 @@
     wait: true
     wait_sleep: 2
     wait_timeout: 240
+
+- name: Remove an ingressclasses
+  k8s:
+    state: absent
+    api_version: v1
+    kind: IngressClass
+    name: nginx
+  when:
+    - nginx_cluster == "blk"
+    - nginx_type == "internal" or nginx_type == "external"

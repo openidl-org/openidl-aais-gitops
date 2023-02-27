@@ -1,4 +1,4 @@
 Host github_roles_configs
         HostName github.com
         User git
-        IdentityFile ~/.ssh/openidl-d1-config
+        IdentityFile ~/.ssh/openidl-git-config

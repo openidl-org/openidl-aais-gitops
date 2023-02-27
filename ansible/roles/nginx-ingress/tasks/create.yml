@@ -1,16 +1,7 @@
 ---
-- name: "Creating Nginx namespace '{{ nginx.nginx_namespace }}' if missing"
+- name: "Creating Nginx namespace '{{ nginx_nginx_namespace }}' if missing"
   k8s:
-    name: "nginx-{{ type }}"
-    kind: Namespace
-    state: present
-    wait: true
-    wait_sleep: 2
-    wait_timeout: 60
-
-- name: "Creating cert-manager namespace if missing"
-  k8s:
-    name: cert-manager
+    name: "nginx-{{ nginx_type }}"
     kind: Namespace
     state: present
     wait: true
@@ -28,19 +19,8 @@
     repo_url: "https://charts.jetstack.io"
 
 - name: "Install Nginx Ingress Controller"
-  kubernetes.core.helm:
-    chart_ref: nginx/ingress-nginx
-    chart_version: "{{nginx.nginx_chart_version}}"
-    release_name: "nginx-{{type}}"
-    release_state: present
-    release_namespace: "nginx-{{type}}"
-    force: True
-    wait: True
-    wait_timeout: "300s"
-    update_repo_cache: True
-    disable_hook: True
-    values_files:
-      - roles_configs/nginx-{{cluster}}-cluster/values-{{type}}.yaml
+  include_tasks: "install_ingress_controller.yml"
+  tags: ingress_controller
 
 - name: "Create nginx IngressClass"
   kubernetes.core.k8s:
@@ -51,26 +31,36 @@
       metadata:
         annotations:
           ingressclass.kubernetes.io/is-default-class: "false"
-          meta.helm.sh/release-name: "nginx-{{type}}"
-          meta.helm.sh/release-namespace: "nginx-{{type}}"
+          meta.helm.sh/release-name: "nginx-{{nginx_type}}"
+          meta.helm.sh/release-namespace: "nginx-{{nginx_type}}"
         labels:
           app.kubernetes.io/component: controller
-          app.kubernetes.io/instance: "nginx-{{type}}"
+          app.kubernetes.io/instance: "nginx-{{nginx_type}}"
           app.kubernetes.io/name: ingress-nginx
           app.kubernetes.io/part-of: ingress-nginx
-          cluster: "{{cluster}}-cluster"
+          cluster: "{{nginx_cluster}}-cluster"
           component: nginx-ingress-controller
         name: nginx
       spec:
-        controller: "k8s.io/ingress-nginx-{{type}}"
+        controller: "k8s.io/ingress-nginx-{{nginx_type}}"
   when:
-    - cluster == "blk"
-    - type == "internal" or type == "external"
+    - nginx_cluster == "blk"
+    - nginx_type == "internal" or nginx_type == "external"
+
+
+- name: "Creating cert-manager namespace if missing"
+  k8s:
+    name: cert-manager
+    kind: Namespace
+    state: present
+    wait: true
+    wait_sleep: 2
+    wait_timeout: 60
 
 - name: "Install Jetstack certificate manager"
   kubernetes.core.helm:
     chart_ref: cert-manager/cert-manager
-    chart_version: "{{nginx.cert_manager_chart_version}}"
+    chart_version: "{{nginx_cert_manager_chart_version}}"
     release_name: cert-manager
     release_state: present
     release_namespace: cert-manager
@@ -78,7 +68,6 @@
     wait: True
     wait_timeout: "300s"
     update_repo_cache: True
-    disable_hook: True
     release_values:
       installCRDs: true
 
@@ -93,7 +82,7 @@
         name: "{{ item.name }}"
       spec:
         acme:
-          email: "{{ nginx.cert_manager_email }}"
+          email: "{{ nginx_cert_manager_email }}"
           preferredChain: ""
           privateKeySecretRef:
             name: "{{ item.name }}"
@@ -103,5 +92,5 @@
                 ingress:
                   class: "{{ item.controller_name }}"
   loop:
-    - { name: "letsencrypt-staging", controller_name: "{{ nginx.controller_name }}", url: "https://acme-staging-v02.api.letsencrypt.org/directory" }
-    - { name: "letsencrypt-prod", controller_name: "{{ nginx.controller_name }}", url: "https://acme-v02.api.letsencrypt.org/directory" }
+    - { name: "letsencrypt-staging", controller_name: "{{ nginx_controller_name }}", url: "{{nginx_tls_cert_stage_url}}" }
+    - { name: "letsencrypt-prod", controller_name: "{{ nginx_controller_name }}", url: "{{nginx_tls_cert_prod_url}}" }

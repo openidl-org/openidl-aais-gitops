@@ -18,7 +18,7 @@
 - name: "Create ssh key"
   delegate_to: "{{ item }}"
   copy:
-    dest: "~/.ssh/openidl-d1-config"
+    dest: "~/.ssh/openidl-git-config"
     mode: 0600
     content: |
       {{ ssh_key | b64decode }}
@@ -28,10 +28,10 @@
   delegate_to: "{{ item }}"
   git:
     repo: "git@github_roles_configs:{{ git_configs_repo_url }}"
-    dest: "./roles_configs"
+    dest: "{{git_config_path}}"
+    version: "{{ git_configs_repo_branch }}"
     clone: yes
     update: yes
-    version: main
     accept_hostkey: true
   register: pull_result
   with_items: "{{delegate_to}}"

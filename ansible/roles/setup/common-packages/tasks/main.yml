@@ -1,5 +1,5 @@
 ---
-- include: set-facts.yml
+- include_tasks: set-facts.yml
 
 - name: "Install package dependencies - apt"
   become: true

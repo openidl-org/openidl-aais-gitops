@@ -1,0 +1,17 @@
+- set_fact:
+    admin_identity_wallet:
+      data:
+        credentials:
+          certificate: "{{ admin_identity_json.data.cert | b64decode | regex_replace('\n' , '\\n') }}"
+          privateKey: "{{ admin_identity_json.data.private_key | b64decode | regex_replace('\r\n' , '\\r\\n') }}"
+        mspId: "{{network.org_name}}"
+        type: "X.509"
+      id: "{{admin_identity_json.id}}"
+
+- name: "Put the admin identity to Wallet"
+  include_role:
+    name: wallet
+  vars:
+    wallet_ops: "put"
+    wallet_path: "{{ admin_identity_wallet.id }}"
+    wallet_identity: "{{ admin_identity_wallet }}"

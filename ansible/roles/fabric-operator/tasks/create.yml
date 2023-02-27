@@ -5,7 +5,7 @@
 - name: Fail if architecture not specified
   fail:
     msg: arch not specified or is not one of "amd64"
-  when: not arch is defined or not arch in ("amd64")
+  when: not operator_arch is defined or not operator_arch in ("amd64")
 
 - name: Create custom resource definitions
-  include_tasks: "{{ target }}/create.yml"
+  include_tasks: "{{ operator_target }}/create.yml"

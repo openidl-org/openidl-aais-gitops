@@ -5,22 +5,22 @@
 - name: Fail if architecture not specified
   fail:
     msg: arch not specified or is not one of "amd64"
-  when: not arch is defined or not arch in ("amd64")
+  when: not console_arch is defined or not console_arch in ("amd64")
 
 - name: Fail if console domain not specified
   fail:
-    msg: console_domain not specified or is empty
+    msg: console domain not specified or is empty
   when: not console_domain is defined or not console_domain
 
-- name: Fail if console email not specified
+- name: Fail if console username not specified
   fail:
-    msg: console_email not specified or is empty
-  when: not console_email is defined or not console_email
+    msg: console username not specified or is empty
+  when: not console_username is defined or not console_username
 
 - name: Fail if console default password not specified
   fail:
-    msg: console_default_password not specified or is empty
-  when: not console_default_password is defined or not console_default_password
+    msg: console password not specified or is empty
+  when: not console_password is defined or not console_password
 
 - name: Create console
-  include_tasks: "{{ target }}/create.yml"
+  include_tasks: "{{ console_target }}/create.yml"

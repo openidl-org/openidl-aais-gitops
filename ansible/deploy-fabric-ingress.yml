@@ -7,10 +7,18 @@
 #   type= [external/internal] - default: external
 ---
 - name: Nginx Ingress Controller
-  hosts: all
+  hosts: ansible_provisioners
   gather_facts: no
   vars:
     do: create
     wait_timeout: 3600
-  roles:
-    - role: nginx-ingress
+  
+  tasks:
+    - include_role:
+        name: "git-config"
+    - include_role:
+        name: "include-config-vars"
+    - set_fact:
+        nginx_cluster: "blk"
+    - include_role:
+        name: "nginx-ingress"

@@ -1,0 +1,40 @@
+---
+- set_fact:
+    template_path: "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"
+
+- name: Check if custom config file is provided
+  stat:
+    path: "{{template_path}}"
+  register: values_file_stat
+
+- set_fact:
+    template_path: "templates/values-{{nginx_cluster}}-{{nginx_type}}.yaml.j2"
+  when: not values_file_stat.stat.exists
+
+- name: Template Ingress Controller chart values "{{template_path}}"
+  set_fact:
+    chart_values: "{{ lookup('template', template_path) | from_yaml }}"
+
+- name: Create remote directory
+  file:
+    path: "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster"
+    state: directory
+
+- name: "Copy Ingress Controller chart values to remote  {{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"
+  ansible.builtin.copy:
+    content: "{{ chart_values | to_nice_yaml }}"
+    dest: "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"
+
+- name: "Install Nginx Ingress Controller"
+  kubernetes.core.helm:
+    chart_ref: nginx/ingress-nginx
+    chart_version: "{{nginx_nginx_chart_version}}"
+    release_name: "nginx-{{nginx_type}}"
+    release_state: present
+    release_namespace: "nginx-{{nginx_type}}"
+    force: True
+    wait: True
+    wait_timeout: "300s"
+    update_repo_cache: True
+    values_files:
+      - "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"

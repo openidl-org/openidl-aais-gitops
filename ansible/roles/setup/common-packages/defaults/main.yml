@@ -3,6 +3,7 @@ common_packages:
   - git
   - jq
   - gcc
+  - python3-devel
 
 
 is_apt: false

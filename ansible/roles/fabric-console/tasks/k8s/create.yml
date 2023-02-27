@@ -12,18 +12,18 @@
 - name: Fail if namespace not specified
   fail:
     msg: namespace not specified or is empty
-  when: not namespace is defined or not namespace
+  when: not console_namespace is defined or not console_namespace
 
 - name: Determine if namespace exists
   k8s_info:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
+    name: "{{ console_namespace }}"
   register: namespace_info
 
 - name: Determine if console exists
   k8s_info:
-    namespace: "{{ namespace }}"
+    namespace: "{{ console_namespace }}"
     api_version: "ibp.com/v1alpha2"
     kind: IBPConsole
     name: "{{ console_name }}"
@@ -32,14 +32,14 @@
 - name: Create console
   k8s:
     state: present
-    namespace: "{{ namespace }}"
+    namespace: "{{ console_namespace }}"
     resource_definition: "{{ lookup('template', 'k8s/hlf-operations-console.yaml.j2') }}"
     apply: yes
   register: create_console
 
 - name: Wait for console deployment to exist
   k8s_info:
-    namespace: "{{ namespace }}"
+    namespace: "{{ console_namespace }}"
     api_version: apps/v1
     kind: Deployment
     name: "{{ console_name }}"
@@ -51,7 +51,7 @@
 - name: Wait for console deployment to start
   k8s:
     state: present
-    namespace: "{{ namespace }}"
+    namespace: "{{ console_namespace }}"
     api_version: apps/v1
     kind: Deployment
     name: "{{ console_name }}"
@@ -66,16 +66,21 @@
       kind: Ingress
       metadata:
         name: "{{ console_name }}"
-        namespace: "{{ namespace }}"
+        namespace: "{{ console_namespace }}"
         annotations:
+          cert-manager.io/cluster-issuer: "{{console_cluster_issuer}}"
           kubernetes.io/ingress.class: "{{console_ingress_class}}"
           nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
           nginx.ingress.kubernetes.io/ssl-passthrough: "false"
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
       spec:
         ingressClassName: "{{console_ingress_class}}"
+        tls:
+        - hosts:
+          - "{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"
+          secretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
     merge_type: merge
 
 - name: Print console URL
   debug:
-    msg: IBM Blockchain Platform console available at "https://{{ namespace }}-{{ console_name }}-console.{{ console_domain }}"
+    msg: Operator console available at "https://{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"

@@ -3,4 +3,4 @@
 #
 ---
 - name: Delete console
-  include_tasks: "{{ target }}/delete.yml"
+  include_tasks: "{{ console_target }}/delete.yml"
