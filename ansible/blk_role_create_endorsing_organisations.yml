@@ -31,9 +31,11 @@
         ca_version: "{{ network.ca_version }}"
         organization_admin_enrollment_id: "{{ network.org_name }}_org_admin"
         organization_admin_enrollment_secret: "{{ network.org_name }}_org_admin"
+        peer_name: "{{ network.org_name }}_peer"
         peer_enrollment_id: "{{ network.peer_enrollment_id }}"
         peer_enrollment_secret: "{{ network.peer_enrollment_secret }}"
         peer_version: "{{ network.peer_version }}"
+        peers: 1
         wait_timeout: 600
         ca_name: "{{ network.ca_name }}"
         ca_admin_identity: "{{ network.ca_name }}admin.json"
