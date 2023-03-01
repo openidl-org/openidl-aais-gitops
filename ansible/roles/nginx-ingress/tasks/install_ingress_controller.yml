@@ -3,6 +3,7 @@
     template_path: "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"
 
 - name: Check if custom config file is provided
+  delegate_to: localhost
   stat:
     path: "{{template_path}}"
   register: values_file_stat
@@ -29,12 +30,13 @@
   kubernetes.core.helm:
     chart_ref: nginx/ingress-nginx
     chart_version: "{{nginx_nginx_chart_version}}"
-    release_name: "nginx-{{nginx_type}}"
+    release_name: "{{nginx_controller_namespace}}"
     release_state: present
-    release_namespace: "nginx-{{nginx_type}}"
+    release_namespace: "{{nginx_controller_namespace}}"
     force: True
     wait: True
     wait_timeout: "300s"
     update_repo_cache: True
+    create_namespace: true
     values_files:
       - "{{git_config_path}}/nginx-{{nginx_cluster}}-cluster/values-{{nginx_type}}.yaml"

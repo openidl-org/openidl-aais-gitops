@@ -1,13 +1,4 @@
 ---
-- name: "Creating Nginx namespace '{{ nginx_nginx_namespace }}' if missing"
-  k8s:
-    name: "nginx-{{ nginx_type }}"
-    kind: Namespace
-    state: present
-    wait: true
-    wait_sleep: 2
-    wait_timeout: 60
-
 - name: "Add Nginx ingress controller chart repo"
   kubernetes.core.helm_repository:
     name: nginx
@@ -21,32 +12,6 @@
 - name: "Install Nginx Ingress Controller"
   include_tasks: "install_ingress_controller.yml"
   tags: ingress_controller
-
-- name: "Create nginx IngressClass"
-  kubernetes.core.k8s:
-    state: present
-    definition:
-      apiVersion: networking.k8s.io/v1
-      kind: IngressClass
-      metadata:
-        annotations:
-          ingressclass.kubernetes.io/is-default-class: "false"
-          meta.helm.sh/release-name: "nginx-{{nginx_type}}"
-          meta.helm.sh/release-namespace: "nginx-{{nginx_type}}"
-        labels:
-          app.kubernetes.io/component: controller
-          app.kubernetes.io/instance: "nginx-{{nginx_type}}"
-          app.kubernetes.io/name: ingress-nginx
-          app.kubernetes.io/part-of: ingress-nginx
-          cluster: "{{nginx_cluster}}-cluster"
-          component: nginx-ingress-controller
-        name: nginx
-      spec:
-        controller: "k8s.io/ingress-nginx-{{nginx_type}}"
-  when:
-    - nginx_cluster == "blk"
-    - nginx_type == "internal" or nginx_type == "external"
-
 
 - name: "Creating cert-manager namespace if missing"
   k8s:
