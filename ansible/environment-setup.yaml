@@ -4,10 +4,12 @@
 #  - checks and installs kubectl, helm and vault clients
 #  - If cloud platform is AWS, checks and installs aws-cli and aws-authenticator
 #######################################
-  - hosts: all
+  - hosts: ansible_provisioners
     gather_facts: yes
     no_log: "{{ no_ansible_log | default(false) }}"
     tasks:
+    - include_role:
+        name: "import-config-vars"
     - include_role:
         name: setup/common-packages
       vars:
@@ -23,7 +25,6 @@
           os: "{{ install_os }}"
           arch: "{{ install_arch }}"
           bin_directory: "{{ bin_install_dir }}"
-      with_items: "{{ network.organizations }}"
     - include_role:
         name:  setup/helm
       vars:
@@ -31,7 +32,6 @@
           os: "{{ install_os }}"
           arch: "{{ install_arch }}"
           bin_directory: "{{ bin_install_dir }}"
-      with_items: "{{ network.organizations }}"
     - include_role:
         name:  setup/vault
       vars:
@@ -39,29 +39,27 @@
           os: "{{ install_os }}"
           arch: "{{ install_arch }}"
           bin_directory: "{{ bin_install_dir }}"
-        with_items: "{{ network.organizations }}"
-    - include_role:
+    - name: AWS CLI setup
+      include_role:
         name: setup/aws-cli
       vars:
         aws_access_key: "{{ aws.access_key }}"
         aws_secret_key: "{{ aws.secret_key }}"
         aws_external_id: "{{ aws_external_id }}"
         aws_assume_role_arn: "{{ aws_assume_role_arn }}"
-        eks_cluster: "{{ eks_cluster }}"
-        region: "{{ region }}"
-      with_items: "{{ network.organizations }}"
-      when: "item.cloud_provider == 'aws' or item.cloud_provider == 'aws-baremetal'"
-    - include_role:
+        eks_cluster: "{{ fabric_operator_k8s_cluster }}"
+      when: cloud_provider == 'aws'
+
+    - name: AWS AUTH setup
+      include_role:
         name: setup/aws-auth
       vars:
         aws_authenticator:
           os: "{{ install_os }}"
           arch: "{{ install_arch }}"
           bin_directory: "{{ bin_install_dir }}"
-        kubeconfig_path: "{{ item.k8s.config_file }}"
-        kubecontext: "{{ item.k8s.context }}"
-      with_items: "{{ network.organizations }}"
-      when: "item.cloud_provider == 'aws'"
+      when: cloud_provider == 'aws'
+
     - include_role:
         name: setup/fabric
       vars:
@@ -69,7 +67,6 @@
         aws_secret_key: "{{ cicd_aws.secret_key }}"
         aws_external_id: "{{ cicd_aws_external_id }}"
         aws_assume_role_arn: "{{ cicd_aws_assume_role_arn }}"
-        region: "{{ region }}"
         default_aws_profile: cicd-role
     vars: #These variables can be overriden from the command line
       privilege_escalate: false           #Default to NOT escalate to root privledges

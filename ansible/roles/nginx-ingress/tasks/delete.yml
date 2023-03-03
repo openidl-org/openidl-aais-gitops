@@ -46,13 +46,3 @@
     wait: true
     wait_sleep: 2
     wait_timeout: 240
-
-- name: Remove an ingressclasses
-  k8s:
-    state: absent
-    api_version: v1
-    kind: IngressClass
-    name: nginx
-  when:
-    - nginx_cluster == "blk"
-    - nginx_type == "internal" or nginx_type == "external"

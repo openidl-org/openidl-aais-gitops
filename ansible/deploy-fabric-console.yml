@@ -5,9 +5,9 @@
 # Create: ansible-playbook role_fabric_console.yml --extra-vars "state=present"
 # Delete: ansible-playbook role_fabric_console.yml --extra-vars "state=absent"
 ---
-- name: Deploy Fabric Operator and Operator Console
+- name: Deploy Fabric Operator Console
   hosts: ansible_provisioners
-  
+
   tasks:
     - include_role:
         name: "import-config-vars"
@@ -16,4 +16,4 @@
     - include_role:
         name: "setup/switch-cluster"
     - include_role:
-        name: "fabric-operator"
+        name: "fabric-console"

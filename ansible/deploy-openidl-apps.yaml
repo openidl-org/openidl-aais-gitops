@@ -2,16 +2,11 @@
   gather_facts: false
   no_log: "{{ no_ansible_log | default(false) }}"
   tasks:
-    - name: Checkout configuration
-      include_role:
-        name: "git-config"
-
     - include_role:
-        name: "include-config-vars"
-
-    - name: Configure environment
-      include_role:
-        name: "prerun-job"
-
+        name: "import-config-vars"
+    - set_fact:
+        switch_to_cluster: "{{openidl_apps_cluster}}"
+    - include_role:
+        name: "setup/switch-cluster"
     - include_role:
         name: "openidl-apps"

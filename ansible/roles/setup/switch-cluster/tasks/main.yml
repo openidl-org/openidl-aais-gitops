@@ -1,5 +1,8 @@
 ---
-- name: configuring aws
-  shell: |
-    aws eks update-kubeconfig --name {{ cluster }}
-  register: aws_conf
+- name: Fail if switch_to_cluster not defined
+  fail:
+    msg: switch_to_cluster == ""
+  when: switch_to_cluster == ""
+
+- name: Switch to k8s cluster {{ switch_to_cluster }}
+  include_tasks: "switch-cluster-{{ cloud_deployment }}.yml"

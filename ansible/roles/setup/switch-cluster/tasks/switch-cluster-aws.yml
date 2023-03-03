@@ -1,0 +1,5 @@
+---
+- name: Configuring aws eks cluster
+  shell: |
+    aws eks update-kubeconfig --name {{ switch_to_cluster }}
+  register: aws_conf

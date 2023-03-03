@@ -1,5 +1,5 @@
 do: create
-nginx_cluster: blk
+nginx_cluster: ""
 nginx_type: external
 nginx_tls_cert_prod_url: "https://acme-v02.api.letsencrypt.org/directory"
 nginx_tls_cert_stage_url: "https://acme-staging-v02.api.letsencrypt.org/directory"

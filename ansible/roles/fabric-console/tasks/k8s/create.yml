@@ -81,6 +81,34 @@
           secretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
     merge_type: merge
 
+- name: Pull vault access config, store it as secret
+  include_tasks: "k8s/{{console_vault_cloud_deployment}}-vault-secret.yml"
+
+- name: "Patch console vault secret"
+  k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      state: patch
+      metadata:
+        name: "{{ console_name }}"
+        namespace: "{{ console_namespace }}"
+      spec:
+        template:
+          spec:
+            containers:
+              - name: optools
+                volumeMounts:
+                  - name: vault-secret
+                    mountPath: /server/conf/vault
+                    readOnly: true
+            volumes:
+              - name: vault-secret
+                secret:
+                  defaultMode: 420
+                  secretName: "{{console_vault_secret_name}}"
+    merge_type: strategic-merge
+
 - name: Print console URL
   debug:
     msg: Operator console available at "https://{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"
