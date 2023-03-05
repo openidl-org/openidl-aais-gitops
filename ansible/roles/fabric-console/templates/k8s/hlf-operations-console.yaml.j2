@@ -11,9 +11,12 @@ spec:
   serviceAccountName: "{{ console_service_account }}"
   email: "{{ console_username }}"
   password: "{{ console_password }}"
-  allowDefaultPassword: true
+  passwordSecretName: "{{console_passwordSecretName}}"
+  allowDefaultPassword: "{{console_allowDefaultPassword}}"
   imagePullSecrets:
   - "{{ console_image_pull_secret }}"
+  ingress:
+    tlsSecretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
   networkinfo:
     domain: "{{ console_domain }}"
   images:
@@ -31,8 +34,6 @@ spec:
   versions:
     {{ console_versions | to_nice_yaml(indent=2, width=1024) | indent(4, false) }}
 {% endif %}
-  networkinfo:
-    domain: "{{console_domain}}"
   storage:
     console:
       class: "{{ console_storage_class }}"

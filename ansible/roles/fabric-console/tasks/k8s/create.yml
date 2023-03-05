@@ -14,20 +14,28 @@
     msg: namespace not specified or is empty
   when: not console_namespace is defined or not console_namespace
 
-- name: Determine if namespace exists
-  k8s_info:
-    api_version: v1
-    kind: Namespace
-    name: "{{ console_namespace }}"
-  register: namespace_info
+# - name: Determine if namespace exists
+#   k8s_info:
+#     api_version: v1
+#     kind: Namespace
+#     name: "{{ console_namespace }}"
+#   register: namespace_info
 
-- name: Determine if console exists
-  k8s_info:
+# - name: Determine if console exists
+#   k8s_info:
+#     namespace: "{{ console_namespace }}"
+#     api_version: "ibp.com/v1alpha2"
+#     kind: IBPConsole
+#     name: "{{ console_name }}"
+#   register: existing_console
+
+- name: Clear the console default password secret
+  k8s:
+    status: absent
     namespace: "{{ console_namespace }}"
-    api_version: "ibp.com/v1alpha2"
-    kind: IBPConsole
-    name: "{{ console_name }}"
-  register: existing_console
+    api_version: "v1"
+    kind: Secret
+    name: "{{ console_passwordSecretName }}"
 
 - name: Create console
   k8s:
@@ -59,27 +67,27 @@
     wait_timeout: "{{ wait_timeout }}"
   changed_when: False
 
-- name: "Patch ingress"
-  k8s:
-    definition:
-      apiVersion: networking.k8s.io/v1
-      kind: Ingress
-      metadata:
-        name: "{{ console_name }}"
-        namespace: "{{ console_namespace }}"
-        annotations:
-          cert-manager.io/cluster-issuer: "{{console_cluster_issuer}}"
-          kubernetes.io/ingress.class: "{{console_ingress_class}}"
-          nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
-          nginx.ingress.kubernetes.io/ssl-passthrough: "false"
-          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      spec:
-        ingressClassName: "{{console_ingress_class}}"
-        tls:
-        - hosts:
-          - "{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"
-          secretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
-    merge_type: merge
+# - name: "Patch ingress"
+#   k8s:
+#     definition:
+#       apiVersion: networking.k8s.io/v1
+#       kind: Ingress
+#       metadata:
+#         name: "{{ console_name }}"
+#         namespace: "{{ console_namespace }}"
+#         annotations:
+#           cert-manager.io/cluster-issuer: "{{console_cluster_issuer}}"
+#           kubernetes.io/ingress.class: "{{console_ingress_class}}"
+#           nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
+#           nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+#           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#       spec:
+#         ingressClassName: "{{console_ingress_class}}"
+#         tls:
+#         - hosts:
+#           - "{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"
+#           secretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
+#     merge_type: merge
 
 - name: Pull vault access config, store it as secret
   include_tasks: "k8s/{{console_vault_cloud_deployment}}-vault-secret.yml"
