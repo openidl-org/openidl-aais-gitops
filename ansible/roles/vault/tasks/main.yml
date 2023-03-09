@@ -40,7 +40,7 @@
             enabled: true
         ingress:
           enabled: true
-          annotations: "kubernetes.io/ingress.class"=haproxy 
+          annotations: "\"kubernetes.io/ingress.class\"=haproxy"
           hosts:
             - host: "{{ vault.internal_domain }}"
           route:
