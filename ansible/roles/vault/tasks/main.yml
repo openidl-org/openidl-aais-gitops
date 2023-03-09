@@ -29,7 +29,7 @@
     force: True
     wait: True
     wait_timeout: "300s"
-    values_files: "./vault-values.yaml"
+    # values_files: "./vault-values.yaml"
     update_repo_cache: True
     release_values:
       tlsDisable: false
@@ -40,7 +40,6 @@
             enabled: true
         ingress:
           enabled: true
-          annotations: "kubernetes.io/ingress.class=haproxy"
           hosts:
             - host: "{{ vault.internal_domain }}"
           route:
