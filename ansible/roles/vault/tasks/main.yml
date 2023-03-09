@@ -32,7 +32,6 @@
     wait_timeout: "300s"
     # values_files: "./vault-values.yaml"
     update_repo_cache: True
-
     release_values:
       tlsDisable: false
       server:
@@ -52,9 +51,6 @@
               - "{{ vault.internal_domain }}"
         dataStorage:
           storageClass: "{{vault_storage_class}}"
-
-- debug:
-    var: vault_install_results
 
 - name: "Initialize the vault"
   no_log: false
@@ -77,12 +73,10 @@
       - "{{ unsealkey['content'] | b64decode | regex_findall('Key 4: (.*)')|last }}"
       - "{{ unsealkey['content'] | b64decode | regex_findall('Key 5: (.*)')|last }}"
 
-- name: "Unseal the vault"
+- name: "Unseal the vault-0"
   no_log: false
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator unseal {{item}}
-    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 -- vault operator unseal {{item}}
-    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 -- vault operator unseal {{item}}
   loop: "{{ unseal_keys }}"
 
 - name: "Wait till vault deployment completes and vault status availability"
@@ -112,6 +106,13 @@
 - name: Join Vault-2 to vault cluster
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 vault operator raft join http://{{ vault.name }}-0.{{ vault.name }}-internal:8200
+
+- name: "Unseal the peers"
+  no_log: false
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 -- vault operator unseal {{item}}
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 -- vault operator unseal {{item}}
+  loop: "{{ unseal_keys }}"
 
 - name: Generate vault-add-user script
   template:
