@@ -363,6 +363,7 @@
 - name: "Get cluster status"
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator raft list-peers
+  register: cluster_status
 
 - debug:
     var: cluster_status
