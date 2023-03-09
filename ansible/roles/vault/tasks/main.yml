@@ -55,7 +55,7 @@
             - hosts:
               - "{{ vault.internal_domain }}"
         dataStorage:
-          storageClass: openidl-sc
+          storageClass: "{{vault_storage_class}}"
 
 - name: "Initialize the vault"
   no_log: false

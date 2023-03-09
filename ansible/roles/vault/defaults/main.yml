@@ -7,6 +7,8 @@ vault_ingress_class: "nginx"
 default_aws_profile: "cicd-role"
 vault_registry: "ghcr.io/openidl-org/openidl-aais-gitops"
 vault_registry_version: latest
+vault_storage_class: "openidl-sc"
+
 vault:
   name: "{{vault_name}}"
   vault_namespace: "{{vault_name}}"
