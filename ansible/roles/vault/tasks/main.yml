@@ -66,11 +66,11 @@
 # unseal needed with at least 3 out of 5 unseal keys
 - set_fact:
     unseal_keys:
-      - "{{ unsealkey['content'] | b64decode | regex_findall('Unseal Key 1: (.*)')|last }}"
-      - "{{ unsealkey['content'] | b64decode | regex_findall('Unseal Key 2: (.*)')|last }}"
-      - "{{ unsealkey['content'] | b64decode | regex_findall('Unseal Key 3: (.*)')|last }}"
-      - "{{ unsealkey['content'] | b64decode | regex_findall('Unseal Key 4: (.*)')|last }}"
-      - "{{ unsealkey['content'] | b64decode | regex_findall('Unseal Key 5: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 1: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 2: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 3: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 4: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 5: (.*)')|last }}"
 
 - name: "Unseal the vault"
   no_log: true
