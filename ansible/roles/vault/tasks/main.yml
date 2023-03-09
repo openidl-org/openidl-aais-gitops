@@ -73,7 +73,7 @@
       - "{{ unsealkey['content'] | b64decode | regex_findall('Key 5: (.*)')|last }}"
 
 - name: "Unseal the vault"
-  no_log: true
+  no_log: false
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator unseal {{item}}
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 -- vault operator unseal {{item}}
