@@ -33,12 +33,13 @@
     # values_files: "./vault-values.yaml"
     update_repo_cache: True
     release_values:
-      tlsDisable: false
+      tlsDisable: true
       server:
         ha:
           enabled: true
           raft:
             enabled: true
+            setNodeId: true
         ingress:
           enabled: true
           hosts:
@@ -93,11 +94,11 @@
       status: true
   register: pod_info
 
-- name: Create secret path for org
-  no_log: false
-  shell: |
-    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
-    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault secrets enable -version=1 -path={{ vault.env }} kv
+#- name: Create secret path for org
+#  no_log: false
+#  shell: |
+#    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+#    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault secrets enable -version=1 -path={{ vault.env }} kv
 
 - name: Join Vault-1 to vault cluster
   shell: |
