@@ -1,13 +1,6 @@
 ---
 - include_tasks: set_facts.yml
 
-- name: "Create a k8s namespace"
-  k8s:
-    name: "{{ vault.vault_namespace }}"
-    api_version: v1
-    kind: Namespace
-    state: present
-
 - name: "generate vault values template from vault.j2 file"
   template:
     src: templates/vault.j2
@@ -32,9 +25,11 @@
     release_name: "{{ vault.name }}"
     release_state: present
     release_namespace: "{{ vault.vault_namespace }}"
+    create_namespace: true
     force: True
     wait: True
     wait_timeout: "300s"
+    values_files: "./vault-values.yaml"
     update_repo_cache: True
     release_values:
       tlsDisable: false
