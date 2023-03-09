@@ -74,7 +74,7 @@
       - "{{ unsealkey['content'] | b64decode | regex_findall('Key 5: (.*)')|last }}"
 
 - name: "Unseal the vault-0"
-  no_log: false
+  no_log: true
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator unseal {{item}}
   loop: "{{ unseal_keys }}"
@@ -108,7 +108,7 @@
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 vault operator raft join http://{{ vault.name }}-0.{{ vault.name }}-internal:8200
 
 - name: "Unseal the peers"
-  no_log: false
+  no_log: true
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 -- vault operator unseal {{item}}
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 -- vault operator unseal {{item}}
