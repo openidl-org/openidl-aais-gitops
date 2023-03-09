@@ -19,6 +19,7 @@
     repo_url: "https://{{vault.vault_chart_repo}}"
 
 - name: "Install Vault"
+  register: vault_install_results
   kubernetes.core.helm:
     chart_ref: hashicorp/vault
     chart_version: "{{ vault.vault_chart_version }}"
@@ -31,7 +32,7 @@
     wait_timeout: "300s"
     # values_files: "./vault-values.yaml"
     update_repo_cache: True
-    register: vault_install_results
+
     release_values:
       tlsDisable: false
       server:
