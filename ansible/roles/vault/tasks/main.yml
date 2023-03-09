@@ -179,22 +179,22 @@
               - name: VAULT_ROOT_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: vault-user-creds
+                    name: "{{ vault.name }}-user-creds"
                     key: VAULT_ROOT_TOKEN
               - name: VAULT_CONFIG_USER_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: vault-user-creds
+                    name: "{{ vault.name }}-user-creds"
                     key: VAULT_CONFIG_USER_TOKEN
               - name: VAULT_KVS_USER
                 valueFrom:
                   secretKeyRef:
-                    name: vault-user-creds
+                    name: "{{ vault.name }}-user-creds"
                     key: VAULT_KVS_USER
               - name: VAULT_KVS_USER_TOKEN
                 valueFrom:
                   secretKeyRef:
-                    name: vault-user-creds
+                    name: "{{ vault.name }}-user-creds"
                     key: VAULT_KVS_USER_TOKEN
               - name: ORG_NAME
                 value: "{{ vault.env }}"
