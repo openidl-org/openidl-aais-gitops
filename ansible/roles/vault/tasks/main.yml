@@ -94,11 +94,11 @@
       status: true
   register: pod_info
 
-#- name: Create secret path for org
-#  no_log: false
-#  shell: |
-#    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
-#    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault secrets enable -version=1 -path={{ vault.env }} kv
+- name: Create secret path for org
+  no_log: false
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault secrets enable -version=1 -path={{ vault.env }} kv
 
 - name: Join Vault-1 to vault cluster
   shell: |
@@ -359,3 +359,10 @@
     api_version: v1
     kind: Secret
     state: absent
+
+- name: "Get cluster status"
+  shell: |
+    kubectl exec {{ vault.name }}-0 -- vault operator raft list-peers
+
+- debug:
+    var: cluster_status
