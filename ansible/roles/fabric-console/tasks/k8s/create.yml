@@ -34,13 +34,15 @@
   no_log: "{{hide_sensitive_logs}}"
   k8s:
     state: present
-    api_version: "v1"
-    kind: Secret
-    metadata:
-      name: "{{ console_passwordSecretName }}"
-      namespace: "{{ console_namespace }}"
-    data:
-      password: "{{ console_password }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "{{ console_passwordSecretName }}"
+        namespace: "{{ console_namespace }}"
+      data:
+        password: "{{ console_password }}"
 
 - name: Create console
   k8s:
