@@ -9,13 +9,14 @@ vault_registry: "ghcr.io/openidl-org/openidl-aais-gitops"
 vault_registry_version: latest
 vault_storage_class: "openidl-sc"
 delete_secrets: false
+vault_address: "{{vault_name}}.{{vault_domain}}"
 
 vault:
   name: "{{vault_name}}"
   vault_namespace: "{{vault_name}}"
   vault_chart_version: 0.23.0
   vault_chart_repo: helm.releases.hashicorp.com
-  internal_domain: "{{vault_name}}.{{vault_domain}}"
+  internal_domain: "{{vault_address}}"
   ingress_class: "{{vault_ingress_class}}"
   env: "{{env_id}}"
   region: "{{region}}"
