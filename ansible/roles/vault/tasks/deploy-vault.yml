@@ -67,13 +67,12 @@
           storageClass: "{{vault_storage_class}}"
 
 - name: "Initialize the vault"
-  no_log: false
   shell: |
     sleep 60
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator init > ./vault-unseal-keys.txt
 
 - name: "Get the vault-unseal-key from the server"
-  no_log: false
+  no_log: "{{hide_sensitive_logs}}"
   slurp:
     src: "./vault-unseal-keys.txt"
   register: unsealkey
@@ -88,7 +87,7 @@
       - "{{ unsealkey['content'] | b64decode | regex_findall('Key 5: (.*)')|last }}"
 
 - name: "Unseal the vault-0"
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator unseal {{item}}
   loop: "{{ unseal_keys }}"
@@ -108,7 +107,7 @@
   register: pod_info
 
 - name: Create secret path for org
-  no_log: false
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault secrets enable -version=1 -path={{ vault.env }} kv
@@ -122,7 +121,7 @@
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 vault operator raft join http://{{ vault.name }}-0.{{ vault.name }}-internal:8200
 
 - name: "Unseal the peers"
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 -- vault operator unseal {{item}}
     kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 -- vault operator unseal {{item}}
@@ -152,7 +151,7 @@
         add-vault-user.sh: "{{ add_vault_user_script.content | b64decode }}"
 
 - name: Create secret for credentials
-  no_log: false
+  no_log: "{{hide_sensitive_logs}}"
   k8s:
     state: present
     definition:
@@ -170,7 +169,7 @@
         VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
 
 - name: Launch Pod for vault user
-  no_log: false
+  no_log: "{{hide_sensitive_logs}}"
   k8s:
     state: present
     definition:
@@ -270,7 +269,6 @@
         namespace: "{{ vault.vault_namespace }}"
 
 - name: "Generate unseal keys json"
-  no_log: false
   template:
     src: templates/unseal_keys.json.j2
     dest: ./unseal-keys.json
@@ -278,7 +276,6 @@
     keys: "{{ unseal_keys }}"
 
 - name: "Generate user credentials json"
-  no_log: false
   template:
     src: templates/creds.json.j2
     dest: ./creds-config.json
@@ -289,7 +286,6 @@
     vault_org_name: "config"
 
 - name: "Generate user credentials json"
-  no_log: false
   template:
     src: templates/creds.json.j2
     dest: ./creds-kvs.json
@@ -301,7 +297,7 @@
 
 # SECRETS MANAGER
 - name: "Upload credentials to secret manager"
-  no_log: false
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }}
@@ -319,7 +315,7 @@
       description: "Vault unseal keys"
 
 - name: "upload Vault root token to aws secrets manager"
-  no_log: false
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}

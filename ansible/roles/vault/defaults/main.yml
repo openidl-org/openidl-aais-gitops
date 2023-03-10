@@ -10,6 +10,7 @@ vault_registry_version: latest
 vault_storage_class: "openidl-sc"
 delete_secrets: false
 vault_address: "{{vault_name}}.{{vault_domain}}"
+hide_sensitive_logs: true
 
 vault:
   name: "{{vault_name}}"
