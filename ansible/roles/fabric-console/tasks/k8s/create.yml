@@ -37,9 +37,6 @@
     kind: Secret
     name: "{{ console_passwordSecretName }}"
 
-- debug:
-    msg: "{{ lookup('template', 'k8s/hlf-operations-console.yaml.j2') }}"
-
 - name: Create console
   k8s:
     state: present
@@ -70,27 +67,27 @@
     wait_timeout: "{{ wait_timeout }}"
   changed_when: False
 
-# - name: "Patch ingress"
-#   k8s:
-#     definition:
-#       apiVersion: networking.k8s.io/v1
-#       kind: Ingress
-#       metadata:
-#         name: "{{ console_name }}"
-#         namespace: "{{ console_namespace }}"
-#         annotations:
-#           cert-manager.io/cluster-issuer: "{{console_cluster_issuer}}"
-#           kubernetes.io/ingress.class: "{{console_ingress_class}}"
-#           nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
-#           nginx.ingress.kubernetes.io/ssl-passthrough: "false"
-#           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-#       spec:
-#         ingressClassName: "{{console_ingress_class}}"
-#         tls:
-#         - hosts:
-#           - "{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"
-#           secretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
-#     merge_type: merge
+- name: "Patch ingress"
+  k8s:
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: "{{ console_name }}"
+        namespace: "{{ console_namespace }}"
+        annotations:
+          cert-manager.io/cluster-issuer: "{{console_cluster_issuer}}"
+          kubernetes.io/ingress.class: "{{console_ingress_class}}"
+          nginx.ingress.kubernetes.io/proxy-connect-timeout: 60s
+          nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      spec:
+        ingressClassName: "{{console_ingress_class}}"
+        tls:
+        - hosts:
+          - "{{ console_namespace }}-{{ console_name }}-console.{{ console_domain }}"
+          secretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
+    merge_type: merge
 
 - name: Pull vault access config, store it as secret
   include_tasks: "k8s/{{console_vault_cloud_deployment}}-vault-secret.yml"

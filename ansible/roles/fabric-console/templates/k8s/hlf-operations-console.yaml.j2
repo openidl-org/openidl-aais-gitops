@@ -15,8 +15,6 @@ spec:
   allowDefaultPassword: {{console_allowDefaultPassword | lower}}
   imagePullSecrets:
   - "{{ console_image_pull_secret }}"
-  ingress:
-    tlsSecretName: "{{ console_namespace }}-{{ console_name }}-console-tls"
   networkinfo:
     domain: "{{ console_domain }}"
   images:
