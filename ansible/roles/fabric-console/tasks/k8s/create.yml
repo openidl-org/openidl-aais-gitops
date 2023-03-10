@@ -37,6 +37,9 @@
     kind: Secret
     name: "{{ console_passwordSecretName }}"
 
+- debug:
+    msg: "{{ lookup('template', 'k8s/hlf-operations-console.yaml.j2') }}"
+
 - name: Create console
   k8s:
     state: present
