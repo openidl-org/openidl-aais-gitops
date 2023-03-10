@@ -306,7 +306,7 @@
 
 # SECRETS MANAGER
 - name: "Upload credentials to secret manager"
-  no_log: true
+  no_log: false
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }} {{aws_overwrite_secret}}
@@ -324,7 +324,7 @@
       description: "Vault unseal keys"
 
 - name: "upload Vault root token to aws secrets manager"
-  no_log: true
+  no_log: false
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }} {{aws_overwrite_secret}}
