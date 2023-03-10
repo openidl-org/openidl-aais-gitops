@@ -31,6 +31,8 @@ default_aws_profile: cicd-role
 console_passwordSecretName: "{{console_name}}-console-pw"
 console_allowDefaultPassword: true
 
+hide_sensitive_logs: true
+
 # Must be custom defined
   # console_domain: "example.com"
   # console_password: ""
