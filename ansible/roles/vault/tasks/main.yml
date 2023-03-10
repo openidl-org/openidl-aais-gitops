@@ -286,9 +286,27 @@
     vault_user_token: "{{ vault_kvs_user_token }}"
     vault_org_name: "kvs"
 
+#Fail if AWS secrets exist
+- name: "Fail is aws secret exist as it is not safe to overwrite"
+  shell: |
+    export AWS_PROFILE={{ vault.aws_profile }}
+    aws secretsmanager list-secrets --filter Key=name,Values={{ vault.env }}-{{ item.name }}
+  register: aws_secret_list
+  fail_when: aws_secret_list.stdout | to_json | json_query('SecretList') | length != 0
+  with_items:
+    - name: config-vault
+      file: creds-config.json
+      description: "Vault Credentials for config user"
+    - name: kvs-vault
+      file: creds-kvs.json
+      description: "Vault Credentials for kvs user"
+    - name: vault-unseal-key
+      file: unseal-keys.json
+      description: "Vault unseal keys"
+
 # SECRETS MANAGER
 - name: "Upload credentials to secret manager"
-  no_log: false
+  no_log: true
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }}
@@ -306,7 +324,7 @@
       description: "Vault unseal keys"
 
 - name: "upload Vault root token to aws secrets manager"
-  no_log: false
+  no_log: true
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
