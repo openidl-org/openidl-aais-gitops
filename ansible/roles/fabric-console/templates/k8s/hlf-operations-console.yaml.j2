@@ -12,7 +12,7 @@ spec:
   email: "{{ console_username }}"
   password: "{{ console_password }}"
   passwordSecretName: "{{console_passwordSecretName}}"
-  allowDefaultPassword: "{{console_allowDefaultPassword}}"
+  allowDefaultPassword: {{console_allowDefaultPassword | lower}}
   imagePullSecrets:
   - "{{ console_image_pull_secret }}"
   ingress:
