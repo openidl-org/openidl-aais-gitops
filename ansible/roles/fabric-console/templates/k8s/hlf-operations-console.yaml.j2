@@ -10,7 +10,7 @@ spec:
     accept: true
   serviceAccountName: "{{ console_service_account }}"
   email: "{{ console_username }}"
-  password: "{{ console_password }}"
+  
   passwordSecretName: "{{console_passwordSecretName}}"
   allowDefaultPassword: {{console_allowDefaultPassword | lower}}
   imagePullSecrets:

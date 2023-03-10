@@ -2,13 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 ---
-- name: configuring aws
-  shell: |
-    export AWS_PROFILE=baf-role
-  changed_when: false
-  tags:
-    - notest
-
 - name: Fail if namespace not specified
   fail:
     msg: namespace not specified or is empty
@@ -36,6 +29,37 @@
     api_version: "v1"
     kind: Secret
     name: "{{ console_passwordSecretName }}"
+
+
+  no_log: "{{hide_sensitive_logs}}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "{{ vault.name }}-user-creds"
+        namespace: "{{ vault.vault_namespace }}"
+      data:
+        VAULT_ROOT_TOKEN: "{{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last | b64encode }}"
+        VAULT_CONFIG_USER: "{{ vault_config_user | b64encode }}"
+        VAULT_CONFIG_USER_TOKEN: "{{ vault_config_user_token | b64encode }}"
+        VAULT_KVS_USER: "{{ vault_kvs_user | b64encode }}"
+        VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
+
+
+- name: Push console password to k8s secret
+  no_log: true
+  k8s:
+    state: present
+    api_version: "v1"
+    kind: Secret
+    metadata:
+      name: "{{ console_passwordSecretName }}"
+      namespace: "{{ console_namespace }}"
+    data:
+      password: "{{ console_password }}"
 
 - name: Create console
   k8s:
