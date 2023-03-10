@@ -8,7 +8,6 @@
     aws secretsmanager list-secrets --filter Key=name,Values={{ vault.env }}-{{ item.name }}
   register: aws_secret_list
   failed_when: ( ( aws_secret_list.stdout | from_json ).SecretList | length ) != 0
-  when: aws_force_secret_overwrite == false
   with_items:
     - name: config-vault
     - name: kvs-vault
@@ -310,6 +309,8 @@
     - name: vault-unseal-key
     - name: root-token
   when: aws_force_secret_overwrite == true
+  tags:
+    - aws_force_secret_overwrite
 
 # SECRETS MANAGER
 - name: "Upload credentials to secret manager"
