@@ -31,7 +31,7 @@
 
 - name: Clear the console default password secret
   k8s:
-    status: absent
+    state: absent
     namespace: "{{ console_namespace }}"
     api_version: "v1"
     kind: Secret
