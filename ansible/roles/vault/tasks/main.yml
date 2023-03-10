@@ -1,7 +1,6 @@
 ---
 - include_tasks: set_facts.yml
 
-
 #Fail if AWS secrets exist
 - name: "Fail is aws secret exist as it is not safe to overwrite"
   shell: |
@@ -9,16 +8,12 @@
     aws secretsmanager list-secrets --filter Key=name,Values={{ vault.env }}-{{ item.name }}
   register: aws_secret_list
   failed_when: ( ( aws_secret_list.stdout | from_json ).SecretList | length ) != 0
+  when: aws_force_secret_overwrite == false
   with_items:
     - name: config-vault
-      file: creds-config.json
-      description: "Vault Credentials for config user"
     - name: kvs-vault
-      file: creds-kvs.json
-      description: "Vault Credentials for kvs user"
     - name: vault-unseal-key
-      file: unseal-keys.json
-      description: "Vault unseal keys"
+    - name: root-token
 
 - name: "generate vault values template from vault.j2 file"
   template:
@@ -305,12 +300,16 @@
     vault_user_token: "{{ vault_kvs_user_token }}"
     vault_org_name: "kvs"
 
+- set_fact:
+    aws_overwrite_secret: " --force-overwrite-replica-secret"
+  when: aws_force_secret_overwrite == true
+
 # SECRETS MANAGER
 - name: "Upload credentials to secret manager"
   no_log: true
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
-    aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }}
+    aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }} {{aws_overwrite_secret}}
     # add resource policy to the secrets
     aws secretsmanager put-resource-policy --secret-id {{ vault.env }}-{{ item.name }} --resource-policy file://aws_resource_policy.json
   with_items:
@@ -328,7 +327,7 @@
   no_log: true
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
-    aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+    aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }} {{aws_overwrite_secret}}
     aws secretsmanager put-resource-policy --secret-id {{ vault.env }}-root-token --resource-policy file://aws_resource_policy.json
 
 # CLEANUP
