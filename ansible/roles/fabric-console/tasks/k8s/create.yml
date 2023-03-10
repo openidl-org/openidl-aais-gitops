@@ -42,7 +42,7 @@
         name: "{{ console_passwordSecretName }}"
         namespace: "{{ console_namespace }}"
       data:
-        password: "{{ console_password }}"
+        password: "{{ console_password | b64encode }}"
 
 - name: Create console
   k8s:
