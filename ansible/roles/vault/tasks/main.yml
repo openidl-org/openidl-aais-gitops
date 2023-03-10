@@ -300,8 +300,15 @@
     vault_user_token: "{{ vault_kvs_user_token }}"
     vault_org_name: "kvs"
 
-- set_fact:
-    aws_overwrite_secret: " --force-overwrite-replica-secret"
+- name: Delete aws secrets before creating new secrets
+  shell: |
+    export AWS_PROFILE={{ vault.aws_profile }}
+    aws secretsmanager delete-secret --secret-id {{ vault.env }}-{{ item.name }} --force-delete-without-recovery
+  with_items:
+    - name: config-vault
+    - name: kvs-vault
+    - name: vault-unseal-key
+    - name: root-token
   when: aws_force_secret_overwrite == true
 
 # SECRETS MANAGER
@@ -309,7 +316,7 @@
   no_log: false
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
-    aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }} {{aws_overwrite_secret}}
+    aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }}
     # add resource policy to the secrets
     aws secretsmanager put-resource-policy --secret-id {{ vault.env }}-{{ item.name }} --resource-policy file://aws_resource_policy.json
   with_items:
@@ -327,18 +334,8 @@
   no_log: false
   shell: |
     export AWS_PROFILE={{ vault.aws_profile }}
-    aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }} {{aws_overwrite_secret}}
+    aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
     aws secretsmanager put-resource-policy --secret-id {{ vault.env }}-root-token --resource-policy file://aws_resource_policy.json
-
-# CLEANUP
-#- name: "Delete credentials from secret manager"
-#  no_log: false
-#  shell: |
-#    export AWS_PROFILE={{ vault.aws_profile }}
-#    aws secretsmanager delete-secret --secret-id {{ vault.env }}-{{ item }} --force-delete-without-recovery
-#  with_items:
-#    - config-vault
-#    - kvs-vault
 
 - name: "Delete supporting files"
   file:
