@@ -292,7 +292,7 @@
     export AWS_PROFILE={{ vault.aws_profile }}
     aws secretsmanager list-secrets --filter Key=name,Values={{ vault.env }}-{{ item.name }}
   register: aws_secret_list
-  fail_when: aws_secret_list.stdout | to_json | json_query('SecretList') | length != 0
+  failed_when: aws_secret_list.stdout | to_json | json_query('SecretList') | length != 0
   with_items:
     - name: config-vault
       file: creds-config.json
