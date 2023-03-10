@@ -8,6 +8,7 @@ default_aws_profile: "cicd-role"
 vault_registry: "ghcr.io/openidl-org/openidl-aais-gitops"
 vault_registry_version: latest
 vault_storage_class: "openidl-sc"
+vault_tls_secret_name: "{{vault_name}}-tls"
 delete_secrets: false
 vault_address: "{{vault_name}}.{{vault_domain}}"
 hide_sensitive_logs: true

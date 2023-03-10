@@ -63,6 +63,7 @@
           tls:
             - hosts:
               - "{{ vault.internal_domain }}"
+              secretName: "{{vault_tls_secret_name}}"
         dataStorage:
           storageClass: "{{vault_storage_class}}"
 
