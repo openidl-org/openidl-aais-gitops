@@ -3,9 +3,11 @@
       data:
         credentials:
           certificate: "{{ admin_identity_json.data.cert | b64decode | regex_replace('\n' , '\\n') }}"
-          privateKey: "{{ admin_identity_json.data.private_key | b64decode | regex_replace('\r\n' , '\\r\\n') }}"
-        mspId: "{{network.org_name}}"
+          private_key: "{{ admin_identity_json.data.private_key | b64decode | regex_replace('\n' , '\\n') }}"
+        msp_id: "{{msp_id}}"
         type: "X.509"
+      cas: "{{cass}}"
+      ca_certs: "[{ \"{{cert_auth}}\" : \"{{admin_identity_json.data.ca}}\" }]"
       id: "{{admin_identity_json.id}}"
 
 - name: "Put the admin identity to Wallet"

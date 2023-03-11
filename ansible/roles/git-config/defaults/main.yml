@@ -3,5 +3,6 @@
 ssh_key: "base64 encoded string"
 git_config_path: "/tmp/roles_configs"
 git_configs_repo_url: "senofi/openidl-d1-config.git"
+git_configs_repo_branch: main
 delegate_to:
   - localhost

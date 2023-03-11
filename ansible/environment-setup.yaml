@@ -11,6 +11,8 @@
     - include_role:
         name: "import-config-vars"
     - include_role:
+        name: setup/hlf-fabric-tools
+    - include_role:
         name: setup/common-packages
       vars:
         common_packages:

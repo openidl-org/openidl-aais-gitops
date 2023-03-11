@@ -9,6 +9,8 @@
       data: 
         data: "{{ wallet_identity.data | to_json | string }}"
         id: "{{ wallet_identity.id }}"
+        ca_certs: "{{ wallet_identity.ca_certs | to_json }}"
+        cas: "{{ wallet_identity.cas | to_json }}"
     auth_method: userpass
     username: "{{ vault_config.username }}"
     password: "{{ vault_config.password }}"

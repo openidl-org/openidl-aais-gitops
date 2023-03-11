@@ -1,0 +1,12 @@
+---
+- name: "Pull configs"
+  delegate_to: "{{ item }}"
+  git:
+    repo: "git@github_roles_configs:{{ git_configs_repo_url }}"
+    dest: "{{git_config_path}}"
+    version: "{{ git_configs_repo_branch }}"
+    clone: yes
+    update: yes
+    accept_hostkey: true
+  register: pull_result
+  with_items: "{{delegate_to}}"

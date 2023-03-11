@@ -1,0 +1,64 @@
+
+- set_fact:
+    en_secret: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+
+- name: Clear json files with admin identities
+  file:
+    state: absent
+    path: "{{item}}"
+  with_items:
+    - "{{ cert_auth }}-ca-admin.json"
+    - "{{ msp_id }}-msp-admin.json"
+
+- include_role:
+    name: ibm.blockchain_platform.ordering_organization
+  vars:
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    organization_name: "{{ ord_organization_name}}"
+    organization_msp_id: "{{  msp_id }}"
+    ca_admin_enrollment_id: "{{ca_admin_id}}"
+    ca_admin_enrollment_secret: "{{ en_secret }}-ca-admin"
+    ca_version: "{{ hlf_ca_version }}"
+    organization_admin_enrollment_id: "{{ msp_admin_id }}"
+    organization_admin_enrollment_secret: "{{ en_secret }}-msp-admin"
+    ordering_service_enrollment_id: "{{ord_service_enrollment_id}}"
+    ordering_service_enrollment_secret: "{{ en_secret }}-service"
+    ordering_service_nodes: "{{ hlf_orderer_nodes_num }}"
+    ordering_service_version: "{{ hlf_orderer_version }}"
+    ordering_service_name: "{{ ord_service_name }}"
+    wait_timeout: 600
+    ca_name: "{{ cert_auth }}"
+    ca_admin_identity: "{{ cert_auth }}-ca-admin.json"
+    organization_admin_identity: "{{ msp_id }}-msp-admin.json"
+    state: "{{ord_state}}"
+
+- include_role:
+    name: upload-admin-users-to-wallet
+  when: ord_state == "present"
+
+- set_fact:
+    en_secret: "{{ lookup('ansible.builtin.password', '/dev/null chars=ascii_lowercase,digits length=8') }}"
+
+- set_fact:
+    identity:
+      id: "{{ msp_admin_tls_id }}"
+      type: "admin"
+      enrolment_secret: "{{en_secret}}"
+
+- set_fact:
+    enroll_to_tls_ca: true
+
+- name: Enroll ordering msp admin TLS with TLS CA
+  include_role:
+    name: "identity-deploy"
+
+- name: Cleanup json files with admin identities
+  file:
+    state: absent
+    path: "{{item}}"
+  with_items:
+    - "{{ cert_auth }}-ca-admin.json"
+    - "{{ msp_id }}-msp-admin.json"

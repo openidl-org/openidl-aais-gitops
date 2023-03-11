@@ -5,21 +5,22 @@
     seed_attr: "{ \"name\": \"seed\", \"value\": \"{{seed}}\" ,  \"ecert\" : \"true\" }"
 
 - set_fact:
-    identity_cert_attributes: "{{ identity.cert_attrs + [ seed_attr ] }}"
+    identity_cert_attributes: "{{ [ seed_attr ] }}"   
 
-- debug:
-    msg: "{{ identity_cert_attributes }}"
+- set_fact:
+    identity_cert_attributes: "{{ identity.cert_attrs + [ seed_attr ] }}"
+  when: identity.cert_attrs is defined and identity.cert_attrs != ""
 
 - name: Re register the idenity if already registered
   ibm.blockchain_platform.registered_identity:
     state: "present"
-    api_endpoint: "{{ console.api_endpoint }}"
-    api_authtype: "{{ console.api_authtype }}"
-    api_key: "{{ console.username }}"
-    api_secret: "{{ console.password }}"
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
     api_timeout: "{{ api_timeout | default(omit) }}"
-    certificate_authority: "{{ network.ca_name }}"
-    registrar: "{{ wallet_fetched_identity.data.data.data | b64decode | from_json }}"
+    certificate_authority: "{{ cert_auth }}"
+    registrar: "{{ wallet_operator_identity_dict }}"
     enrollment_id: "{{ identity.id }}"
     enrollment_secret: "{{ identity.enrolment_secret }}"
     max_enrollments: -1

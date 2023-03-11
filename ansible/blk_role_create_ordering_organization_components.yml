@@ -1,47 +1,14 @@
 ---
 - name: "Create components for an ordering organization"
   hosts: all
-  vars:
-    state: present
   tasks:
     - include_role:
-        name: git-config
+        name: import-config-vars
 
-    - name: "Blockchain collection"
-      include_role:
+    - include_role:
         name: setup/blockchain-platform
       vars:
         blockchain_collection_install: true
 
-    - name: "Include vars from git"
-      include_role:
-        name: include-config-vars
-
     - include_role:
-        name: ibm.blockchain_platform.ordering_organization
-      vars:
-        api_endpoint: "{{ console.api_endpoint }}"
-        api_authtype: "{{ console.api_authtype }}"
-        api_key: "{{ console.username }}"
-        api_secret: "{{ console.password }}"
-        organization_name: "{{ network.org_name }}"
-        organization_msp_id: "{{ network.msp_id }}"
-        ca_admin_enrollment_id: "{{ network.org_name }}_ca_admin"
-        ca_admin_enrollment_secret: "{{ network.org_name }}_ca_admin"
-        ca_version: "{{ network.ca_version }}"
-        organization_admin_enrollment_id: "{{ network.org_name }}_org_admin"
-        organization_admin_enrollment_secret: "{{ network.org_name }}_org_admin"
-        ordering_service_enrollment_id: "{{ network.org_name }}_service"
-        ordering_service_enrollment_secret: "{{ network.org_name }}_service"
-        ordering_service_nodes: "{{ network.ordering_service_nodes }}"
-        ordering_service_version: "{{ network.ordering_service_version }}"
-        ordering_service_name: "{{ network.ordererorg_name }}"
-        wait_timeout: 600
-        ca_name: "{{ network.ca_name }}"
-        ca_admin_identity: "{{ network.ca_name }}admin.json"
-        organization_admin_identity: "{{ network.org_name }}admin.json"
-      when: network.ordererorg | bool
-
-    - include_role:
-        name: upload-admin-users-to-wallet
-      when: state == "present"
+        name: hlf/bootstrap-ordering-service

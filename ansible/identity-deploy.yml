@@ -9,9 +9,9 @@
     - include_role:
         name: "include-config-vars"
 
-    - name: Configure environment
-      include_role:
-        name: "prerun-job"
+    # - name: Configure environment
+    #   include_role:
+    #     name: "prerun-job"
 
     - include_role:
         name: "identity-deploy"

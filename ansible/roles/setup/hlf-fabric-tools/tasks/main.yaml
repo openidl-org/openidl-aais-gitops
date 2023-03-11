@@ -6,33 +6,40 @@
 
 - name: Create HLF home folder to extract the tools
   file:
-    path: "{{ fabric.tools.home_folder }}"
+    path: "{{ fabric_tools_home_folder }}"
     state: directory
     mode: "u=rwx,g=rx,o=rwx"
   become: true
 
 - name: Download Fabric Tools archive (configtx, crypto etc)
   get_url:
-    url: "{{ fabric.tools.url }}"
-    dest: "{{ fabric.tools.home_folder }}/{{ fabric.tools.archive }}"
+    url: "{{ fabric_tools_url }}"
+    dest: "{{ fabric_tools_home_folder }}/{{ fabric_tools_archive }}"
     mode: 0755
 
 - name: Extract HLF tools archive
   unarchive:
-    src: "{{ fabric.tools.home_folder }}/{{ fabric.tools.archive }}"
-    dest: "{{ fabric.tools.home_folder }}"
+    src: "{{ fabric_tools_home_folder }}/{{ fabric_tools_archive }}"
+    dest: "{{ fabric_tools_home_folder }}"
     remote_src: yes
 
 - name: Create symlink to HLF peer CLI
   file:
-    src: "{{ fabric.tools.home_folder }}/bin/peer"
+    src: "{{ fabric_tools_home_folder }}/bin/peer"
     dest: "/usr/local/bin/peer"
     state: link
   become: true
 
 - name: Create symlink to HLF configtxlator CLI
   file:
-    src: "{{ fabric.tools.home_folder }}/bin/configtxlator"
+    src: "{{ fabric_tools_home_folder }}/bin/configtxlator"
     dest: "/usr/local/bin/configtxlator"
+    state: link
+  become: true
+
+- name: Create symlink to HLF osnadmin CLI
+  file:
+    src: "{{ fabric_tools_home_folder }}/bin/osnadmin"
+    dest: "/usr/local/bin/osnadmin"
     state: link
   become: true

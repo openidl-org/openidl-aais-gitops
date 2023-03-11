@@ -1,0 +1,20 @@
+---
+- name: "Creates directory"
+  file:
+    path: "{{git_config_path}}/{{git_dest_path}}"
+    state: directory
+
+- name: "Copy file"
+  copy:
+    src: "{{git_src_file}}"
+    dest: "{{git_config_path}}/{{git_dest_path}}"
+    remote_src: yes
+
+- name: "add commit push"
+  shell: |
+    cd {{git_config_path}}
+    git config user.email cicd@senofi.ca
+    git config user.name CICD
+    git add .
+    git commit -m "Add/Update {{git_src_file}}"
+    git push origin {{git_configs_repo_branch}}
