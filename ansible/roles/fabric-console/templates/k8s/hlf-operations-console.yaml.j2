@@ -10,8 +10,9 @@ spec:
     accept: true
   serviceAccountName: "{{ console_service_account }}"
   email: "{{ console_username }}"
-  password: "{{ console_password }}"
-  allowDefaultPassword: true
+  
+  passwordSecretName: "{{console_passwordSecretName}}"
+  allowDefaultPassword: {{console_allowDefaultPassword | lower}}
   imagePullSecrets:
   - "{{ console_image_pull_secret }}"
   networkinfo:
@@ -31,8 +32,6 @@ spec:
   versions:
     {{ console_versions | to_nice_yaml(indent=2, width=1024) | indent(4, false) }}
 {% endif %}
-  networkinfo:
-    domain: "{{console_domain}}"
   storage:
     console:
       class: "{{ console_storage_class }}"

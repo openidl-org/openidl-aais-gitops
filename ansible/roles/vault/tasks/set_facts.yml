@@ -1,7 +1,7 @@
 ---
 - name: "Get KMS ID"
   shell: |
-    aws kms describe-key --key-id alias/{{ vault.network.org_name }}-{{ vault.env }}-vault-kmskey | jq -r .KeyMetadata.KeyId
+    aws kms describe-key --key-id alias/{{ vault.env }}-vault-kmskey | jq -r .KeyMetadata.KeyId
   register: output
 
 - no_log: false
@@ -26,8 +26,8 @@
 
 - no_log: false
   set_fact:
-    vault_config_user: "config-{{ vault.network.org_name }}-{{ config_user }}"
+    vault_config_user: "config-{{ vault.env }}-{{ config_user }}"
 
 - no_log: false
   set_fact:
-    vault_kvs_user: "kvs-{{ vault.network.org_name }}-{{ config_user }}"
+    vault_kvs_user: "kvs-{{ vault.env  }}-{{ config_user }}"

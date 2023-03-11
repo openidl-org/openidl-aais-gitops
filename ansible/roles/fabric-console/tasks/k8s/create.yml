@@ -2,32 +2,47 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 ---
-- name: configuring aws
-  shell: |
-    export AWS_PROFILE=baf-role
-  changed_when: false
-  tags:
-    - notest
-
 - name: Fail if namespace not specified
   fail:
     msg: namespace not specified or is empty
   when: not console_namespace is defined or not console_namespace
 
-- name: Determine if namespace exists
-  k8s_info:
-    api_version: v1
-    kind: Namespace
-    name: "{{ console_namespace }}"
-  register: namespace_info
+# - name: Determine if namespace exists
+#   k8s_info:
+#     api_version: v1
+#     kind: Namespace
+#     name: "{{ console_namespace }}"
+#   register: namespace_info
 
-- name: Determine if console exists
-  k8s_info:
+# - name: Determine if console exists
+#   k8s_info:
+#     namespace: "{{ console_namespace }}"
+#     api_version: "ibp.com/v1alpha2"
+#     kind: IBPConsole
+#     name: "{{ console_name }}"
+#   register: existing_console
+
+- name: Clear the console default password secret
+  k8s:
+    state: absent
     namespace: "{{ console_namespace }}"
-    api_version: "ibp.com/v1alpha2"
-    kind: IBPConsole
-    name: "{{ console_name }}"
-  register: existing_console
+    api_version: "v1"
+    kind: Secret
+    name: "{{ console_passwordSecretName }}"
+
+- name: Push console password to k8s secret the console default password secret
+  no_log: "{{hide_sensitive_logs}}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "{{ console_passwordSecretName }}"
+        namespace: "{{ console_namespace }}"
+      data:
+        password: "{{ console_password | b64encode }}"
 
 - name: Create console
   k8s:
