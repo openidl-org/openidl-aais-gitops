@@ -23,7 +23,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.datacallapp.ingressClassName }}
   rules:
     - host: {{ .Values.global.datacallapp.ingresshostname }}
       http:
@@ -53,7 +53,7 @@ spec:
     - {{ .Values.global.datacallapp.publicingresshostname }}
     secretName: data-call-app-tls
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.datacallapp.ingressClassName }}
   rules:
     - host: {{ .Values.global.datacallapp.publicingresshostname }}
       http:

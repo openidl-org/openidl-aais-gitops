@@ -23,7 +23,7 @@ spec:
     - {{ .Values.global.insurancedatamanager.ingresshostname }}
     secretName: insurance-data-manager-tls
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.insurancedatamanager.ingressClassName }}
   rules:
     - host: {{ .Values.global.insurancedatamanager.ingresshostname }}
       http:

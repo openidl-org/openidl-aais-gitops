@@ -5,6 +5,7 @@
     state: absent
 
 - name: Enroll the identity
+  no_log: true
   ibm.blockchain_platform.enrolled_identity:
     state: "present"
     api_endpoint: "{{ console_api_endpoint }}"
@@ -22,6 +23,7 @@
   register: enrolled_identity
 
 - set_fact:
+    no_log: true
     identity_wallet:
       data:
         credentials:

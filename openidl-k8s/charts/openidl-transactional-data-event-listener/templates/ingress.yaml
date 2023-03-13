@@ -23,7 +23,7 @@ spec:
     - {{ .Values.global.transactionaldataeventlistener.ingresshostname }}
     secretName: transactional-data-event-listener-tls
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.transactionaldataeventlistener.ingressClassName }}
   rules:
     - host: {{ .Values.global.transactionaldataeventlistener.ingresshostname }}
       http:

@@ -1,5 +1,5 @@
 - set_fact:
-    wallet_resource_path: "{{vault_engine_mount}}/data/{{vault_config.vaultPath}}/{{wallet_path}}"
+    wallet_resource_path: "{{vault_config.orgName}}/data/{{vault_config.vaultPath}}/{{wallet_path}}"
 
 - name: Put to Vault with path {{ wallet_resource_path }}
   community.hashi_vault.vault_write:
@@ -12,7 +12,8 @@
         ca_certs: "{{ wallet_identity.ca_certs | to_json }}"
         cas: "{{ wallet_identity.cas | to_json }}"
     auth_method: userpass
+    mount_point: "{{ vault_config.orgName }}"
     username: "{{ vault_config.username }}"
     password: "{{ vault_config.password }}"
-    validate_certs: false
+    validate_certs: true
   register: vault_put_out

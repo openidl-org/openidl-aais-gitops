@@ -1,0 +1,5 @@
+apps_chart_gitrepo: github.com/senofi/openidl-aais-gitops.git
+apps_chart_gitrepo_branch: operator-develop
+app_chart_dest_folder: "/tmp/openidl-code"
+config_folder: "/tmp/openidl-code/{{ env_id }}-config"
+application_namespace: openidl-apps

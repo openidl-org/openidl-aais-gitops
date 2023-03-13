@@ -1,0 +1,12 @@
+application_namespace: openidl-apps
+aws_region: "{{region}}"
+git_config_path: "/tmp/roles_configs"
+app_chart_dest_folder: "/tmp/openidl-code"
+app_chart_values_path: "/tmp/{{org_id}}/app/app-global-values.yml"
+apps_chart_gitrepo: github.com/senofi/openidl-aais-gitops.git
+apps_chart_gitrepo_branch: operator-develop
+nginx_controller_name: nginx
+applications_domain: "app.{{main_domain}}"
+apps_image_repository: "ghcr.io/senofi/openidl-main"
+apps_image_tag: "fix-sequence-5d4d943-29"
+app_data_call_address: "data-call-app-service.{{ applications_domain }}"

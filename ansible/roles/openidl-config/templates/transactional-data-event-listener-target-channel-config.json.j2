@@ -1,19 +1,15 @@
 {
     "targetChannels": [
+{% for channel in network.channels %}
         {
-            "channelName": "defaultchannel",
-            "chaincodeName": "openidl-cc-default"
-        },
-{% for channel in network.channels if org_name in channel.name %}
-        {
-            "channelName": "{{ channel.name }}",
-            "chaincodeName": "{{ channel.chaincode.name }}"
+            "chaincodeName": "{{ channel.chaincode.name }}",
+            "channelName": "{{ channel.name }}"
         }{% if loop.last %}{% else %},{% endif %}
 {% endfor %}
     ],
     "users": [{
         "org": "{{ network.org_name }}",
-        "user": "openidl-{{ network.org_name }}-transactional-data-event-listener-ibp-2.0",
-        "mspId": "{{ network.org_name }}MSP"
+        "user": "{{application_fabric_tdel_user}}",
+        "mspId": "{{ network.msp_id }}"
     }]
 }

@@ -24,7 +24,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.utilities.ingressClassName }}
   rules:
     - host: {{ .Values.global.utilities.ingresshostname }}
       http:
@@ -54,7 +54,7 @@ spec:
     - {{ .Values.global.utilities.publicingresshostname }}
     secretName: utilities-tls
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.utilities.ingressClassName }}
   rules:
     - host: {{ .Values.global.utilities.publicingresshostname }}
       http:

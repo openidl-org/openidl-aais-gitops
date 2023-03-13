@@ -1,7 +1,7 @@
 {
     "data-call-app-url": {
         "env": "DATA_CALL_APP_URL",
-        "value": "https://data-call-app-service.{{ env }}.{{ domain }}/openidl/api"
+        "value": "https://{{app_data_call_address}}/openidl/api"
     },
     "idp-credentials": {
         "env": "IDP_CONFIG",
@@ -16,7 +16,7 @@
         "value": "8080"
     },
     "icon-bucket-url": {
-		"value": "https://{{ org_name }}-{{ env }}-openidl-publicicons.s3.{{ aws_region }}.amazonaws.com/",
+		"value": "https://{{ s3_icon_bucket_url }}/",
 		"env": "ICON_BUCKET_URL"
 	}
 }

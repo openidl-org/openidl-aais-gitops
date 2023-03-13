@@ -1,0 +1,31 @@
+default_aws_profile: "cicd-role"
+console_api_authtype: "basic"
+cert_auth: "{{msp_id}}"
+aws_region: "{{region}}"
+applications_domain: "app.{{main_domain}}"
+s3_icon_bucket_url: "{{ org_id }}-{{ env_id }}-openidl-publicicons.s3.{{ region }}.amazonaws.com"
+app_data_call_address: "data-call-app-service.{{ applications_domain }}"
+config_folder: "/tmp/openidl-code/{{ env_id }}-config"
+
+network:
+  org_name: "{{org_id}}"
+  msp_id: "{{msp_id}}"
+  channels: "{{fabric_channels}}"
+
+support:
+  fromAddress: "{{contact_email}}"
+  toAddresses:
+    - "{{contact_email}}"
+
+mongodb:
+  namespace: "mongodb-{{org_id}}"
+
+# Must be defined as a secure credential
+hds_host: ""
+hds_port: ""
+hds_username: ""
+hds_password: ""
+hds_dbname: ""
+
+application_cognito_user_pool: "{{env_id}}-{{org_id}}"
+application_cognito_appl_client: "{{env_id}}-{{org_id}}-app-client"

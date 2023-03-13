@@ -27,7 +27,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.global.upload.ingressClassName }}
   rules:
     - host: upload-aais.test.io
       http:

@@ -1,10 +1,3 @@
-# Usage:
-#   ansible-playbook role_nginx_ingress.yml -e do=create -e cluster=app-cluster -e type=external
-#   ansible-playbook role_nginx_ingress.yml -e do=delete -e cluster=app-cluster -e type=external
-#
-# VARS:
-#   cluster= [app-cluster/blk-cluster] - default: app-cluster
-#   type= [external/internal] - default: external
 ---
 - name: Nginx Ingress Controller
   hosts: ansible_provisioners

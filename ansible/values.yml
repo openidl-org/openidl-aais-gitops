@@ -1,4 +1,3 @@
-
 ################ CONFIGURATION ##############
 
 # DNS domain of the organization applications
@@ -7,13 +6,14 @@ main_domain: ""
 #Organization ID / HLF MSP ID
 org_id: ""
 
-# Environment ID where the organization node
+# Environment ID where the organization node is deployed
 env_id: ""
 
-# Hyperledger Fabric Opertor Console
+aws_account_number: ""
+
+# Hyperledger Fabric Opertor Console initial user and password
 console_username: ""
 console_password: ""
-console_peer: ""
 
 #Nginx cert manager email
 nginx_cert_manager_email: ""
@@ -21,21 +21,24 @@ nginx_cert_manager_email: ""
 # Region of the deployment
 region: ""
 
+# carrier or advisory
+application_identity_org_type: ""
+
 ############################################
 
 ######## Templated variables with default values, no need to adjust ###########
 cloud_provider: aws
+# console_image: ghcr.io/hyperledger-labs/fabric-console
+# console_image_label: latest
 console_image: ghcr.io/senofi/fabric-console
+console_image_label: "latest"
 fabric_operator_k8s_cluster: "{{env_id}}-blk-cluster"
 openidl_apps_cluster: "{{env_id}}-app-cluster"
 console_domain: "{{main_domain}}"
 console_name: operator
 console_namespace: hlf
-console_k8s_cluster: 
-console:
-  api_endpoint: "https://{{console_namespace}}-{{console_name}}-console.{{console_domain}}"
-  api_authtype: basic
-  username: "{{console_username}}"
-  password: "{{console_password}}"
-  peer: "{{console_peer}}"
+console_api_endpoint: "https://{{console_namespace}}-{{console_name}}-console.{{console_domain}}"
+application_fabric_app_user: "{{org_id}}-{{ application_identity_org_type }}-app-user"
+application_fabric_dcp_user: "{{org_id}}-{{ application_identity_org_type }}-data-call-processor-user"
+msp_id: "{{org_id}}"
 ###############################################################################

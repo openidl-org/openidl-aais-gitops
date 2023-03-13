@@ -5,11 +5,11 @@
         "simpleURI": "mongodb://{{ mongo_user }}:{{ mongo_user_token }}@{{ network.org_name }}-mongodb-0.{{ network.org_name }}-mongodb-headless.{{mongodb.namespace}}.svc.cluster.local:27017,{{ network.org_name }}-mongodb-1.{{ network.org_name }}-mongodb-headless.{{mongodb.namespace}}.svc.cluster.local:27017,{{ network.org_name }}-mongodb-2.{{ network.org_name }}-mongodb-headless.{{mongodb.namespace}}.svc.cluster.local:27017/openidl-offchain-db?authSource=openidl-offchain-db"
     },
     "postgres": {
-        "host": "{{ hds.host }}",
-        "port": "{{ hds.port }}",
-        "username": "{{ hds.username }}",
-        "password": "{{ hds.password }}",
-        "database": "{{ hds.dbname }}"
+        "host": "{{ hds_host }}",
+        "port": "{{ hds_port }}",
+        "username": "{{ hds_username }}",
+        "password": "{{ hds_password }}",
+        "database": "{{ hds_dbname }}"
     },
     "defaultDbType": "mongo"
 }

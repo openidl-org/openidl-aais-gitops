@@ -1,74 +1,41 @@
 ---
-- name: Update kubeconfig and set context to openidl {{ app_cluster_name }}
-  shell: |
-    export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
-
-- name: Dispose temporary git repository content
-  file:
-    path: /tmp/openidl-code/
-    state: absent
-  become: yes
-
 - name: Create Kubernetes namespace
   k8s:
-    name: "{{ namespace }}"
+    name: "{{ application_namespace }}"
     kind: Namespace
     state: present
     wait: true
     wait_sleep: 2
     wait_timeout: 60
-    
-- name: Dispose temporary git config repository content
-  file:
-    path: "/tmp/roles_configs"
-    state: absent
-  become: yes
-    
-- name: "Pull global config of the applictions"
-  git:
-    repo: "git@github_roles_configs:senofi/openidl-d1-config.git"
-    dest: "/tmp/roles_configs"
-    clone: yes
-    update: yes
-    version: main
-    accept_hostkey: true
-  register: pull_result
 
-- name: Download git repository content
-  no_log: false
-  shell: |
-    git clone https://{{ apps.gitrepo }} -b {{ apps.gitrepo_branch }} /tmp/openidl-code
-  # git:
-  #   repo: "https://{{ gitrepo_username|urlencode() }}:{{ gitrepo_password|urlencode() }}@{{ gitrepo_name }}"
-  #   dest: /tmp/openidl
-  #   force: yes
-  #   single_branch: yes
-  #   version: "{{ gitrepo_branch }}"
+- name: "Pull openidl apps helm chart"
+  include_tasks: pull-chart.yaml
+
+- set_fact:
+    app_values_path: "{{git_config_path}}/apps/app-global-values.yml"
+
+- name:
+  stat:
+    path: "{{app_values_path}}"
+  register: reg_path
+
+- name:
+  include_tasks: template-app-values.yaml
+  when: not reg_path.stat.exists
 
 - name: Deploy openIDL app on Analytics node using helm
   shell: |
-    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl-code/openidl-k8s \
-    -f /tmp/roles_configs/{{ org_name }}/apps/app-global-values.yml -n {{ namespace }} \
-    --set global.datacallapp.ingressenabled=true \
-    --set global.utilities.ingressenabled=true \
-    --set global.ui.ingressenabled=true \
-    --set global.transactionaldataeventlistener.ingressenabled=true \
-    --set global.insurancedatamanager.ingressenabled=true \
-    --set global.secrets.install=false
-  when: node_type == "analytics"
+    helm upgrade --recreate-pods --install {{ env_id }}-{{ org_id }} {{app_chart_dest_folder}}/openidl-k8s \
+    -f {{app_values_path}} -n {{ application_namespace }}
+  when: application_node_type == "analytics"
 
 - name: Deploy openIDL app on Carrier node using helm
   shell: |
-    helm upgrade --recreate-pods --install {{ env }}-{{ org_name }} /tmp/openidl-code/openidl-k8s \
-    -f /tmp/roles_configs/{{ org_name }}/apps/app-global-values.yml -n {{ namespace }} \
-    --set global.datacallapp.ingressenabled=true \
-    --set global.utilities.ingressenabled=true \
-    --set global.carrierui.ingressenabled=true \
-    --set global.insurancedatamanager.ingressenabled=true \
-    --set global.secrets.install=false
-  when: node_type == "carrier"
+    helm upgrade --recreate-pods --install {{ env_id }}-{{ org_id }} {{app_chart_dest_folder}}/openidl-k8s \
+    -f {{app_values_path}} -n {{ application_namespace }}
+  when: application_node_type == "carrier"
 
 - name: Annotate ingress
   shell: |
-    kubectl -n {{ namespace }} annotate ingress kubernetes.io/ingress.class=nginx-external --all
+    kubectl -n {{ application_namespace }} annotate ingress kubernetes.io/ingress.class={{nginx_controller_name}} --all
   ignore_errors: yes 

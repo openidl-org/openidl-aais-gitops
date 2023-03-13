@@ -1,3 +1,3 @@
 - include: deploy_identity.yaml
     app_identity="{{ item }}"
-  loop: "{{ network.application_identities }}"
+  loop: "{{ application_identities }}"

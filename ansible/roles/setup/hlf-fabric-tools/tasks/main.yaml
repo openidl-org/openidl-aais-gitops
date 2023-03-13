@@ -37,6 +37,13 @@
     state: link
   become: true
 
+- name: Create symlink to HLF configtxgen CLI
+  file:
+    src: "{{ fabric_tools_home_folder }}/bin/configtxgen"
+    dest: "/usr/local/bin/configtxgen"
+    state: link
+  become: true
+
 - name: Create symlink to HLF osnadmin CLI
   file:
     src: "{{ fabric_tools_home_folder }}/bin/osnadmin"

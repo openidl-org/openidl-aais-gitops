@@ -1,21 +1,25 @@
 - set_fact:
     wallet_resource_path: "{{vault_config.vaultPath}}/{{wallet_path}}"
 
-- name: Fetch identity certs from Vault {{ vault_config.url }} with path {{ wallet_resource_path }}
+- name: Fetch identity certs from Vault {{ vault_config.url }} with path {{ wallet_resource_path }} under {{vault_config.orgName}}
+  no_log: true
   community.hashi_vault.vault_kv2_get:
     url: "{{ vault_config.url }}"
     path: "{{ wallet_resource_path }}"
-    engine_mount_point: "{{vault_engine_mount}}"
+    engine_mount_point: "{{vault_config.orgName}}"
+    mount_point: "{{vault_config.orgName}}"
     auth_method: userpass
     username: "{{ vault_config.username }}"
     password: "{{ vault_config.password }}"
-    validate_certs: false
+    validate_certs: true
   register: wallet_fetched_identity
 
 - set_fact:
+    no_log: true
     wallet_fetched_identity_dict: "{{ wallet_fetched_identity.data.data.data | from_json }}"
 
 - set_fact:
+    no_log: true
     wallet_operator_identity_dict:
       cert: "{{wallet_fetched_identity_dict.credentials.certificate | regex_replace('\\n', '\n') | b64encode }}"
       private_key: "{{wallet_fetched_identity_dict.credentials.private_key | regex_replace('\\n', '\n') | b64encode }}"
@@ -25,6 +29,7 @@
   when: wallet_fetched_identity.data.data.ca_certs is defined
 
 - set_fact:
+    no_log: true
     wallet_operator_identity_dict:
       cert: "{{wallet_fetched_identity_dict.credentials.certificate | regex_replace('\\n', '\n') | b64encode }}"
       private_key: "{{wallet_fetched_identity_dict.credentials.private_key | regex_replace('\\n', '\n') | b64encode }}"

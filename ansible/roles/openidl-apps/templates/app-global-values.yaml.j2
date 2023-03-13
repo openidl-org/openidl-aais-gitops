@@ -1,0 +1,114 @@
+global:
+  clusterurl: carrierdemo.com
+  appsecret: apps-secret
+  configpath: config-local-carrier
+  datacallapp:
+    install: true
+    port: 8080
+    targetport: 8080
+    servicename: data-call-app-service
+    ingressenabled: true
+    ingresshostname: data-call-app-service.internal.{{applications_domain}}
+    publicingresshostname: {{app_data_call_address}}
+    ingressClassName: {{nginx_controller_name}}
+    image:
+      repository: {{apps_image_repository}}/openidl-data-call-app
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  utilities:
+    install: true
+    port: 8080
+    targetport: 8080
+    servicename: utilities-service
+    ingressenabled: true
+    ingresshostname: utilities-service.internal.{{applications_domain}}
+    publicingresshostname: utilities-service.{{applications_domain}}
+    ingressClassName: {{nginx_controller_name}}
+    image:
+      repository: {{apps_image_repository}}/openidl-utilities
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  carrierui:
+    install: {% if application_node_type == 'carrier' %}true{% else %}false{% endif %}
+
+    servicename: carrier-ui-service
+    port: 8080
+    targetport: 8080
+    ingressenabled: true
+    ingresshostname: openidl.{{applications_domain}}
+    ingressClassName: {{nginx_controller_name}}
+    image:
+      repository: {{apps_image_repository}}/openidl-carrier-ui
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  insurancedatamanager:
+    install: false
+    port: 8080
+    targetport: 8080
+    servicename: insurance-data-manager-service
+    ingressenabled: true
+    ingresshostname: insurance-data-manager-service.{{applications_domain}}
+    ingressClassName: {{nginx_controller_name}}
+    image:
+      repository: {{apps_image_repository}}/openidl-insurance-data-manager
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  datacallprocessor:
+    install: {% if application_node_type == 'carrier' %} true {% else %} false {% endif %}
+
+    port: 8080
+    targetport: 8080
+    servicename: data-call-processor-service
+    ingressClassName: {{nginx_controller_name}}
+    image:
+      repository: {{apps_image_repository}}/openidl-data-call-processor
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  upload:
+    install: false
+    port: 80
+    targetport: 80
+    servicename: upload-service
+    ingressClassName: {{nginx_controller_name}}
+    image:
+      repository: ghcr.io/openidl-org/openidl-upload
+      pullPolicy: IfNotPresent
+      tag: latest
+  datacallmoodlistener:
+    install: true
+    port: 8080
+    targetport: 8080
+    ingressClassName: {{nginx_controller_name}}
+    servicename: data-call-mood-listener-service
+    image:
+      repository: {{apps_image_repository}}/openidl-data-call-mood-listener
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  transactionaldataeventlistener:
+    install: {% if application_node_type == 'analytics' %} true {% else %} false {% endif %}
+
+    port: 8080
+    targetport: 8080
+    servicename: transactional-data-event-listener-service
+    ingressenabled: true
+    ingressClassName: {{nginx_controller_name}}
+    ingresshostname: transactional-data-event-listener.{{applications_domain}}
+    image:
+      repository: {{apps_image_repository}}/openidl-transactional-data-event-listener
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  ui:
+    install: {% if application_node_type == 'analytics' %} true {% else %} false {% endif %}
+
+    servicename: ui-service
+    port: 8080
+    targetport: 8080
+    ingressenabled: true
+    ingressClassName: {{nginx_controller_name}}
+    ingresshostname: openidl.{{applications_domain}}
+    image:
+      repository: {{apps_image_repository}}/openidl-org/openidl-ui
+      pullPolicy: IfNotPresent
+      tag: {{apps_image_tag}}
+  secrets:
+    install: false

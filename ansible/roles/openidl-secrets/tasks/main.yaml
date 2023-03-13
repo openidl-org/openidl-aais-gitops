@@ -1,27 +1,24 @@
 ---
-- name: Update kubeconfig and set context to openidl {{ app_cluster_name }}
-  shell: |
-    export AWS_PROFILE=cicd-role; aws eks update-kubeconfig --region {{ aws_region }} --name {{ app_cluster_name }}
 
 - name: Delete folder for HELM chart
   file:
-   path: /tmp/openidl-code/helm
+   path: "{{app_chart_dest_folder}}/helm"
    state: absent
 
 - name: Download HELM chart
   no_log: false
   shell: |
-    git clone https://{{ gitrepo_name }} -b {{ gitrepo_branch }} /tmp/openidl-code/helm
+    git clone https://{{ apps_chart_gitrepo }} -b {{ apps_chart_gitrepo_branch }} {{app_chart_dest_folder}}/helm
 
 - name: Copy config files
   copy:
    remote_src: true
-   src: /tmp/openidl-code/{{ env_id }}-config/
-   dest: /tmp/openidl-code/helm/openidl-k8s/charts/openidl-secrets/{{ org_name }}-{{ env }}-config/
+   src: "{{config_folder}}/"
+   dest: "{{app_chart_dest_folder}}/helm/openidl-k8s/charts/openidl-secrets/{{ org_id }}-{{ env_id }}-config/"
 
-- name: Create Kubernetes namespace {{ namespace }}
+- name: Create Kubernetes namespace {{ application_namespace }}
   k8s:
-    name: "{{ namespace }}"
+    name: "{{ application_namespace  }}"
     kind: Namespace
     state: present
     wait: true
@@ -30,11 +27,11 @@
 
 - name: Deploy secrets
   shell: |
-    cd /tmp/openidl-code/helm/
+    cd {{app_chart_dest_folder}}/helm/
     helm upgrade --install \
-              {{ env }}-{{ org_name }}-secrets openidl-k8s \
-              -f openidl-k8s/global-values-secrets.yaml -n {{ namespace }} \
-            --set global.configpath={{ org_name }}-{{ env }}-config
+              {{ env_id }}-{{ org_id }}-secrets openidl-k8s \
+              -f openidl-k8s/global-values-secrets.yaml -n {{ application_namespace }} \
+            --set global.configpath={{ org_id }}-{{ env_id }}-config
   register: deploy_secrets
 
 #- name: Dispose of temporary git repository content

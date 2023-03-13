@@ -1,0 +1,4 @@
+mongodb:
+  namespace: "mongodb-{{org_id}}"
+
+aws_region: "{{region}}"

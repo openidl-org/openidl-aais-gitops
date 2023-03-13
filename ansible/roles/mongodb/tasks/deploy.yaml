@@ -25,7 +25,7 @@
 - name: Install mongodb helm chart
   kubernetes.core.helm:
     chart_ref: bitnami/mongodb
-    release_name: "{{ network.org_name }}"
+    release_name: "{{ org_id }}"
     release_state: present
     release_namespace: "{{ mongodb.namespace }}"
     force: True
@@ -49,7 +49,7 @@
         storageClass: "openidl-sc"
       serviceAccount:
         create: true
-        name: "{{ network.org_name }}mongodbsvcuser"
+        name: "{{ org_id }}mongodbsvcuser"
       externalAccess:
         enabled: false
         service:
@@ -71,62 +71,62 @@
 
 - name: Check mongodb-user secret exists
   shell : |
-    aws secretsmanager list-secrets --filter Key="name",Values="{{ network.org_name }}-{{ env }}-mongodb-user" | jq .SecretList[0].Name
+    aws secretsmanager list-secrets --filter Key="name",Values="{{ org_id }}-{{ env_id}}-mongodb-user" | jq .SecretList[0].Name
   register: mongodb_user_secret
 
 - name: Create mongodb user in AWS secrets manager
   no_log: false
   shell: |
-    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
+    aws secretsmanager create-secret --name {{ org_id }}-{{ env_id}}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
   when: mongodb_user_secret.stdout == "null"
 
 - name: Update mongodb user in AWS secrets manager
   no_log: false
   shell: |
-    aws secretsmanager update-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-user --secret-string {{ mongodb_user }}
+    aws secretsmanager update-secret --secret-id {{ org_id }}-{{ env_id}}-mongodb-user --secret-string {{ mongodb_user }}
   when: mongodb_user_secret.stdout != "null"
 
 - name: Check mongodb-user-token secret exists
   shell : |
-    aws secretsmanager list-secrets --filter Key="name",Values="{{ network.org_name }}-{{ env }}-mongodb-user-token" | jq .SecretList[0].Name
+    aws secretsmanager list-secrets --filter Key="name",Values="{{ org_id }}-{{ env_id}}-mongodb-user-token" | jq .SecretList[0].Name
   register: mongodb_user_token_secret
 
 - name: Create mongodb user token in AWS secrets manager
   no_log: false
   shell: |
-    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
+    aws secretsmanager create-secret --name {{ org_id }}-{{ env_id}}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
   when: mongodb_user_token_secret.stdout == "null"
 
 - name: Update mongodb user token in AWS secrets manager
   no_log: false
   shell: |
-    aws secretsmanager update-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-user-token --secret-string {{ mongodb_user_token }}
+    aws secretsmanager update-secret --secret-id {{ org_id }}-{{ env_id}}-mongodb-user-token --secret-string {{ mongodb_user_token }}
   when: mongodb_user_token_secret.stdout != "null"
 
 - name: Check mongodb-root-token secret exists
   shell : |
-    aws secretsmanager list-secrets --filter Key="name",Values="{{ network.org_name }}-{{ env }}-mongodb-root-token" | jq .SecretList[0].Name
+    aws secretsmanager list-secrets --filter Key="name",Values="{{ org_id }}-{{ env_id}}-mongodb-root-token" | jq .SecretList[0].Name
   register: mongodb_root_token_secret
 
 - name: Create mongodb root token in AWS secrets manager
   no_log: false
   shell: |
-    aws secretsmanager create-secret --name {{ network.org_name }}-{{ env }}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
+    aws secretsmanager create-secret --name {{ org_id }}-{{ env_id}}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
   when: mongodb_root_token_secret.stdout == "null"
 
 - name: Update mongodb root token in AWS secrets manager
   no_log: false
   shell: |
-    aws secretsmanager update-secret --secret-id {{ network.org_name }}-{{ env }}-mongodb-root-token --secret-string {{ mongodb_root_token }}
+    aws secretsmanager update-secret --secret-id {{ org_id }}-{{ env_id}}-mongodb-root-token --secret-string {{ mongodb_root_token }}
   when: mongodb_root_token_secret.stdout != "null"
 
 - name: Add resource policy to the secret created {{ item }}
   shell: |
     aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
   with_items:
-  - "{{ network.org_name }}-{{ env }}-mongodb-user-token"
-  - "{{ network.org_name }}-{{ env }}-mongodb-root-token"
-  - "{{ network.org_name }}-{{ env }}-mongodb-user"
+  - "{{ org_id }}-{{ env_id}}-mongodb-user-token"
+  - "{{ org_id }}-{{ env_id}}-mongodb-root-token"
+  - "{{ org_id }}-{{ env_id}}-mongodb-user"
 
 - name: Delete aws resource policy file
   file:
