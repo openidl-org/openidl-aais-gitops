@@ -12,7 +12,7 @@
   when: identity.cert_attrs is defined and identity.cert_attrs != ""
 
 - name: Re register the idenity if already registered
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   ibm.blockchain_platform.registered_identity:
     state: "present"
     api_endpoint: "{{ console_api_endpoint }}"

@@ -6,6 +6,7 @@ applications_domain: "app.{{main_domain}}"
 s3_icon_bucket_url: "{{ org_id }}-{{ env_id }}-openidl-publicicons.s3.{{ region }}.amazonaws.com"
 app_data_call_address: "data-call-app-service.{{ applications_domain }}"
 config_folder: "/tmp/openidl-code/{{ env_id }}-config"
+aws_iam_user_prefix: "{{env_id}}"
 
 network:
   org_name: "{{org_id}}"
@@ -29,3 +30,4 @@ hds_dbname: ""
 
 application_cognito_user_pool: "{{env_id}}-{{org_id}}"
 application_cognito_appl_client: "{{env_id}}-{{org_id}}-app-client"
+hide_sensitive_logs: true

@@ -22,17 +22,17 @@
     no_log: true
     wallet_operator_identity_dict:
       cert: "{{wallet_fetched_identity_dict.credentials.certificate | regex_replace('\\n', '\n') | b64encode }}"
-      private_key: "{{wallet_fetched_identity_dict.credentials.private_key | regex_replace('\\n', '\n') | b64encode }}"
-      ca_certs: "{{wallet_fetched_identity.data.data.ca_certs}}"
+      private_key: "{{wallet_fetched_identity_dict.credentials.privateKey | regex_replace('\\n', '\n') | b64encode }}"
+      ca_root_certs: "{{wallet_fetched_identity.data.data.ca_root_certs}}"
       name: "{{ wallet_fetched_identity.data.data.id }}"
       type: "identity"
-  when: wallet_fetched_identity.data.data.ca_certs is defined
+  when: wallet_fetched_identity.data.data.ca_root_certs is defined
 
 - set_fact:
     no_log: true
     wallet_operator_identity_dict:
       cert: "{{wallet_fetched_identity_dict.credentials.certificate | regex_replace('\\n', '\n') | b64encode }}"
-      private_key: "{{wallet_fetched_identity_dict.credentials.private_key | regex_replace('\\n', '\n') | b64encode }}"
+      private_key: "{{wallet_fetched_identity_dict.credentials.privateKey | regex_replace('\\n', '\n') | b64encode }}"
       name: "{{ wallet_fetched_identity.data.data.id }}"
       type: "identity"
-  when: wallet_fetched_identity.data.data.ca_certs is not defined
+  when: wallet_fetched_identity.data.data.ca_root_certs is not defined

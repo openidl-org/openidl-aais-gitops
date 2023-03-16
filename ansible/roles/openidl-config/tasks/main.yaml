@@ -11,35 +11,35 @@
     mode: 0755
 
 - name: Get Mongodb User
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ org_id }}-{{ env_id }}-mongodb-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
   register: mongodb_user
 
 - name: Get Mongodb User Token
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ org_id }}-{{ env_id }}-mongodb-user-token --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
   register: mongodb_user_token
 
 - name: Get Apps User
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .access_id
   register: apps_user_access_id
 
 - name: Get Apps User token
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .secret_key
   register: apps_user_secret_key
 
 - name: Get Cognito User-Pool ID
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws cognito-idp list-user-pools --region {{ aws_region }} --max-results 20 | jq -r ".UserPools[] | select(.Name | contains(\"{{ application_cognito_user_pool }}\")) | .Id"
@@ -53,14 +53,14 @@
   register: cognito_app_client_id
 
 - name: Get Organizations and IDs
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-organization-ids --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .organizations
   register: organizations
 
 - name: Create a connection profile
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   ibm.blockchain_platform.connection_profile:
     api_endpoint: "{{ console_api_endpoint }}"
     api_authtype: "{{ console_api_authtype }}"

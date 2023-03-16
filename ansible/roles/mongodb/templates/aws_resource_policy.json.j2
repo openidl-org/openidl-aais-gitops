@@ -5,7 +5,7 @@
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-            "arn:aws:iam::{{ aws_account_number }}:role/{{ env_id }}-gitactions-admin",
+            "arn:aws:iam::{{ aws_account_number }}:role/{{ aws_iam_user_prefix }}-gitactions-admin",
             "arn:aws:iam::{{ aws_account_number }}:role/tf_automation"
             ]
       },
@@ -16,8 +16,8 @@
       "Effect": "Allow",
       "Principal": {
         "AWS": [
-            "arn:aws:iam::{{ aws_account_number }}:role/{{ env_id }}-openidl-apps",
-	        "arn:aws:iam::{{ aws_account_number }}:role/{{ env_id }}-baf-automation"
+            "arn:aws:iam::{{ aws_account_number }}:role/{{ aws_iam_user_prefix }}-openidl-apps",
+	        "arn:aws:iam::{{ aws_account_number }}:role/{{ aws_iam_user_prefix }}-baf-automation"
 			]
       },
       "Action": [
@@ -37,10 +37,10 @@
 		    "StringNotLike": {
 			    "aws:PrincipalArn": [
 			        "arn:aws:iam::{{ aws_account_number }}:root",
-			        "arn:aws:iam::{{ aws_account_number }}:role/{{ env_id }}-gitactions-admin",
+			        "arn:aws:iam::{{ aws_account_number }}:role/{{ aws_iam_user_prefix }}-gitactions-admin",
                     "arn:aws:iam::{{ aws_account_number }}:role/tf_automation",
-				    "arn:aws:iam::{{ aws_account_number }}:role/{{ env_id }}-openidl-apps",
-				    "arn:aws:iam::{{ aws_account_number }}:role/{{ env_id }}-baf-automation"
+				    "arn:aws:iam::{{ aws_account_number }}:role/{{ aws_iam_user_prefix }}-openidl-apps",
+				    "arn:aws:iam::{{ aws_account_number }}:role/{{ aws_iam_user_prefix }}-baf-automation"
 				]
 			}
 		}

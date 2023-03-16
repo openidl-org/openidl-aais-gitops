@@ -7,7 +7,7 @@
     wallet_path: "{{ ca_admin_id }}"
 
 - name: Register the idenity
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   ibm.blockchain_platform.registered_identity:
     state: "present"
     api_endpoint: "{{ console_api_endpoint }}"
@@ -26,7 +26,7 @@
   when: identity.cert_attrs is defined
 
 - name: Register the identity
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   ibm.blockchain_platform.registered_identity:
     state: "present"
     api_endpoint: "{{ console_api_endpoint }}"

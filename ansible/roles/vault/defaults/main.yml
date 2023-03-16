@@ -2,7 +2,7 @@
 # Vault vars
 ###############################
 vault_name: hlf-vault
-vault_domain: "{{main_domain}}"
+vault_domain: "net.{{main_domain}}"
 vault_ingress_class: "nginx"
 default_aws_profile: "cicd-role"
 vault_registry: "ghcr.io/openidl-org/openidl-aais-gitops"
@@ -12,6 +12,7 @@ vault_tls_secret_name: "{{vault_name}}-tls"
 delete_secrets: false
 vault_address: "{{vault_name}}.{{vault_domain}}"
 hide_sensitive_logs: true
+aws_iam_user_prefix: "{{env_id}}"
 
 vault:
   name: "{{vault_name}}"

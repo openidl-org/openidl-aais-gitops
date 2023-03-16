@@ -9,7 +9,7 @@
       data: 
         data: "{{ wallet_identity.data | to_json | string }}"
         id: "{{ wallet_identity.id }}"
-        ca_certs: "{{ wallet_identity.ca_certs | to_json }}"
+        ca_root_certs: "{{ wallet_identity.ca_root_certs | to_json }}"
         cas: "{{ wallet_identity.cas | to_json }}"
     auth_method: userpass
     mount_point: "{{ vault_config.orgName }}"

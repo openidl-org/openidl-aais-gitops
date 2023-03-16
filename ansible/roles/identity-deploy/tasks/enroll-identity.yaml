@@ -5,7 +5,7 @@
     state: absent
 
 - name: Enroll the identity
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   ibm.blockchain_platform.enrolled_identity:
     state: "present"
     api_endpoint: "{{ console_api_endpoint }}"
@@ -23,16 +23,16 @@
   register: enrolled_identity
 
 - set_fact:
-    no_log: true
+    no_log: "{{hide_sensitive_logs}}"
     identity_wallet:
       data:
         credentials:
           certificate: "{{enrolled_identity.enrolled_identity.cert | b64decode | regex_replace('\n' , '\\n') }}"
-          private_key: "{{ enrolled_identity.enrolled_identity.private_key | b64decode | regex_replace('\n' , '\\n') }}"
-        msp_id: "{{msp_id}}"
+          privateKey: "{{ enrolled_identity.enrolled_identity.private_key | b64decode | regex_replace('\n' , '\\n') }}"
+        mspId: "{{msp_id}}"
         type: "X.509"
-      ca_certs: "[{\"{{ cert_auth }}\":\"{{enrolled_identity.enrolled_identity.ca}}\"}]"
-      cas: "[]"
+      ca_root_certs: "[\"{{enrolled_identity.enrolled_identity.ca}}\"]"
+      cas: "{{[]}}"
       id: "{{identity.id}}"
 
 - name: "Put the enrolled identity to Wallet"

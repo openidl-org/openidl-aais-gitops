@@ -1,6 +1,6 @@
 {
     "listenerChannels": [
-{% for channel in network.channels if org_name in channel.name %}
+{% for channel in network.channels if network.org_name in channel.name %}
     {
         "channelName": "{{ channel.name }}",
         "events": [
