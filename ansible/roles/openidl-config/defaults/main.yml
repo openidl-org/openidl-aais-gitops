@@ -7,6 +7,7 @@ s3_icon_bucket_url: "{{ org_id }}-{{ env_id }}-openidl-publicicons.s3.{{ region 
 app_data_call_address: "data-call-app-service.{{ applications_domain }}"
 config_folder: "/tmp/openidl-code/{{ env_id }}-config"
 aws_iam_user_prefix: "{{env_id}}"
+aws_s3_hds_bucket: "{{ org_id }}-{{ env_id }}-openidl-hdsdatastore"
 
 network:
   org_name: "{{org_id}}"

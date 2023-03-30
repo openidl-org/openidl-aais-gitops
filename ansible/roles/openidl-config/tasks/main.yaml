@@ -86,7 +86,7 @@
     aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
     mongo_user: "{{ mongodb_user.stdout }}"
     mongo_user_token: "{{ mongodb_user_token.stdout }}"
-    s3_hds_bucket: "{{ org_id }}-{{ env_id }}-openidl-hdsdatastore"
+    s3_hds_bucket: "{{aws_s3_hds_bucket}}"
   with_items:
     - channel-config.json
     - data-call-app-default-config.json
@@ -122,7 +122,7 @@
     aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
     mongo_user: "{{ mongodb_user.stdout }}"
     mongo_user_token: "{{ mongodb_user_token.stdout }}"
-    s3_hds_bucket: "{{ org_id }}-{{ env_id }}-openidl-hdsdatastore"
+    s3_hds_bucket: "{{aws_s3_hds_bucket}}"
   with_items:
     - transactional-data-event-listener-channel-config.json
     - transactional-data-event-listener-default-config.json
@@ -149,7 +149,7 @@
     aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
     mongo_user: "{{ mongodb_user.stdout }}"
     mongo_user_token: "{{ mongodb_user_token.stdout }}"
-    s3_hds_bucket: "{{ org_id }}-{{ env_id }}-openidl-hdsdatastore"
+    s3_hds_bucket: "{{aws_s3_hds_bucket}}"
   with_items:
     - data-call-processor-default-config.json
     - data-call-processor-mappings-config.json
