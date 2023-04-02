@@ -30,12 +30,7 @@ pipeline {
                         currentBuild.displayName = "${params.org_name} - ${params.env}"
                         def orgs = "${params.org_name}".split(',')
                         orgs.each { item ->
-                            length = "${item}".length()
-                            if( length <= 4) {
-                                org = "${item}".substring(0,length)
-                            } else {
-                                org = "${item}".substring(0,4)
-                            }
+                            org = "${item}"
                             echo "Triggering for ${org}"
                             buildInfra()
                         }
