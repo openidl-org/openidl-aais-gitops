@@ -99,7 +99,6 @@ module "app_eks_cluster" {
       version        = var.app_cluster_version
     }
   }
-
   tags = merge(
     local.tags,
     {
@@ -122,6 +121,12 @@ module "app_eks_cluster" {
     aws_iam_role_policy_attachment.eks_nodegroup_AmazonEKSCNIPolicy,
     aws_iam_role_policy_attachment.eks_nodegroup_AmazonEKSWorkerNodePolicy,
     aws_iam_instance_profile.eks_instance_profile]
+}
+resource "aws_eks_addon" "app_eks_cluster_addons" {
+  cluster_name      = local.app_cluster_name
+  addon_name        = "aws-ebs-csi-driver"
+  addon_version     = "v1.17.0-eksbuild.1"
+  depends_on = [module.app_eks_cluster]
 }
 #Blockchain cluster specific
 #SSH key pair for blockchain cluster worker nodes (eks)
@@ -235,7 +240,6 @@ module "blk_eks_cluster" {
       version        = var.blk_cluster_version
     }
   }
-
   tags = merge(
     local.tags,
     {
@@ -258,4 +262,10 @@ module "blk_eks_cluster" {
     aws_iam_role_policy_attachment.eks_nodegroup_AmazonEKSCNIPolicy,
     aws_iam_role_policy_attachment.eks_nodegroup_AmazonEKSWorkerNodePolicy,
     aws_iam_instance_profile.eks_instance_profile]
+}
+resource "aws_eks_addon" "blk_eks_cluster_addons" {
+  cluster_name      = local.blk_cluster_name
+  addon_name        = "aws-ebs-csi-driver"
+  addon_version     = "v1.17.0-eksbuild.1"
+  depends_on = [module.blk_eks_cluster]
 }
