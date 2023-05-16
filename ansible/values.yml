@@ -1,44 +1,91 @@
-################ CONFIGURATION ##############
 
-# DNS domain of the organization applications
+################ BEGIN OF CONFIGURATION ##############
+
+###### All setting under the CONFIGURATION section should be configured before deploying the openIDL node
+
+# DNS domain of the organization applications. The main domain is used to define the node endpoints
+# Example: carr1.testnet.openidl.org
 main_domain: ""
 
-#Organization ID / HLF MSP ID
+# Organization ID / HLF MSP ID / Organization name. This is the org setting used to provision the cloud resources
+# Example: carr1
 org_id: ""
 
-# Environment ID where the organization node is deployed
+# Environment ID is usually a combination of the org_id and the env used to provision the cloud resources
+# Example: carr1-test
 env_id: ""
 
+# The AWS account number
 aws_account_number: ""
 
-# Hyperledger Fabric Opertor Console initial user and password
-console_username: ""
-console_password: ""
+# Email used for componenets like nginx cert manager and openidl applications
+# Example: openidl@senofi.ca
+contact_email: ""
 
-#Nginx cert manager email
-nginx_cert_manager_email: ""
+# The AWS region of the deployment
+# Example: us-east-2
+region: 
 
-# Region of the deployment
-region: ""
-
-# carrier or advisory
+# The openIDL HLF identity type: carrier or advisory (advisory is used for analytics node)
+# Example: carrier
 application_identity_org_type: ""
 
-############################################
+# The opneIDL application type: analytics or carrier
+# Example: carrier
+application_node_type: "" 
 
-######## Templated variables with default values, no need to adjust ###########
+# HLF resources related settings for carrier node (analytics)
+# Used to configure the openIDL applications
+# Can be adjusted if different names are used for the chaincode or the channels
+# Note that the analytics node have multiple channels with the carrier nodes that should be configured
+# The configuration can be adjusted after the node joins the openIDL network and 
+# the IDs of the other nodes are known
+app_common_channel_name: "defaultchannel"
+app_common_chaincode_name: "openidl-cc-default"
+app_private_chaincode_name: "openidl-cc-analytics-carrier"
+
+fabric_channels:
+  - name: "{{app_common_channel_name}}"
+    common: true
+    chaincode:
+      name: "{{app_common_chaincode_name}}"
+  - name: "analytics-{{org_id}}"
+    common: false
+    chaincode:
+      name: "{{app_private_chaincode_name}}"
+
+################ END OF CONFIGURATION ##############
+
+######## Templated variables with default values, DO NOT adjust unless in advanced mode ###########
 cloud_provider: aws
-# console_image: ghcr.io/hyperledger-labs/fabric-console
-# console_image_label: latest
 console_image: ghcr.io/senofi/fabric-console
-console_image_label: "latest"
+console_image_label: "sha256:134874cd3b89b963b64e66d6344265245dfa9000838e125d846b0f7a985f1734"
 fabric_operator_k8s_cluster: "{{env_id}}-blk-cluster"
 openidl_apps_cluster: "{{env_id}}-app-cluster"
-console_domain: "{{main_domain}}"
+applications_domain: "app.{{main_domain}}"
+console_domain: "net.{{main_domain}}"
+vault_domain: "net.{{main_domain}}"
 console_name: operator
 console_namespace: hlf
 console_api_endpoint: "https://{{console_namespace}}-{{console_name}}-console.{{console_domain}}"
 application_fabric_app_user: "{{org_id}}-{{ application_identity_org_type }}-app-user"
 application_fabric_dcp_user: "{{org_id}}-{{ application_identity_org_type }}-data-call-processor-user"
+application_fabric_tdel_user: "{{org_id}}-{{ application_identity_org_type }}-transactional-data-event-listener-user"
+application_fabric_dcml_user: "{{org_id}}-{{ application_identity_org_type }}-data-call-mood-listener"
+application_fabric_indm_user: "{{org_id}}-{{ application_identity_org_type }}-insurance-data-manager"
 msp_id: "{{org_id}}"
+console_peer: "{{org_id}}peer1"
+application_identities:
+  - id: "{{ application_fabric_app_user }}"
+    org_type: "{{ application_identity_org_type }}"
+  - id: "{{ application_fabric_dcp_user }}"
+    org_type: "{{ application_identity_org_type }}"
+  - id: "{{ application_fabric_tdel_user }}"
+    org_type: "{{ application_identity_org_type }}"
+  - id: "{{ application_fabric_dcml_user }}"
+    org_type: "{{ application_identity_org_type }}"
+  - id: "{{ application_fabric_indm_user }}"
+    org_type: "{{ application_identity_org_type }}"
+application_cognito_user_pool: "{{env_id}}-{{org_id}}"
+application_cognito_appl_client: "{{env_id}}-{{org_id}}-app-client"
 ###############################################################################
