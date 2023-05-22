@@ -17,7 +17,7 @@ resource "helm_release" "app_nginx_external" {
 }
 #Setting up ha proxy in blk cluster
 resource "helm_release" "blk_nginx_external" {
-  depends_on = [data.aws_eks_cluster.blk_eks_cluster, data.aws_eks_cluster_auth.blk_eks_cluster_auth, kubernetes_config_map_v1_data.blk_config_map]
+  depends_on = [data.aws_eks_cluster.blk_eks_cluster, data.aws_eks_cluster_auth.blk_eks_cluster_auth, kubernetes_config_map.blk_config_map]
   provider = helm.blk_cluster
   namespace = "nginx-external"
   create_namespace = true

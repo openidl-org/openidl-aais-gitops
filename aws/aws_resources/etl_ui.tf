@@ -52,94 +52,94 @@ resource "aws_s3_bucket_public_access_block" "upload_ui" {
     bucket = aws_s3_bucket.upload_ui.id
     depends_on = [aws_s3_bucket.upload_ui]
 }
-resource "aws_s3_bucket_policy" "upload_ui" {
-  depends_on = [aws_cloudfront_origin_access_identity.origin_access_identity,aws_cloudfront_distribution.upload_ui]
-  bucket = aws_s3_bucket.upload_ui.id
-  policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AllowCloudFrontServicePrincipalReadOnly",
-            "Effect": "Allow",
-            "Principal": {
-                "Service": "cloudfront.amazonaws.com"
-            },
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
-            "Condition": {
-                "StringEquals": {
-                    "AWS:SourceArn": "${aws_cloudfront_distribution.upload_ui.arn}"
-                }
-            }
-        },
-        {
-            "Sid": "AllowPutObjects",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "${aws_iam_role.git_actions_admin_role.arn}"
-            },
-            "Action": [
-                "s3:PutObject"
-            ],
-            "Resource": [
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
-            ]
-        },
-        {
-            "Sid": "AllowLegacyOAIReadOnly",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "${aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn}"
-            },
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
-        },
-        #{
-        #    "Sid": "AllowPublicAccess",
-        #    "Effect": "Allow",
-        #    "Principal": "*",
-        #    "Action": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
-        #    "Resource": [
-        #        "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
-        #        "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
-        #    ]
-        #},
-        {
-            "Sid": "AllowIAMAccess",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": ["${var.aws_role_arn}"]
-            },
-            "Action": "*",
-            "Resource": [
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
-                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
-            ]
-        },
-        {
-        "Sid": "DenyOthers",
-        "Effect": "Deny",
-        "Principal": "*",
-        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:PutObject", "s3:PutBucketAcl", "s3:PutObjectAcl", "s3:PutObjectVersionAcl"],
-        "Resource": [
-          "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
-          "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
-        ],
-        "Condition": {
-		      "StringNotLike": {
-		          "aws:userid": [
-                  "${data.aws_iam_role.terraform_role.unique_id}:*",
-                  "${data.aws_iam_user.terraform_user.user_id}",
-				          "${var.aws_account_number}",
-                  "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
-              ]
-          }
-		    }
-      }
-    ]
-  })
-}
+#resource "aws_s3_bucket_policy" "upload_ui" {
+#  depends_on = [aws_cloudfront_origin_access_identity.origin_access_identity,aws_cloudfront_distribution.upload_ui]
+#  bucket = aws_s3_bucket.upload_ui.id
+#  policy = jsonencode({
+#    "Version": "2012-10-17",
+#    "Statement": [
+#        {
+#            "Sid": "AllowCloudFrontServicePrincipalReadOnly",
+#            "Effect": "Allow",
+#            "Principal": {
+#                "Service": "cloudfront.amazonaws.com"
+#            },
+#            "Action": "s3:GetObject",
+#            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+#            "Condition": {
+#                "StringEquals": {
+#                    "AWS:SourceArn": "${aws_cloudfront_distribution.upload_ui.arn}"
+#                }
+#            }
+#        },
+#        {
+#            "Sid": "AllowPutObjects",
+#            "Effect": "Allow",
+#            "Principal": {
+#                "AWS": "${aws_iam_role.git_actions_admin_role.arn}"
+#            },
+#            "Action": [
+#                "s3:PutObject"
+#            ],
+#            "Resource": [
+#                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+#                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
+#            ]
+#        },
+#        {
+#            "Sid": "AllowLegacyOAIReadOnly",
+#            "Effect": "Allow",
+#            "Principal": {
+#                "AWS": "${aws_cloudfront_origin_access_identity.origin_access_identity.iam_arn}"
+#            },
+#            "Action": "s3:GetObject",
+#            "Resource": "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*"
+#        },
+#        #{
+#        #    "Sid": "AllowPublicAccess",
+#        #    "Effect": "Allow",
+#        #    "Principal": "*",
+#        #    "Action": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket"],
+#        #    "Resource": [
+#        #        "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+#        #        "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+#        #    ]
+#        #},
+#        {
+#            "Sid": "AllowIAMAccess",
+#            "Effect": "Allow",
+#            "Principal": {
+#                "AWS": ["${var.aws_role_arn}"]
+#            },
+#            "Action": "*",
+#            "Resource": [
+#                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+#                "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+#            ]
+#        },
+#        {
+#        "Sid": "DenyOthers",
+#        "Effect": "Deny",
+#        "Principal": "*",
+#        "NotAction": [ "s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket", "s3:PutObject", "s3:PutBucketAcl", "s3:PutObjectAcl", "s3:PutObjectVersionAcl"],
+#        "Resource": [
+#          "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}",
+#          "arn:aws:s3:::${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}/*",
+#        ],
+#        "Condition": {
+#		      "StringNotLike": {
+#		          "aws:userid": [
+#                  "${data.aws_iam_role.terraform_role.unique_id}:*",
+#                  "${data.aws_iam_user.terraform_user.user_id}",
+#				          "${var.aws_account_number}",
+#                  "arn:aws:sts:::${var.aws_account_number}:assumed-role/${local.terraform_role_name[1]}/terraform",
+#              ]
+#          }
+#		    }
+#      }
+#    ]
+#  })
+#}
 resource "aws_s3_bucket_website_configuration" "upload_ui" {
   depends_on = [aws_s3_bucket.upload_ui]
   bucket = aws_s3_bucket.upload_ui.id
@@ -612,49 +612,49 @@ resource "aws_api_gateway_stage" "stage" {
   rest_api_id   = aws_api_gateway_rest_api.upload_ui.id
   stage_name    = "${var.aws_env}"
 }
-resource "aws_cloudfront_distribution" "upload_ui" {
-  depends_on = [aws_s3_bucket.upload_ui,aws_acm_certificate.upload_ui,aws_cloudfront_origin_access_identity.origin_access_identity]
-  origin {
-    domain_name = "${aws_s3_bucket.upload_ui.bucket_regional_domain_name}"
-    origin_id   = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
-    }
-  }
-  enabled             = true
-  is_ipv6_enabled     = true
-  default_root_object = "index.html"
-  aliases = ["${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"]
-  restrictions {
-    geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["US", "CA"]
-    }
-  }
-  default_cache_behavior {
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
-  }
-  viewer_certificate {
-    cloudfront_default_certificate = false
-    acm_certificate_arn = aws_acm_certificate.upload_ui.arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
-  }
-}
+#resource "aws_cloudfront_distribution" "upload_ui" {
+#  depends_on = [aws_s3_bucket.upload_ui,aws_acm_certificate.upload_ui,aws_cloudfront_origin_access_identity.origin_access_identity]
+#  origin {
+#    domain_name = "${aws_s3_bucket.upload_ui.bucket_regional_domain_name}"
+#    origin_id   = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+#    s3_origin_config {
+#      origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
+#    }
+#  }
+#  enabled             = true
+#  is_ipv6_enabled     = true
+#  default_root_object = "index.html"
+#  aliases = ["${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"]
+#  restrictions {
+#    geo_restriction {
+#      restriction_type = "whitelist"
+#      locations        = ["US", "CA"]
+#    }
+#  }
+#  default_cache_behavior {
+#    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+#    cached_methods   = ["GET", "HEAD"]
+#    target_origin_id = "${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}"
+#
+#    forwarded_values {
+#      query_string = false
+#
+#      cookies {
+#        forward = "none"
+#      }
+#    }
+#    viewer_protocol_policy = "redirect-to-https"
+#    min_ttl                = 0
+#    default_ttl            = 3600
+#    max_ttl                = 86400
+#  }
+#  viewer_certificate {
+#    cloudfront_default_certificate = false
+#    acm_certificate_arn = aws_acm_certificate.upload_ui.arn
+#    ssl_support_method       = "sni-only"
+#    minimum_protocol_version = "TLSv1.2_2021"
+#  }
+#}
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
   comment = "access-identity-${local.std_name}-${var.s3_bucket_name_upload_ui}.${var.aws_env}.${local.public_domain}.s3.amazonaws.com"
 }
