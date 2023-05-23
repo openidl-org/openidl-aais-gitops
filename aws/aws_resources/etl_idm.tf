@@ -6,11 +6,19 @@ resource "aws_s3_bucket" "etl" {
     tags = merge(local.tags, {"name" = "${local.std_name}-${each.value}"})
   depends_on = [aws_sns_topic.etl]
 }
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_etl_acl_ownership" {
+  for_each = var.s3_bucket_names_etl
+    bucket = aws_s3_bucket.etl[each.key].id
+    rule {
+      object_ownership = "ObjectWriter"
+    }
+}
+
 resource "aws_s3_bucket_acl" "etl" {
   for_each = var.s3_bucket_names_etl
     bucket = aws_s3_bucket.etl[each.key].id
     acl = "private"
-  depends_on = [aws_s3_bucket.etl]
+  depends_on = [aws_s3_bucket.etl, aws_s3_bucket_ownership_controls.s3_bucket_etl_acl_ownership]
 }
 resource "aws_s3_bucket_lifecycle_configuration" "etl" {
   for_each = var.s3_bucket_names_etl
@@ -156,8 +164,8 @@ resource "aws_s3_bucket_policy" "etl" {
             "Effect": "Allow",
             "Principal": {
                 "AWS": [
-                  "${aws_iam_role.etl_lambda.arn}",
-                  "${aws_iam_role.upload.arn}"
+                  "${aws_iam_role.etl_lambda.arn}"
+                  # "${aws_iam_role.upload.arn}"
                 ]
             },
             "Action": [

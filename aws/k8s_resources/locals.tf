@@ -129,7 +129,7 @@ locals {
   dns_entries_list_non_prod = {
     "openidl.${var.aws_env}.${local.public_domain}" = data.aws_alb.app_nlb_external.dns_name,
     "bastion.${var.aws_env}.${local.public_domain}" = var.create_bastion_host ? data.terraform_remote_state.base_setup.outputs.public_ip_bastion_host : null,
-    "upload.${var.aws_env}.${local.public_domain}" = data.terraform_remote_state.base_setup.outputs.upload_ui_s3_website_endpoint,
+    # "upload.${var.aws_env}.${local.public_domain}" = data.terraform_remote_state.base_setup.outputs.upload_ui_s3_website_endpoint,
     "*.ordererorg.${var.aws_env}.${local.public_domain}" = data.aws_alb.blk_nlb_external.dns_name,
     "*.${var.org_name}-net.${var.org_name}.${var.aws_env}.${local.public_domain}" = data.aws_alb.blk_nlb_external.dns_name,
     "data-call-app-service.${var.aws_env}.${local.public_domain}" = data.aws_alb.app_nlb_external.dns_name,
@@ -139,7 +139,7 @@ locals {
   dns_entries_list_prod = {
     "openidl.${local.public_domain}" = data.aws_alb.app_nlb_external.dns_name,
     "bastion.${local.public_domain}" = var.create_bastion_host? data.terraform_remote_state.base_setup.outputs.public_ip_bastion_host : null,
-    "upload.${local.public_domain}}" = data.terraform_remote_state.base_setup.outputs.upload_ui_s3_website_endpoint,
+    # "upload.${local.public_domain}}" = data.terraform_remote_state.base_setup.outputs.upload_ui_s3_website_endpoint,
     "*.ordererorg.${local.public_domain}" = data.aws_alb.blk_nlb_external.dns_name,
     "*.${var.org_name}-net.${var.org_name}.${local.public_domain}" = data.aws_alb.blk_nlb_external.dns_name,
     "data-call-app-service.${local.public_domain}" = data.aws_alb.app_nlb_external.dns_name,

@@ -36,7 +36,18 @@ resource "aws_kms_key" "s3_kms_key" {
             "Sid": "Allow use of the key",
             "Effect": "Allow",
             "Principal": {
-                "AWS": local.org_name == "anal" ? ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}", "${aws_iam_role.reporting_lambda[0].arn}"] :  ["${aws_iam_role.openidl_apps_iam_role.arn}", "${var.aws_role_arn}", "${aws_iam_role.etl_lambda.arn}", "${aws_iam_role.upload.arn}"]
+                "AWS": local.org_name == "anal" ? [
+                  "${aws_iam_role.openidl_apps_iam_role.arn}", 
+                  "${var.aws_role_arn}", 
+                  "${aws_iam_role.etl_lambda.arn}", 
+                  # "${aws_iam_role.upload.arn}", 
+                  "${aws_iam_role.reporting_lambda[0].arn}"
+                  ] :  [
+                    "${aws_iam_role.openidl_apps_iam_role.arn}", 
+                    "${var.aws_role_arn}", 
+                    "${aws_iam_role.etl_lambda.arn}"
+                    # "${aws_iam_role.upload.arn}"
+                ]
             },
             "Action": [
                 "kms:Encrypt",
@@ -218,7 +229,6 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy_hds" {
 resource "aws_s3_bucket" "s3_bucket_logos_public" {
   count = var.create_s3_bucket_public ? 1 : 0
   bucket = "${local.std_name}-${var.s3_bucket_name_logos}"
-  acl    = "private"
   force_destroy = true
   versioning {
     enabled = false
@@ -229,6 +239,14 @@ resource "aws_s3_bucket" "s3_bucket_logos_public" {
       "name" = "${local.std_name}-${var.s3_bucket_name_logos}"
     },)
 }
+
+resource "aws_s3_bucket_acl" "s3_bucket_logos_public" {
+  count = var.create_s3_bucket_public ? 1 : 0
+  bucket = aws_s3_bucket.s3_bucket_logos_public[0].id
+  acl  = "private"
+  depends_on = [aws_s3_bucket.s3_bucket_logos_public, aws_s3_bucket_ownership_controls.s3_bucket_logos_public]
+}
+
 #Blocking public access to s3 bucket
 resource "aws_s3_bucket_public_access_block" "s3_bucket_logos_public_access_block" {
   count = var.create_s3_bucket_public ? 1 : 0
@@ -239,11 +257,21 @@ resource "aws_s3_bucket_public_access_block" "s3_bucket_logos_public_access_bloc
   bucket                  = aws_s3_bucket.s3_bucket_logos_public[0].id
   depends_on              = [aws_s3_bucket.s3_bucket_logos_public, aws_s3_bucket_policy.s3_bucket_logos_policy]
 }
+
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_logos_public" {
+  count = var.create_s3_bucket_public ? 1 : 0
+  bucket = aws_s3_bucket.s3_bucket_logos_public[0].id
+  rule {
+    object_ownership = "ObjectWriter"
+  }
+}
+
 #S3 bucket policy for public s3 bucket
 resource "aws_s3_bucket_policy" "s3_bucket_logos_policy" {
   count = var.create_s3_bucket_public ? 1 : 0
   bucket     = "${local.std_name}-${var.s3_bucket_name_logos}"
-  depends_on = [aws_s3_bucket.s3_bucket_logos_public]
+  depends_on = [aws_s3_bucket.s3_bucket_logos_public, aws_s3_bucket_ownership_controls.s3_bucket_logos_public]
+
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -310,7 +338,6 @@ resource "aws_s3_bucket_policy" "s3_bucket_logos_policy" {
 #S3 bucket for storing access logs of s3 and its objects
 resource "aws_s3_bucket" "s3_bucket_access_logs" {
   bucket = "${local.std_name}-${var.s3_bucket_name_access_logs}"
-  acl    = "log-delivery-write"
   force_destroy = true
   versioning {
     enabled = true
@@ -350,6 +377,20 @@ resource "aws_s3_bucket" "s3_bucket_access_logs" {
     }
   }  
 }
+
+resource "aws_s3_bucket_acl" "s3_bucket_access_logs" {
+  bucket = aws_s3_bucket.s3_bucket_access_logs.id
+  acl = "log-delivery-write"
+  depends_on = [aws_s3_bucket.etl, aws_s3_bucket_ownership_controls.s3_bucket_access_log_acl_ownership]
+}
+
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_access_log_acl_ownership" {
+  bucket = aws_s3_bucket.s3_bucket_access_logs.id
+  rule {
+    object_ownership = "ObjectWriter"
+  }
+}
+
 #Blocking public access to s3 bucket used for s3 access logging
 resource "aws_s3_bucket_public_access_block" "s3_bucket_public_access_block_access_logs" {
   block_public_acls       = true
@@ -357,12 +398,21 @@ resource "aws_s3_bucket_public_access_block" "s3_bucket_public_access_block_acce
   ignore_public_acls      = true
   restrict_public_buckets = true
   bucket                  = aws_s3_bucket.s3_bucket_access_logs.id
-  depends_on              = [aws_s3_bucket.s3_bucket_access_logs, aws_s3_bucket_policy.s3_bucket_policy_access_logs]
+  depends_on              = [aws_s3_bucket.s3_bucket_access_logs, aws_s3_bucket_policy.s3_bucket_policy_access_logs, aws_s3_bucket_ownership_controls.s3_bucket_access_logs_acl_ownership]
 }
+
+# Resource to avoid error "AccessControlListNotSupported: The bucket does not allow ACLs"
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_access_logs_acl_ownership" {
+  bucket = aws_s3_bucket.s3_bucket_access_logs.id
+  rule {
+    object_ownership = "ObjectWriter"
+  }
+}
+
 #Setting up a bucket policy to restrict access to s3 bucket used for s3 access logging
 resource "aws_s3_bucket_policy" "s3_bucket_policy_access_logs" {
   bucket     = "${local.std_name}-${var.s3_bucket_name_access_logs}"
-  depends_on = [aws_s3_bucket.s3_bucket_access_logs]
+  depends_on = [aws_s3_bucket.s3_bucket_access_logs, aws_s3_bucket_ownership_controls.s3_bucket_access_logs_acl_ownership]
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [

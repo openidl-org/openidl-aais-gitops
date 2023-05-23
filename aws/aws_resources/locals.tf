@@ -143,12 +143,12 @@ locals {
 
   dns_entries_list_non_prod = var.create_bastion_host ? {
     "app-bastion.${var.aws_env}.${local.public_domain}" = aws_eip.bastion_host_eip[0].public_ip #module.bastion_nlb[0].lb_dns_name
-    "upload.${var.aws_env}.${local.public_domain}" = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
+    # "upload.${var.aws_env}.${local.public_domain}" = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
     } : {}
 
   dns_entries_list_prod = var.create_bastion_host ? {
     "app-bastion.${local.public_domain}" = aws_eip.bastion_host_eip[0].public_ip #module.bastion_nlb[0].lb_dns_name
-    "upload.${local.public_domain}" = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
+    # "upload.${local.public_domain}" = aws_s3_bucket_website_configuration.upload_ui.website_endpoint
     } : {}
 
   app_eks_control_plane_sg_computed_ingress = var.create_bastion_host ? [

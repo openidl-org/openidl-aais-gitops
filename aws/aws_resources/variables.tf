@@ -637,7 +637,7 @@ variable "create_cognito_userpool" {
 }
 variable "create_s3_bucket_public" {
   type = bool
-  default = true
+  default = false
   description = "Determines whether to create public s3 bucket to manage logos"
 }
 variable "create_vpc" {
