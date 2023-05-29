@@ -1,0 +1,15 @@
+---
+- name: "Get {{main_domain}} DNS info"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws route53 list-hosted-zones | jq -c '.[][] | select( .Name == "{{main_domain}}.")'
+  register: root_zone_info
+
+- set_fact:
+    root_zone_info_data: "{{root_zone_info.stdout | from_json}}"
+
+- set_fact:
+    dns_zone: "{{ root_zone_info_data.Id | replace('/hostedzone/', '', 1) }}"
+
+- set_fact:
+    nginx_controller_tag: "{{nginx_controller_namespace}}/{{nginx_controller_namespace}}-ingress-nginx-{{nginx_controller_name}}"

@@ -1,0 +1,23 @@
+---
+
+- name: "Fail if AWS access key/secret, region or arn role are not provided"
+  fail:
+    msg: "AWS access key and secret must be set"
+  when: not aws_access_key or not aws_secret_key or not aws_assume_role_arn or not region
+
+- name: "Fail if AWS config profile and user not provided"
+  fail:
+    msg: "AWS config profile and config user must be provided"
+  when: not aws_conf_profile or not aws_conf_user
+
+- name: Set AWS profile {{ aws_conf_profile }} for user {{aws_conf_user}} with external ID {{aws_external_id}}
+  no_log: true
+  shell: |
+    aws configure set aws_access_key_id {{ aws_access_key }} --profile {{aws_conf_user}}
+    aws configure set aws_secret_access_key {{ aws_secret_key }} --profile {{aws_conf_user}}
+    aws configure set region {{ region }} --profile {{aws_conf_profile}}
+    aws configure set external_id {{ aws_external_id }} --profile {{aws_conf_profile}}
+    aws configure set source_profile {{aws_conf_user}} --profile {{aws_conf_profile}}
+    aws configure set role_arn {{ aws_assume_role_arn }} --profile {{aws_conf_profile}}
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws sts get-caller-identity

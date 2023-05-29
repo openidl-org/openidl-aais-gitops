@@ -1,0 +1,17 @@
+{
+  "Comment": "Ansible managed",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "*.{{subdomain}}",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "{{elb.CanonicalHostedZoneId}}",
+          "DNSName": "{{elb.DNSName}}.",
+          "EvaluateTargetHealth": true
+        }
+      }
+    }
+  ]
+}

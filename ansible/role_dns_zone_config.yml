@@ -1,0 +1,7 @@
+---
+- name: "Setup Route53 hosted zones"
+  hosts: all
+  gather_facts: yes
+  roles:
+    - role: import-config-vars
+    - role: dns-config

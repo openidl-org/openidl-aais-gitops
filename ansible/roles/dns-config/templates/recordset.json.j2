@@ -1,0 +1,16 @@
+{
+  "Comment": "Ansible managed",
+  "Changes": [{
+    "Action": "UPSERT",
+    "ResourceRecordSet": {
+      "Name": "{{subdomain}}",
+      "Type": "NS",
+      "TTL": 300,
+      "ResourceRecords": [
+        { "Value": "{{ns_record[0]}}" },
+        { "Value": "{{ns_record[1]}}" },
+        { "Value": "{{ns_record[2]}}" },
+        { "Value": "{{ns_record[3]}}" }
+      ]
+    }}]
+}

@@ -1,0 +1,20 @@
+---
+- name: "Setup DNS hosted zones"
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - include_role:
+        name: "import-config-vars"
+    - set_fact:
+        aws_conf_profile: "dns-setup-role"
+    - set_fact:
+        aws_conf_user: "dns-setup-user"
+    - include_role:
+        name: "setup/set-aws-profile"
+    - set_fact:
+        resource_domain: "{{applications_domain}}"
+    - set_fact:
+        elb_tag_key: "{{openidl_apps_cluster}}"
+    - include_role:
+        name: "dns-config"

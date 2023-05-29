@@ -1,0 +1,31 @@
+---
+- name: "Fail if elb tag not provided"
+  fail:
+    msg: "External Load Balancer tag must be provided"
+  when: not elb_tag_key
+
+- name: "Get ELB tags - {{subdomain}}"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws elbv2  describe-load-balancers | \
+      jq -r .[][].LoadBalancerArn | \
+      while read lbarn; do 
+        aws elbv2 describe-tags --resource-arn $lbarn | \
+          jq -c '.TagDescriptions[] | select( .Tags[].Key | contains("{{elb_tag_key}}") )'| \
+          jq -c '. | select( .Tags[].Value | contains("{{nginx_controller_tag}}"))';
+      done
+  register: elb_tags_info
+
+- set_fact:
+    elb_tags: "{{elb_tags_info.stdout}}"
+
+- name: "Get ELB info - {{subdomain}}-cluster"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws elbv2  describe-load-balancers | jq -c '.[][] | select( .LoadBalancerArn == "{{elb_tags.ResourceArn}}")'
+  register: elb_info
+  when: elb_tags_info.stdout
+
+- set_fact:
+    elb: "{{elb_info.stdout}}"
+  when: elb_tags_info.stdout
