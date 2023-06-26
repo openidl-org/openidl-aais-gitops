@@ -8,5 +8,5 @@ apps_chart_gitrepo_branch: operator-develop
 nginx_controller_name: nginx
 applications_domain: "app.{{main_domain}}"
 apps_image_repository: "ghcr.io/senofi/openidl-main"
-apps_image_tag: "fix-sequence-5d4d943-29"
+apps_image_tag: "senofi-develop-ace9c38-47"
 app_data_call_address: "data-call-app-service.{{ applications_domain }}"
