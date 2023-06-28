@@ -30,6 +30,10 @@
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .access_id
   register: apps_user_access_id
+- name: "Fail if AWS apps user not found in AWS secrets manager"
+  fail:
+    msg: "AWS apps user access id should be available in AWS secrets manager {{ env_id }}-apps-user"
+  when: not apps_user_access_id.stdout
 
 - name: Get Apps User token
   no_log: "{{hide_sensitive_logs}}"
@@ -37,6 +41,10 @@
     export AWS_PROFILE={{ default_aws_profile }}
     /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .secret_key
   register: apps_user_secret_key
+- name: "Fail if AWS apps user not found in AWS secrets manager"
+  fail:
+    msg: "AWS apps user secret key should be available in AWS secrets manager {{ env_id }}-apps-user"
+  when: not apps_user_secret_key.stdout
 
 - name: Get Cognito User-Pool ID
   no_log: "{{hide_sensitive_logs}}"
