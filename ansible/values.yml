@@ -74,7 +74,7 @@ application_fabric_tdel_user: "{{org_id}}-{{ application_identity_org_type }}-tr
 application_fabric_dcml_user: "{{org_id}}-{{ application_identity_org_type }}-data-call-mood-listener"
 application_fabric_indm_user: "{{org_id}}-{{ application_identity_org_type }}-insurance-data-manager"
 msp_id: "{{org_id}}"
-console_peer: "{{org_id}}peer1"
+console_peer: "{{org_id}}-peer1"
 application_identities:
   - id: "{{ application_fabric_app_user }}"
     org_type: "{{ application_identity_org_type }}"
