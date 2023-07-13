@@ -3,6 +3,7 @@ module "vpc" {
   count = var.create_vpc ? 1 : 0
   create_vpc      = true
   source          = "terraform-aws-modules/vpc/aws"
+  version         = "4.0.2"
   name            = "${local.std_name}-vpc"
   cidr            = var.vpc_cidr
   azs             = var.availability_zones
