@@ -50,3 +50,17 @@
     dest: "/usr/local/bin/osnadmin"
     state: link
   become: true
+
+- name: Create symlink to HLF discovery service CLI
+  file:
+    src: "{{ fabric_tools_home_folder }}/bin/discover"
+    dest: "/usr/local/bin/discover"
+    state: link
+  become: true
+
+- name: Create symlink to HLF ordering service CLI
+  file:
+    src: "{{ fabric_tools_home_folder }}/bin/orderer"
+    dest: "/usr/local/bin/orderer"
+    state: link
+  become: true

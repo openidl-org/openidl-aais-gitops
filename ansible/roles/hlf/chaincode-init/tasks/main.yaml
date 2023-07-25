@@ -1,0 +1,210 @@
+---
+- name: "Fail if init parameter is not provided"
+  fail:
+    msg: "Chaincode Init parameter not provided"
+  when: chaincode_init_parameter is not defined
+
+- name: "Fail if target channel id not provided"
+  fail:
+    msg: "Target channel id not provided"
+  when: target_channel_id is not defined or not target_channel_id
+
+- name: "Fail if target chaincode id not provided"
+  fail:
+    msg: "Target chaincode id id not provided"
+  when: target_chaincode_id is not defined or not target_chaincode_id
+
+
+#  1. Use discovery service to collect all endorsing peers and their MSP ids
+#  2. Fetch the MSP definition for each of the endoring MSPs in order to extract the MSP root TLS CA certs
+#  3. Fetch the ordering service endpoint from the channe;
+#  4. Assemble and execute the peer chaincode invoke command
+
+- name: "Creates directory {{config_folder}}/{{msp_id}}"
+  file:
+    path: "{{config_folder}}/{{msp_id}}"
+    state: directory
+
+- set_fact:
+    fabric_config: "{{ fabric_tools_home_folder }}/config"
+
+- set_fact:
+    msp_path: "{{config_folder}}/{{msp_id}}/msp"
+
+- name: "Creates directory {{msp_path}}"
+  file:
+    path: "{{msp_path}}"
+    state: directory
+
+#  ##### Pull admin identity from wallet and store the cert and PK #####
+- name: "Pull admin identity from the wallet"
+  include_role:
+    name: wallet
+  vars:
+    wallet_ops: "get"
+    wallet_path: "{{ msp_admin_id }}"
+
+- set_fact:
+    admin_certs: "{{msp_path}}/admincerts"
+
+- name: "Creates directory {{admin_certs}}"
+  file:
+    path: "{{admin_certs}}"
+    state: directory
+
+
+- set_fact:
+    admin_key_path: "{{msp_path}}/keystore"
+
+- set_fact:
+    admin_cert_path: "{{msp_path}}/signcerts"
+
+- set_fact:
+    admin_ca_certs: "{{msp_path}}/cacerts"
+
+- name: "Creates directory {{admin_ca_certs}}"
+  file:
+    path: "{{admin_ca_certs}}"
+    state: directory
+
+- name: "Creates directory {{admin_cert_path}}"
+  file:
+    path: "{{admin_cert_path}}"
+    state: directory
+
+- name: "Creates directory {{admin_key_path}}"
+  file:
+    path: "{{admin_key_path}}"
+    state: directory
+
+- copy:
+    content: "{{ wallet_operator_identity_dict.cert | b64decode }}"
+    dest: "{{admin_cert_path}}/msp_admin.cert"
+
+- copy:
+    content: "{{ wallet_operator_identity_dict.private_key | b64decode }}"
+    dest: "{{admin_key_path}}/msp_admin_key.pem"
+
+- name: "Get the organization"
+  ibm.blockchain_platform.organization_info:
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    name: "{{ msp_id }}"
+  register: msp_result
+
+- name: "Fail if organization not found {{msp_id}}"
+  fail:
+    msg: "Organization {{ msp_id }} not found in console"
+  when: not msp_result
+
+- copy:
+    content: "{{ msp_result.organization.root_certs | b64decode }}"
+    dest: "{{admin_ca_certs}}/{{msp_id}}_ca_root.certs"
+
+- copy:
+    content: "{{ msp_result.organization.admins | b64decode }}"
+    dest: "{{admin_certs}}/{{msp_id}}_admin.certs"
+#  #########################
+
+#  ##### Pull the MSP peer info from console, extract peer endpoint and TLS CA certs #####
+- name: "Pull {{ console_peer }} info from console for MSP {{ msp_id }}"
+  no_log: "{{hide_sensitive_logs}}"
+  ibm.blockchain_platform.peer_info:
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    name: "{{ console_peer }}"
+  register: peer_info
+
+- name: "Fail if peer not found"
+  fail:
+    msg: "Peer {{ console_peer }} not found in console {{peer_info}}"
+  when: peer_info.peer.api_url is not defined or not peer_info.peer.api_url
+
+#  Peer endpoint
+- set_fact:
+    peer_endpoint: "{{ peer_info.peer.api_url.split('//')[1] }}"
+
+# store the MSP CA TLS certs into a file
+- copy:
+    content: "{{ peer_info.peer.tls_ca_root_cert | b64decode }}"
+    dest: "{{config_folder}}/{{msp_id}}/tls_ca_root_cert.cert"
+#  #########################
+
+
+#  ##### Extract the endorsing peers requried for chaincode invoke, store the root TLS CA certs on the FS #####
+- name: Discover endorsers for chaincode {{target_chaincode_id}} on channel {{ target_channel_id }} with MSP {{msp_id}} and peer {{peer_endpoint}}
+  shell: >
+    discover --peerTLSCA {{config_folder}}/{{msp_id}}/tls_ca_root_cert.cert --userKey {{admin_key_path}}/msp_admin_key.pem --userCert {{admin_cert_path}}/msp_admin.cert --MSP {{msp_id}} endorsers --channel {{ target_channel_id }}  --server {{peer_endpoint}} --chaincode {{target_chaincode_id}}
+  register: endorsersOutput
+
+- set_fact:
+    discovery_endorsers: "{{endorsersOutput.stdout | from_json}}"
+
+- debug:
+    msg: "Discovered  string {{ discovery_endorsers[0].Layouts[0].quantities_by_group }}"
+
+- set_fact:
+    endorsers_string: ""
+- set_fact:
+    tls_root_cert_string: ""
+
+- include: collect-endorsers.yml
+    group_quantity="{{group.value | int }}"
+    group_id="{{group.key}}"
+    egroups="{{discovery_endorsers[0].EndorsersByGroups}}"
+  loop: "{{ discovery_endorsers[0].Layouts[0].quantities_by_group | dict2items }}"
+  loop_control:
+    loop_var: group
+
+- debug:
+    msg: "endorsers_string  {{ endorsers_string }}"
+
+- name: Discover ordering service endpoint for channel {{ target_channel_id }} and peer endpoint {{peer_endpoint}}
+  shell: >
+    discover --peerTLSCA {{config_folder}}/{{msp_id}}/tls_ca_root_cert.cert --userKey {{admin_key_path}}/msp_admin_key.pem  --userCert {{admin_cert_path}}/msp_admin.cert --MSP {{msp_id}} config --channel {{ target_channel_id }}  --server {{peer_endpoint}}
+  register: channelConfigOut
+
+- set_fact:
+    channel_config: "{{channelConfigOut.stdout | from_json}}"
+
+- set_fact:
+    ord_dict: "{{channel_config.orderers | dict2items}}"
+
+- set_fact:
+    orderer_endpoint: "{{ ord_dict[0].value.endpoint[0]}}"
+
+- set_fact:
+    orderer: "{{orderer_endpoint.host}}:{{orderer_endpoint.port}}"
+
+- set_fact:
+    ord_tls_root_cert: "{{channel_config.msps[ord_dict[0].key].tls_root_certs[0] }}"
+
+- copy:
+    content: "{{ ord_tls_root_cert | b64decode }}"
+    dest: "{{config_folder}}/{{msp_id}}/ord_tls_root_cert.cert"
+
+# Invoke the chaincode
+- name: Invoke the chaincode {{ target_chaincode_id }} on channel {{ target_channel_id }}
+  shell: >
+    peer chaincode invoke {{endorsers_string}} {{ tls_root_cert_string }} --cafile {{config_folder}}/{{msp_id}}/ord_tls_root_cert.cert --tls -o {{orderer}} -C {{target_channel_id}} -n {{target_chaincode_id}} --isInit -c '{"Args":["{{chaincode_init_parameter}}"]}'
+  register: invoke
+  environment:
+    CORE_PEER_MSPCONFIGPATH: "{{msp_path}}"
+    CORE_PEER_LOCALMSPID: "{{msp_id}}"
+    CORE_PEER_TLS_ENABLED: "true"
+    CA_ORD_FILE: "{{config_folder}}/{{msp_id}}/ord_tls_root_cert.cert"
+    FABRIC_CFG_PATH: "{{fabric_config}}"
+#  #########################  
+
+- name: Remove admin certs folder
+  file:
+    path: "{{item}}"
+    state: absent
+  with_items:
+    - "{{admin_key_path}}"
+    - "{{admin_cert_path}}"
+    - "{{admin_ca_certs}}"

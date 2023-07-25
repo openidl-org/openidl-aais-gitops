@@ -1,0 +1,48 @@
+- name: "Fail if channel id is provided but empty"
+  fail:
+    msg: "Provided channel id should not be empty"
+  when: init_on_channel_id is defined and init_on_channel_id == ""
+
+- set_fact:
+    cc_id: "{{chan.chaincode.name}}"
+  loop: "{{ fabric_channels }}"
+  loop_control:
+    loop_var: chan
+  when: init_on_channel_id is defined and chan.name == init_on_channel_id
+
+- name: "Fail if chaincode id cannot be found in config"
+  fail:
+    msg: "Chaincode id not found in config for channel {{init_on_channel_id}}"
+  when: init_on_channel_id is defined and (cc_id is not defined or cc_id == "")
+
+- set_fact:
+    common_channel_id: "{{chan.name}}"
+  loop: "{{ fabric_channels }}"
+  loop_control:
+    loop_var: chan
+  when: chan.common == true
+
+- name: "Fail if common channel not defined in config"
+  fail:
+    msg: "The common channel id should be defined in config"
+  when: common_channel_id is not defined or common_channel_id == ""
+
+- include_role:
+    name: hlf/chaincode-init
+  vars:
+    target_chaincode_id: "{{cc_id}}"
+    target_channel_id: "{{init_on_channel_id}}"
+    chaincode_init_parameter: "{{common_channel_id}}"
+  when: init_on_channel_id is defined
+
+# Initialize the chaincodes on all channels
+- include_role:
+    name: hlf/chaincode-init
+  vars:
+    target_chaincode_id: "{{chan.chaincode.name}}"
+    target_channel_id: "{{chan.name}}"
+    chaincode_init_parameter: "{{common_channel_id}}"
+  loop: "{{ fabric_channels }}"
+  loop_control:
+    loop_var: chan
+  when: init_on_channel_id is not defined and chan.common == false
