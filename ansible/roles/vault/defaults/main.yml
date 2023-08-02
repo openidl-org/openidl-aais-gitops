@@ -17,7 +17,7 @@ aws_iam_user_prefix: "{{env_id}}"
 vault:
   name: "{{vault_name}}"
   vault_namespace: "{{vault_name}}"
-  vault_chart_version: 0.23.0
+  vault_chart_version: 0.25.0
   vault_chart_repo: helm.releases.hashicorp.com
   internal_domain: "{{vault_address}}"
   ingress_class: "{{vault_ingress_class}}"
