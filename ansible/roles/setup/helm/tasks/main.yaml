@@ -6,10 +6,11 @@
     tags:
       - molecule-idempotence-notest
 
-  - name: check helm
-    stat:
+  - name: Remove any exisitng helm
+    become: true
+    file:
       path: "{{ helm.bin_directory | default(default.bin_directory)}}/helm"
-    register: helm_stat_result
+      state: absent
     tags:
       - helm
 
@@ -20,7 +21,6 @@
       mode: 0755
       checksum: ""
     register: helm_download
-    when: not helm_stat_result.stat.exists
     tags:
       - helm
 
@@ -30,7 +30,6 @@
       dest: "{{ tmp_directory.path }}"
       copy: no
       mode: 0755
-    when: not helm_stat_result.stat.exists
     tags:
       - helm
 
@@ -49,7 +48,6 @@
       src: "{{ tmp_directory.path }}/{{ helm.os }}-{{ helm.arch }}/helm"
       dest: "{{ helm.bin_directory | default(default.bin_directory) }}/helm"
       mode: '0755'
-    when: not helm_stat_result.stat.exists
 
   - name: Test helm installation
     command: "{{ helm.bin_directory | default(default.bin_directory) }}/helm version"

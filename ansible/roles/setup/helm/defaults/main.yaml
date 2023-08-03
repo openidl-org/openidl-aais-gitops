@@ -3,5 +3,5 @@ tmp_directory: "{{ lookup('env', 'TMPDIR') | default('/tmp',true) }}"
 
 default:
   bin_directory: "{{ bin_install_dir | default('/usr/local/bin') }}"  #Default to ~/bin install directory for binaries
-  version: "v3.2.4"
+  version: "v3.12.2"
   checksum: ""
