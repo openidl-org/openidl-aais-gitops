@@ -6,7 +6,8 @@
     tags:
       - molecule-idempotence-notest
 
-  - name: check helm
+  - name: Remove any exisitng helm
+    become: true
     file:
       path: "{{ helm.bin_directory | default(default.bin_directory)}}/helm"
       state: absent
