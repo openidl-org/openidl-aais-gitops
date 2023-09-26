@@ -11,7 +11,7 @@
     #type: external
     #console_ingress_class: nginx-external
     #console_storage_class: gp2
-    #console_domain: d1.test.senofi.net
+    #console_domain: d1.test.openidl.org
     #console_name: operator
     #namespace: hlf
   roles:

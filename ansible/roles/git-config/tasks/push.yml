@@ -13,7 +13,7 @@
 - name: "add commit push"
   shell: |
     cd {{git_config_path}}
-    git config user.email cicd@senofi.ca
+    git config user.email cicd@openidl.org
     git config user.name CICD
     git add .
     git commit -m "Add/Update {{git_src_file}}"
