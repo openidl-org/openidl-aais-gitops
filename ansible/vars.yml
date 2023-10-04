@@ -194,7 +194,7 @@ fluxcd:
 nginx:
   nginx_chart_version: 4.4.2
   cert_manager_chart_version: 1.10.0
-  cert_manager_email: openidl@senofi.ca
+  cert_manager_email: openidl@openidl.org
   controller_name: nginx-external
 
 ###############################
@@ -205,7 +205,7 @@ vault:
   vault_namespace: vault
   vault_chart_version: 0.23.0
   vault_chart_repo: helm.releases.hashicorp.com
-  internal_domain: vault.d1.test.senofi.net
+  internal_domain: vault.d1.test.openidl.org
   ingress_class: nginx-external
   env: test
   region: us-east-2

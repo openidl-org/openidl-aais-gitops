@@ -19,7 +19,7 @@ env_id: ""
 aws_account_number: ""
 
 # Email used for componenets like nginx cert manager and openidl applications
-# Example: openidl@senofi.ca
+# Example: openidl@openidl.org
 contact_email: ""
 
 # The AWS region of the deployment
