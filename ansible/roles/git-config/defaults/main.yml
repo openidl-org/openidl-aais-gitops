@@ -6,3 +6,5 @@ git_configs_repo_url: ""
 git_configs_repo_branch: main
 delegate_to:
   - localhost
+cicd_git_email: cicd@openidl.org
+cicd_git_name: CICD

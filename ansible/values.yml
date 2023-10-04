@@ -58,7 +58,7 @@ fabric_channels:
 
 ######## Templated variables with default values, DO NOT adjust unless in advanced mode ###########
 cloud_provider: aws
-console_image: ghcr.io/openidl-org/fabric-console
+console_image: ghcr.io/senofi/fabric-console
 console_image_label: "sha256:134874cd3b89b963b64e66d6344265245dfa9000838e125d846b0f7a985f1734"
 fabric_operator_k8s_cluster: "{{env_id}}-blk-cluster"
 openidl_apps_cluster: "{{env_id}}-app-cluster"

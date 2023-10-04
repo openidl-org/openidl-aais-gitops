@@ -8,5 +8,5 @@ apps_chart_gitrepo_branch: operator-develop
 nginx_controller_name: nginx
 applications_domain: "app.{{main_domain}}"
 apps_image_repository: "ghcr.io/openidl-org/openidl-main"
-apps_image_tag: ""
+apps_image_tag: "latest"
 app_data_call_address: "data-call-app-service.{{ applications_domain }}"
