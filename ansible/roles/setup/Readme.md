@@ -57,28 +57,6 @@ This task configures aws cli with *access_id* and *secret_key*.
 
 ----------------
 
-### flux
-#### Task Included
-
-#### 1.  Check if Flux is running
-This task checks whether the flux is running for the environment (network.env.type) . stores the result in *flux_service*
-
-#### 2. Get ssh known hosts
-It get the ssh hosts, runs only when flux service is not found.
-
-#### 3. Helm repo add
-It initializes the helm repo and adds flux, runs only when flux service is not found.
-
-#### 4. Install flux
-This task first creates the HelmRelease Custom resource, and then deploys Flux helmchart, runs only when flux service is not found.
-
-#### 5. wait for pods to come up
-This checks for the flux Pods to come up. It runs when *flux_service.resources* is not there i.e. flux is not found, until kubectl_get_pods gives a positive result.
-
-
--------------
-
-
 ### helm
 This task installs helm.
 
