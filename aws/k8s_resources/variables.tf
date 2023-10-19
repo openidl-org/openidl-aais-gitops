@@ -1,4 +1,4 @@
-#aws environment definition variables
+#AWS environment definition variables
 variable "aws_region" {
   default     = "us-east-2"
   type        = string
@@ -73,8 +73,61 @@ variable "org_name" {
 variable "terraform_state_s3_bucket_name" {
   type = string
   description = "The name of the s3 bucket will manage terraform state files"
+  default = ""
 }
-variable "bastion_host_nlb_external" {
+variable "tfc_workspace_name_aws_resources" {
+  type = string
+  description = "The terraform cloud workspace of AWS resources provisioned"
+  default = ""
+}
+variable "tfc_org_name" {
+  type = string
+  description = "The terraform cloud organisation name"
+  default = ""
+}
+variable "aws_access_key" {
+  type = string
+  default = ""
+  description = "IAM user access key"
+}
+variable "aws_secret_key" {
+  type = string
+  default = ""
+  description = "IAM user secret key"
+}
+variable "aws_external_id" {
+  type = string
+  default = "terraform"
+  description = "ExternalID setup while setting up IAM user and relevant IAM roles"
+
+}
+variable "create_bastion_host" {
   type = bool
-  description = "Do you want to set nlb for the bastion hosts in autoscaling group to be external"
+  default = true
+  description = "Determines whether to create bastion host in the VPC network"
+}
+variable "create_cloudtrial" {
+  type = bool
+  default = true
+  description = "Determines whether to enable cloudtrial"
+}
+variable "create_cognito_userpool" {
+  type = bool
+  default = true
+  description = "Determines whether to create cognito userpool"
+}
+variable "create_s3_bucket_public" {
+  type = bool
+  default = true
+  description = "Determines whether to create public s3 bucket to manage logos"
+}
+variable "create_vpc" {
+  type = bool
+  default = true
+  description = "Determines whether to create vpc or use existing vpc"
+}
+variable "custom_tags" {
+  type = map
+  default = {}
+  description ="List of custom tags to include"
 }

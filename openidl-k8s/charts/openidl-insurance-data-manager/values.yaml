@@ -42,18 +42,27 @@ securityContext:
     # runAsUser: 1000
 
 service:
-    type: NodePort
+    type: ClusterIP
     port: 8080
     targetPort: 8083
 
 ingress:
     enabled: true
+    ingressClassName: nginx-external
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
     annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
         ingress.kubernetes.io/enable-cors: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: HTTP
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+        nginx.ingress.kubernetes.io/rewrite-target: /
+        nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: 300m
+
 
 resources:
     {}

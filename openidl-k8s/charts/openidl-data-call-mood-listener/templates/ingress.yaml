@@ -27,6 +27,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
+  ingressClassName: {{ .Values.global.datacallmoodlistener.ingressClassName }}
   rules:
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}

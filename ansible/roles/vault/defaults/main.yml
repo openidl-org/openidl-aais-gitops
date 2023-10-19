@@ -1,0 +1,29 @@
+###############################
+# Vault vars
+###############################
+vault_name: hlf-vault
+vault_domain: "net.{{main_domain}}"
+vault_ingress_class: "nginx"
+default_aws_profile: "cicd-role"
+vault_registry: "ghcr.io/openidl-org/openidl-aais-gitops"
+vault_registry_version: latest
+vault_storage_class: "openidl-sc"
+vault_tls_secret_name: "{{vault_name}}-tls"
+delete_secrets: false
+vault_address: "{{vault_name}}.{{vault_domain}}"
+hide_sensitive_logs: true
+aws_iam_user_prefix: "{{env_id}}"
+
+vault:
+  name: "{{vault_name}}"
+  vault_namespace: "{{vault_name}}"
+  vault_chart_version: 0.25.0
+  vault_chart_repo: helm.releases.hashicorp.com
+  internal_domain: "{{vault_address}}"
+  ingress_class: "{{vault_ingress_class}}"
+  env: "{{env_id}}"
+  region: "{{region}}"
+  aws_account_number: "{{aws_account_number}}"
+  registry: "{{vault_registry}}"
+  registry_version: "{{vault_registry_version}}"
+  aws_profile: "{{default_aws_profile}}"

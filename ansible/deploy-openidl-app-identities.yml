@@ -1,0 +1,17 @@
+- hosts: ansible_provisioners
+  gather_facts: false
+  no_log: "{{ no_ansible_log | default(false) }}"
+  tasks:
+    - include_role:
+        name: "import-config-vars"
+    - set_fact:
+        switch_to_cluster: "{{fabric_operator_k8s_cluster}}"
+    - include_role:
+        name: "setup/switch-cluster"
+    - name: "Blockchain collection"
+      include_role:
+        name: setup/blockchain-platform
+      vars:
+        blockchain_collection_install: true
+    - include_role:
+        name: "openidl-identities-deploy"

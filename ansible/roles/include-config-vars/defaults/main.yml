@@ -1,0 +1,2 @@
+git_config_path: "/tmp/roles_configs"
+configs_directory: "{{git_config_path}}/orgs_config"

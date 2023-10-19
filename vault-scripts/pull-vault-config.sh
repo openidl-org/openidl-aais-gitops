@@ -77,7 +77,7 @@ pullVaultConfig() {
       exit 1
     fi
 
-    CONFIG_DATA=$(echo $HTTP_STATUS | $JQ ".data.data")
+    CONFIG_DATA=$(echo "${HTTP_STATUS}" | $JQ ".data.data")
 
     if [ -z "${CONFIG_DATA}" ]; then
       echo "CONFIG_DATA is blank."

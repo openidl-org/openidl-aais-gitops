@@ -1,0 +1,29 @@
+- debug:
+    msg: "Endorsment groupss {{ egroups }}"
+
+- set_fact: 
+    endorsment_group: "{{ egroups[group_id] }}"
+
+- debug:
+    msg: "Endorsment group {{ endorsment_group }}"
+
+- include: import-certs-fs.yml
+    msp_peer="{{endorsment_peer}}"
+  loop: "{{ endorsment_group }}"
+  loop_control:
+    loop_var: endorsment_peer
+    index_var: indx
+  when: group_quantity | int > 0 and indx < group_quantity | int
+
+
+- include: assemble-endorsers-and-certs.yml
+    endorsement_peer="{{endorsement_peer_var}}"
+    endorsers_string="{{endorsers_string}}"
+    tls_root_cert_string="{{tls_root_cert_string}}"
+    endorserPrefix="--peerAddresses "
+    endorserTlsPrefix="--tlsRootCertFiles "
+  loop: "{{ endorsment_group }}"
+  loop_control:
+    loop_var: endorsement_peer_var
+    index_var: indx
+  when: group_quantity | int > 0 and indx < group_quantity | int

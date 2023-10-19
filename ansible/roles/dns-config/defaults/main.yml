@@ -1,0 +1,3 @@
+---
+nginx_controller_name: nginx
+nginx_controller_namespace: hlf-nginx

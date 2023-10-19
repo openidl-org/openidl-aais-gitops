@@ -1,0 +1,369 @@
+---
+- include_tasks: set_facts.yml
+
+#Fail if AWS secrets exist
+- name: "Fail is aws secret exist as it is not safe to overwrite"
+  shell: |
+    export AWS_PROFILE={{ vault.aws_profile }}
+    aws secretsmanager list-secrets --filter Key=name,Values={{ vault.env }}-{{ item.name }}
+  register: aws_secret_list
+  failed_when: ( ( aws_secret_list.stdout | from_json ).SecretList | length ) != 0
+  with_items:
+    - name: config-vault
+    - name: kvs-vault
+    - name: vault-unseal-key
+    - name: root-token
+
+- name: "generate vault values template from vault.j2 file"
+  template:
+    src: templates/vault.j2
+    dest: "./vault-values.yaml"
+    mode: 0755
+
+- name: "generate aws resource policy from template aws_resource_policy.json.j2"
+  template:
+    src: templates/aws_resource_policy.json.j2
+    dest: "./aws_resource_policy.json"
+    mode: 0755
+
+- name: "Add vault chart repo"
+  kubernetes.core.helm_repository:
+    name: hashicorp
+    repo_url: "https://{{vault.vault_chart_repo}}"
+
+- name: "Install Vault"
+  register: vault_install_results
+  kubernetes.core.helm:
+    chart_ref: hashicorp/vault
+    chart_version: "{{ vault.vault_chart_version }}"
+    release_name: "{{ vault.name }}"
+    release_state: present
+    release_namespace: "{{ vault.vault_namespace }}"
+    create_namespace: true
+    force: True
+    wait: True
+    wait_timeout: "300s"
+    # values_files: "./vault-values.yaml"
+    update_repo_cache: True
+    release_values:
+      tlsDisable: true
+      server:
+        ha:
+          enabled: true
+          raft:
+            enabled: true
+            setNodeId: true
+        ingress:
+          enabled: true
+          hosts:
+            - host: "{{ vault.internal_domain }}"
+          route:
+            host: "{{ vault.internal_domain }}"
+          ingressClassName: "{{vault.ingress_class}}"
+          tls:
+            - hosts:
+              - "{{ vault.internal_domain }}"
+              secretName: "{{vault_tls_secret_name}}"
+        dataStorage:
+          storageClass: "{{vault_storage_class}}"
+
+- name: "Initialize the vault"
+  shell: |
+    sleep 60
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator init > ./vault-unseal-keys.txt
+
+- name: "Get the vault-unseal-key from the server"
+  no_log: "{{hide_sensitive_logs}}"
+  slurp:
+    src: "./vault-unseal-keys.txt"
+  register: unsealkey
+
+# unseal needed with at least 3 out of 5 unseal keys
+- set_fact:
+    unseal_keys:
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 1: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 2: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 3: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 4: (.*)')|last }}"
+      - "{{ unsealkey['content'] | b64decode | regex_findall('Key 5: (.*)')|last }}"
+
+- name: "Unseal the vault-0"
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator unseal {{item}}
+  loop: "{{ unseal_keys }}"
+
+- name: "Wait till vault deployment completes and vault status availability"
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    name: "{{ vault.name }}-0"
+    namespace: "{{ vault.vault_namespace }}"
+    wait: true
+    wait_sleep: 10
+    wait_timeout: 120
+    wait_condition:
+      type: Ready
+      status: true
+  register: pod_info
+
+- name: Create secret path for org
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault login {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault secrets enable -version=1 -path={{ vault.env }} kv
+
+- name: Join Vault-1 to vault cluster
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 vault operator raft join http://{{ vault.name }}-0.{{ vault.name }}-internal:8200
+
+- name: Join Vault-2 to vault cluster
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 vault operator raft join http://{{ vault.name }}-0.{{ vault.name }}-internal:8200
+
+- name: "Unseal the peers"
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-1 -- vault operator unseal {{item}}
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-2 -- vault operator unseal {{item}}
+  loop: "{{ unseal_keys }}"
+
+- name: Generate vault-add-user script
+  template:
+    src: templates/add-vault-user.sh.j2
+    dest: ./add-vault-user.sh
+    mode: 0755
+
+- name: "Get add user script"
+  slurp:
+    src: "./add-vault-user.sh"
+  register: add_vault_user_script
+
+- name: "Create configmap for network configuration file"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: add-vault-user-script
+        namespace: "{{ vault.vault_namespace }}"
+      data:
+        add-vault-user.sh: "{{ add_vault_user_script.content | b64decode }}"
+
+- name: Create secret for credentials
+  no_log: "{{hide_sensitive_logs}}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: "{{ vault.name }}-user-creds"
+        namespace: "{{ vault.vault_namespace }}"
+      data:
+        VAULT_ROOT_TOKEN: "{{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last | b64encode }}"
+        VAULT_CONFIG_USER: "{{ vault_config_user | b64encode }}"
+        VAULT_CONFIG_USER_TOKEN: "{{ vault_config_user_token | b64encode }}"
+        VAULT_KVS_USER: "{{ vault_kvs_user | b64encode }}"
+        VAULT_KVS_USER_TOKEN: "{{ vault_kvs_user_token | b64encode }}"
+
+- name: Launch Pod for vault user
+  no_log: "{{hide_sensitive_logs}}"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: "{{ vault.name }}-user-script"
+        namespace: "{{ vault.vault_namespace }}"
+      spec:
+        containers:
+          - name: config-user-script
+            image: "{{ vault.registry }}/openidl-baf:{{vault.registry_version}}"
+            env:
+              - name: VAULT_CONFIG_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ vault.name }}-user-creds"
+                    key: VAULT_CONFIG_USER
+              - name: VAULT_ROOT_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ vault.name }}-user-creds"
+                    key: VAULT_ROOT_TOKEN
+              - name: VAULT_CONFIG_USER_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ vault.name }}-user-creds"
+                    key: VAULT_CONFIG_USER_TOKEN
+              - name: VAULT_KVS_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ vault.name }}-user-creds"
+                    key: VAULT_KVS_USER
+              - name: VAULT_KVS_USER_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ vault.name }}-user-creds"
+                    key: VAULT_KVS_USER_TOKEN
+              - name: ORG_NAME
+                value: "{{ vault.env }}"
+              - name: VAULT_URL
+                value: "https://{{ vault.internal_domain }}"
+            command: ["sh", "-c"]
+            args:
+              - |-
+                #!/bin/bash -e
+                cd /home/config
+                echo "Adding config user"
+                ./add-vault-user.sh -V ${VAULT_URL} \
+                  -t ${VAULT_ROOT_TOKEN} \
+                  -U ${VAULT_CONFIG_USER} \
+                  -P ${VAULT_CONFIG_USER_TOKEN} \
+                  -a config-${ORG_NAME} \
+                  -o config \
+                  -e '"create","update","read","list"'
+                echo "Adding kvs user"
+                ./add-vault-user.sh -V ${VAULT_URL} \
+                  -t ${VAULT_ROOT_TOKEN} \
+                  -U ${VAULT_KVS_USER} \
+                  -P ${VAULT_KVS_USER_TOKEN} \
+                  -a kvs-${ORG_NAME} \
+                  -o kvs \
+                  -e '"create","update","read","list"'
+            volumeMounts:
+              - name: "{{ vault.name }}-user-creds"
+                mountPath: "/home/config/"
+                readOnly: true
+        volumes:
+          - name: "{{ vault.name }}-user-creds"
+            configMap:
+              name: add-vault-user-script
+              defaultMode: 0777
+        restartPolicy: Never
+        backoffLimit: 0
+
+- name: Pod logs
+  shell: |
+    sleep 60
+    kubectl -n {{ vault.vault_namespace }} logs -f {{ vault.name }}-user-script
+  register: baf_logs
+  ignore_errors: yes
+
+- name: Pod logs
+  debug:
+    msg: "{{ baf_logs.stdout_lines }}"
+
+- name: "Add missing ingress annotation"
+  k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        name: "{{ vault.name }}"
+        namespace: "{{ vault.vault_namespace }}"
+
+- name: "Generate unseal keys json"
+  template:
+    src: templates/unseal_keys.json.j2
+    dest: ./unseal-keys.json
+  vars:
+    keys: "{{ unseal_keys }}"
+
+- name: "Generate user credentials json"
+  template:
+    src: templates/creds.json.j2
+    dest: ./creds-config.json
+  vars:
+    vault_path: "config-{{ vault.env }}"
+    vault_user: "{{ vault_config_user }}"
+    vault_user_token: "{{ vault_config_user_token }}"
+    vault_org_name: "config"
+
+- name: "Generate user credentials json"
+  template:
+    src: templates/creds.json.j2
+    dest: ./creds-kvs.json
+  vars:
+    vault_path: "kvs-{{ vault.env }}"
+    vault_user: "{{ vault_kvs_user }}"
+    vault_user_token: "{{ vault_kvs_user_token }}"
+    vault_org_name: "kvs"
+
+# SECRETS MANAGER
+- name: "Upload credentials to secret manager"
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ vault.aws_profile }}
+    aws secretsmanager create-secret --name {{ vault.env }}-{{ item.name }} --description "{{ item.description }}" --secret-string file://{{ item.file }}
+    # add resource policy to the secrets
+    aws secretsmanager put-resource-policy --secret-id {{ vault.env }}-{{ item.name }} --resource-policy file://aws_resource_policy.json
+  with_items:
+    - name: config-vault
+      file: creds-config.json
+      description: "Vault Credentials for config user"
+    - name: kvs-vault
+      file: creds-kvs.json
+      description: "Vault Credentials for kvs user"
+    - name: vault-unseal-key
+      file: unseal-keys.json
+      description: "Vault unseal keys"
+
+- name: "upload Vault root token to aws secrets manager"
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ vault.aws_profile }}
+    aws secretsmanager create-secret --name {{ vault.env }}-root-token --description "Vault unseal root token" --secret-string {{ unsealkey['content'] | b64decode | regex_findall('Initial Root Token: (.*)')|last }}
+    aws secretsmanager put-resource-policy --secret-id {{ vault.env }}-root-token --resource-policy file://aws_resource_policy.json
+
+- name: "Delete supporting files"
+  file:
+    state: absent
+    path: "./{{item}}"
+  with_items:
+    - creds-config.json
+    - creds-kvs.json
+    - unseal-keys.json
+    - vault-unseal-keys.txt
+    - add-vault-user.sh
+    - vault-values.yaml
+    - aws_resource_policy.json
+
+- name: "Delete user script pod"
+  k8s:
+    name: "{{ vault.name }}-user-script"
+    namespace: "{{ vault.vault_namespace }}"
+    api_version: v1
+    kind: Pod
+    state: absent
+    wait: yes
+
+- name: "Delete Script Configmap"
+  k8s:
+    name: add-vault-user-script
+    namespace: "{{ vault.vault_namespace }}"
+    api_version: v1
+    kind: ConfigMap
+    state: absent
+
+- name: Delete User Creds Secret
+  k8s:
+    name: "{{ vault.name }}-user-creds"
+    namespace: "{{ vault.vault_namespace }}"
+    api_version: v1
+    kind: Secret
+    state: absent
+
+- name: "Get cluster status"
+  shell: |
+    kubectl -n {{ vault.vault_namespace }} exec {{ vault.name }}-0 -- vault operator raft list-peers
+  register: cluster_status
+
+- debug:
+    var: cluster_status

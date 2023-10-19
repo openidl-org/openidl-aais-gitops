@@ -1,0 +1,10 @@
+# Fetch Vault credentials and location using AWS
+- name: Get vault path config
+  no_log: true
+  shell: |
+    export AWS_PROFILE=cicd-role
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-kvs-vault --version-stage AWSCURRENT --region {{ aws_region }}
+  register: vault_config_out
+
+- set_fact:
+    vault_config: "{{ vault_config_out.stdout | from_json | json_query('SecretString') | from_json }}"

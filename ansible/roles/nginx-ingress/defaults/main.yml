@@ -1,0 +1,13 @@
+do: create
+nginx_cluster: ""
+nginx_type: external
+nginx_tls_cert_prod_url: "https://acme-v02.api.letsencrypt.org/directory"
+nginx_tls_cert_stage_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
+
+nginx_nginx_chart_version: 4.4.2
+nginx_cert_manager_chart_version: 1.10.0
+nginx_controller_name: nginx
+nginx_controller_namespace: hlf-nginx
+
+git_config_path: "/tmp/roles_configs"
+nginx_cert_manager_email: "{{contact_email}}"

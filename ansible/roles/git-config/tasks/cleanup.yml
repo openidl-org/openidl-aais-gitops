@@ -1,0 +1,30 @@
+---
+- name: "Collect files"
+  find:
+    paths: "{{git_config_path}}"
+    hidden: true
+    recurse: true
+  register: collected_files
+
+- name: "Collect directories"
+  find:
+    paths: "{{git_config_path}}"
+    hidden: true
+    recurse: true
+    file_type: directory
+  register: collected_directories
+
+- name: "Remove collected files and directories"
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: >
+    {{
+      collected_files.files
+      + collected_directories.files
+    }}
+
+- name: "Remove config directory"
+  file:
+    path: "{{git_config_path}}"
+    state: absent

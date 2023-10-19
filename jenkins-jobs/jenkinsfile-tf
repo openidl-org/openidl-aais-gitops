@@ -1,0 +1,462 @@
+import groovy.json.JsonSlurper
+pipeline {
+    agent {
+        node {
+            label 'openidl'
+        }
+    }
+    options {
+        // This is required if you want to clean before build
+        skipDefaultCheckout(true)
+    }
+    parameters {
+        string defaultValue: 'app.terraform.io', description: 'Terraform endpoint', name: 'TF_ADDRESS', trim: true
+        string defaultValue: '', description: 'TF Organization', name: 'TF_ORG_NAME', trim: true
+        string defaultValue: '', description: 'Organization Names (comma separated list for multiple organizations without spaces)', name: 'org_name', trim:true
+        string defaultValue: '', description: 'Environment', name: 'env'
+        string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
+        string defaultValue: 'https://github.com/openidl-org/openidl-aais-gitops', description: 'GitHub URL', name: 'GITHUB_URL', trim: true
+        string defaultValue: 'develop', description: 'GitHub Branch', name: 'GITHUB_BRANCH', trim: true
+    }
+    stages {
+        stage('Prepare') {
+            steps {
+                cleanWs()
+                checkout scm
+                withCredentials([string(credentialsId: 'TF_BEARER_TOKEN', variable: 'TF_BEARER_TOKEN')])
+                {
+                    codeCheckout()
+                    script {
+                        currentBuild.displayName = "${params.org_name} - ${params.env}"
+                        def orgs = "${params.org_name}".split(',')
+                        orgs.each { item ->
+                            org = "${item}"
+                            echo "Triggering for ${org}"
+                            buildInfra()
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+def codeCheckout() {
+    stage('Checkout Code') {
+		tool name: 'nodejs', type: 'nodejs'
+        nodejs(cacheLocationStrategy: workspace(), nodeJSInstallationName: 'nodejs') {
+		git credentialsId: 'openidl-aais-gitops', branch: "${params.GITHUB_BRANCH}", url: "${params.GITHUB_URL}"
+			sh '''
+                    echo "Installing Node Modules in Openidl Cognito Custom Message"
+                    cd aws/aws_resources/resources/openidl-cognito-custom-message/ && npm i && cd -
+                    echo "Preparing ETL code for lambda functions"
+                    rm -rf lambda lambda-reporting-processor aws/aws_resources/resources/openidl-upload-lambda aws/aws_resources/resources/openidl-reporting-processor
+                    git clone https://github.com/openidl-org/openidl-etl.git -b develop lambda
+                    cd ./lambda/openidl-etl-intake-processor/ && npm install
+                    cd ../openidl-etl-success-processor/ && npm install
+                    cd ../openidl-upload-ui/infra/ && npm install
+                    cd ../../../
+                    cp -r ./lambda/openidl-etl-intake-processor/ aws/aws_resources/resources/
+                    cp -r ./lambda/openidl-etl-success-processor/ aws/aws_resources/resources/
+                    cp -r ./lambda/openidl-upload-ui/infra aws/aws_resources/resources/openidl-upload-lambda
+                    git clone https://github.com/openidl-org/openidl-main.git -b openidl-nd-poc-main lambda-reporting-processor
+                    cd ./lambda-reporting-processor/lambdas/ReportProcessorLambda/ && npm install
+                    cd ../../../
+                    cp -r ./lambda-reporting-processor/lambdas/ReportProcessorLambda aws/aws_resources/resources/openidl-reporting-processor
+                    tar -czf aws-content.tar.gz -C aws/aws_resources --exclude .git .
+                    echo "Successfully prepared the AWS resources code bundle"
+                    tar -czf k8s-content.tar.gz -C aws/k8s_resources --exclude .git .
+                    echo "Successfully prepared the K8s resources code bundle"
+			'''
+		}
+    }
+}
+def buildInfra() {
+    stage("AWS-Plan-Apply ${org}") {
+        def ws_id = getWorkspaceId("${params.jobPrefix}${org}-${params.env}-aws-resources")
+        println("Workspace Id: " + ws_id)
+        def (config_version, upload_url) = createConfig("${ws_id}")
+        def upload_status = uploadAWSConfig("${upload_url}")
+        def runid = ""
+        runid = plan("${ws_id}")
+        waitForPlan("${runid}")
+    }
+    stage("K8s-Plan-Apply ${org}") {
+        def ws_id = getWorkspaceId("${params.jobPrefix}${org}-${params.env}-k8s-resources")
+        def (config_version, upload_url) = createConfig("${ws_id}")
+        def upload_status = uploadK8sConfig("${upload_url}")
+        def runid = ""
+        runid = plan("${ws_id}")
+        waitForPlan("${runid}")
+    }
+}
+def getWorkspaceId(workspace) {
+    def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]
+            ],
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/organizations/" + "${params.TF_ORG_NAME}" + "/workspaces/" + "${workspace}"
+    )
+    def data = new JsonSlurper().parseText(response.content)
+    println("Workspace Id: " + data.data.id)
+    println("HTTP response for getWorkspaceId:" + response)
+    return data.data.id
+}
+def createConfig(ws_id) {
+    def payload = """
+{
+  "data": {
+    "type": "configuration-versions",
+    "attributes": {
+      "auto-queue-runs": false
+    }
+  }
+}
+    """
+     def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]
+            ],
+        httpMode: 'POST',
+        requestBody: "${payload}",
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/workspaces/" + "${ws_id}" + "/configuration-versions"
+    )
+    def data = new JsonSlurper().parseText(response.content)
+    println("Config Version: " + data.data.id)
+    def upload_url = data.data.attributes."upload-url"
+    println("Upload URL: " + data.data.attributes."upload-url")
+    println("HTTP response for createConfig:" + response)
+    return [data.data.id, data.data.attributes."upload-url"]
+}
+def uploadAWSConfig(url) {
+         def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/octet-stream" ]
+            ],
+        httpMode: 'PUT', multipartName: 'aws-content', responseHandle: 'NONE',
+        uploadFile: './aws-content.tar.gz',
+        url: "${url}"
+    )
+    println("HTTP response for uploadAWSConfig:" + response)
+    println("Code for AWS resources uploaded successfully")
+
+}
+def uploadK8sConfig(url) {
+         def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/octet-stream" ]
+            ],
+        httpMode: 'PUT', multipartName: 'aws-content', responseHandle: 'NONE',
+        uploadFile: './k8s-content.tar.gz',
+        url: "${url}"
+    )
+    println("HTTP response for uploadK8sConfig:" + response)
+    println("Code for K8s resources uploaded successfully")
+}
+def plan(ws_id) {
+    def payload = """
+{
+    "data": {
+        "attributes": {
+            "is-destroy":false,
+            "message": "Triggered run from Jenkins (build #${env.BUILD_NUMBER})"
+        },
+        "type":"runs",
+        "relationships": {
+            "workspace": {
+                "data": {
+                    "type": "workspaces",
+                    "id": "${ws_id}"
+                }
+            }
+        }
+    }
+}
+    """
+    println("Payload inside plan is: " + payload)
+    sh 'sleep 10'
+    def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]
+            ],
+        httpMode: 'POST',
+        requestBody: "${payload}",
+        validResponseCodes: '200:399',
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs"
+    )
+    def data = new JsonSlurper().parseText(response.content)
+    println("Response Status: " + response.status)
+    println("Run Id: " + data.data.id)
+    println("HTTP response for Plan:" + response)
+    return data.data.id
+}
+def planResult(runid){
+    def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]],
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs/${runid}?include=plan"
+    )
+    def data = new JsonSlurper().parseText(response.content)
+    println("HTTP response for planResult:" + response)
+    def plan_log_url = data.included[0].attributes."log-read-url"
+    println("Click the URL to review terraform plan details:\n" + plan_log_url)
+}
+def getPlanStatus(runid) {
+    def result = ""
+    def response = httpRequest(
+        customHeaders: [[ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ]],
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs/${runid}"
+    )
+    def data = new JsonSlurper().parseText(response.content)
+    switch (data.data.attributes.status) {
+        case 'pending':
+            result = "pending"
+        case 'plan_queued':
+            result = "plan_queued"
+            break
+        case 'planning':
+            result = "planning"
+            break
+        case 'planned':
+            result = "planned"
+            break
+        case 'cost_estimating':
+            result = "costing"
+            break
+        case 'cost_estimated':
+            result = "cost_estimated"
+            break
+        case 'policy_checking':
+            result = "policy_checking"
+            break
+        case 'policy_soft_failed':
+            result = "policy_soft_failed"
+            break
+        case 'confirmed':
+            result = "confirmed"
+            break
+        case 'planned_and_finished':
+            result = "planned_and_finished"
+            break
+        case 'policy_override':
+            println(response.content)
+            result = "approve_policy:" + data.data.relationships["policy-checks"].data[0].id
+            break
+        case 'policy_checked':
+            result = "policy_checked"
+            break
+        case 'discarded':
+            result = "discarded"
+            break
+        case 'errored':
+            result = "errored"
+            break
+        case 'canceled':
+            result = "canceled"
+            break
+        case "force_canceled":
+            result = "canceled"
+            break
+        default:
+            result = "running"
+            break
+    }
+    return result
+}
+def waitForPlan(runid) {
+    def count = 0
+    while (true) {
+        def status = getPlanStatus(runid)
+        println("Status: " + status)
+
+        // If a policy requires an override, prompt in the pipeline
+        if (status.startsWith("approve_policy")) {
+            def override
+            planResult("${runid}")
+            try {
+                override = input (message: 'Override policy?',
+                                  ok: 'Continue',
+                                  parameters: [ booleanParam(
+                                      defaultValue: false,
+                                      description: 'A policy restriction is enforced on this workspace. Check the box to approve overriding the policy.',
+                                      name: 'Override')
+                                  ])
+            } catch (err) {
+                override = false
+            }
+
+            // If we're overriding, tell terraform. Otherwise, discard the run
+            if (override == true) {
+                println('Overriding!')
+                def item = status.split(':')[1]
+
+                def overridden = overridePolicy(item)
+                if (!overridden) {
+                    println("Could not override the policy")
+                    discardRun(runid)
+                    error("Could not override the Sentinel policy")
+                    break
+                }
+            } else {
+                println('Rejecting!')
+                discardRun(runid)
+                error("The pipeline failed due to a Sentinel policy restriction.")
+                break
+            }
+        }
+
+        // If we're ready to apply, prompt in the pipeline to do so
+        if (status == "planned" || status == "cost_estimated" || status == "policy_checked") {
+            def apply
+            planResult("${runid}")
+            try {
+                apply = input (message: 'Confirm Apply', ok: 'Continue',
+                                    parameters: [booleanParam(defaultValue: false,
+                                    description: 'Would you like to continue to apply this run?', name: 'Apply')])
+            } catch (err) {
+                apply = false
+            }
+
+            // If we're going to apply, tell Terraform. Otherwise, discard the run
+            if (apply == true) {
+                println('Applying plan')
+                applyRun(runid)
+                break
+            } else {
+                println('Rejecting!')
+                discardRun(runid)
+                error("The pipeline failed due to a manual rejection of the plan.")
+                break
+            }
+        }
+        if (status == "errored") {
+            planResult("${runid}")
+            println("The pipeline failed due to the plan errored")
+            error("The Terraform run has encountered an error while planning, and the pipeline cannot continue.")
+            break
+        } else if(status == "canceled") {
+            planResult("${runid}")
+            println("The pipeline failed due to the plan canceled")
+            error("The Terraform run has been canceled outside the pipeline, and the pipeline cannot continue.")
+            break
+        } else if(status == "discarded")  {
+            planResult("${runid}")
+            println("The pipeline failed due to the plan discarded")
+            error("The Terraform run has been discarded and the pipeline cannot continue.")
+            break
+        } else if(status == "planned_and_finished") {
+            planResult("${runid}")
+            println("The environment is up to date and there are no changes to apply.")
+            break
+        } else if (count > 60) break
+        count++
+        sleep(10)
+    }
+}
+def overridePolicy(policyid) {
+    def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]
+            ],
+        httpMode: 'POST',
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/policy-checks/${policyid}/actions/override"
+    )
+
+    def data = new JsonSlurper().parseText(response.content)
+    if (data.data.attributes.status != "overridden") {
+        return false
+    } else {
+        return true
+    }
+}
+def applyRun(runid) {
+    def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]
+            ],
+        httpMode: 'POST',
+        requestBody: '{ "comment": "Apply confirmed" }',
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs/${runid}/actions/apply"
+    )
+    println("HTTP response for Apply:" + response)
+    waitForApply("${runid}")
+}
+def getApplyStatus(runid) {
+    def result = ""
+    def response = httpRequest(
+        customHeaders: [[ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ]],
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs/${runid}"
+    )
+    def data = new JsonSlurper().parseText(response.content)
+    switch (data.data.attributes.status) {
+        case 'apply_queued':
+            result = data.data.attributes.status
+            break
+        case 'applied':
+            result = data.data.attributes.status
+            break
+        case 'discarded':
+            result = data.data.attributes.status
+            break
+        case 'errored':
+            result = data.data.attributes.status
+            break
+        case 'force_canceled':
+            result = data.data.attributes.status
+            break
+        case 'canceled':
+            result = data.data.attributes.status
+            break
+        default:
+            result = "pending"
+    }
+    return result
+}
+def waitForApply(runid) {
+    def count = 0
+    while (true) {
+        def status = getApplyStatus(runid)
+        println("Status: " + status)
+
+        if (status == 'discarded') {
+            println("This run has been discarded")
+            error("The Terraform run has been discarded, and the pipeline cannot continue.")
+            break
+        } else if (status == 'canceled') {
+            println("This run has been canceled outside the pipeline")
+            error("The Terraform run has been canceled outside the pipeline, and the pipeline cannot continue.")
+            break
+        } else if (status == 'errored') {
+            println("This run has encountered an error while applying")
+            error("The Terraform run has encountered an error while applying, and the pipeline cannot continue.")
+            break
+        } else if (status == 'applied') {
+            println("This run has finished applying")
+            break
+        }
+        else if (count > 120) break
+            count++
+            sleep(60)
+        }
+}
+def discardRun(runid) {
+    def response = httpRequest(
+        customHeaders: [
+                [ name: "Authorization", value: "Bearer " + "${env.TF_BEARER_TOKEN}" ],
+                [ name: "Content-Type", value: "application/vnd.api+json" ]
+            ],
+        httpMode: 'POST',
+        requestBody: '{ "comment": "Run has been discarded" }',
+        url: "https://" + "${params.TF_ADDRESS}" + "/api/v2/runs/${runid}/actions/discard"
+    )
+   println("Discard HTTP response:" + response)
+   waitForApply("${runid}")
+}

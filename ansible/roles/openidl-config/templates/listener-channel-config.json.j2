@@ -1,0 +1,29 @@
+{
+    "applicationName": "openidl-carrier-data-call-processor",
+    "identity": {
+        "user": "{{ application_fabric_dcp_user }}",
+        "wallet": "&wallet"
+    },
+    "listenerChannels": [
+{% for channel in network.channels if not channel.common %}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ConsentedEvent": "ConsentedEvent"
+                }
+            ]
+        },
+{% endfor %}
+{% for channel in network.channels if channel.common %}
+        {
+            "channelName": "{{ channel.name }}",
+            "events": [
+                {
+                    "ExtractionPatternSpecified": "ExtractionPatternSpecified"
+                }
+            ]
+        }{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ]
+}

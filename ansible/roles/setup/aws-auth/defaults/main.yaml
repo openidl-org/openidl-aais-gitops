@@ -1,0 +1,8 @@
+---
+tmp_directory: "{{ lookup('env', 'TMPDIR') | default('/tmp',true) }}"
+
+default:
+  bin_directory: "{{ bin_install_dir | default('/usr/local/bin') }}"  #Default to ~/bin install directory for binaries
+  version: "1.10.3"
+  release_date:  "2018-07-26"
+  checksum: ""

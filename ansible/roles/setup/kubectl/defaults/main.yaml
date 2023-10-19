@@ -1,0 +1,9 @@
+---
+tmp_directory: "{{ lookup('env', 'TMPDIR') | default('/tmp',true) }}"
+
+default:
+  version: "1.25.6"
+  os: "linux"    # use "darwin" for MacOS X, "windows" for Windows
+  arch: "amd64"  # other possible values: "386","arm64","arm","ppc64le","s390x"
+  bin_directory: "{{ bin_install_dir | default('/usr/local/bin') }}"  #Default to ~/bin install directory for binaries
+  checksum: "sha256:3e65d979f90ce488ae43826b06ac75c346a397b2fe0b90a21dbd1a34c5f33de0"

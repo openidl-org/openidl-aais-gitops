@@ -1,0 +1,3 @@
+wallet_kind: "vault"
+cloud_deployment: "aws"
+aws_region: "{{region}}"

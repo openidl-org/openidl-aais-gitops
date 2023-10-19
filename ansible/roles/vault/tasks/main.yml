@@ -1,0 +1,9 @@
+---
+- include_tasks: delete-secrets.yml
+  when: delete_secrets == true
+  tags:
+    - delete_secrets
+
+- include_tasks: deploy-vault.yml
+  tags:
+    - deploy_vault

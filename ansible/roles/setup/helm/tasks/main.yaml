@@ -1,0 +1,56 @@
+---
+  - name: register temporary directory
+    tempfile:
+      state: directory
+    register: tmp_directory
+    tags:
+      - molecule-idempotence-notest
+
+  - name: Remove any exisitng helm
+    become: true
+    file:
+      path: "{{ helm.bin_directory | default(default.bin_directory)}}/helm"
+      state: absent
+    tags:
+      - helm
+
+  - name: Install helm
+    get_url:
+      url: https://get.helm.sh/helm-{{ helm.version | default(default.version) }}-{{ helm.os }}-{{ helm.arch }}.tar.gz
+      dest: "{{ tmp_directory.path }}/helm.tar.gz"
+      mode: 0755
+      checksum: ""
+    register: helm_download
+    tags:
+      - helm
+
+  - name: Unzip helm archive
+    unarchive:
+      src: "{{ helm_download.dest }}"
+      dest: "{{ tmp_directory.path }}"
+      copy: no
+      mode: 0755
+    tags:
+      - helm
+
+  - name: Ensures bin dir exists
+    become: true
+    file:
+      path: "{{ helm.bin_directory | default(default.bin_directory) }}"
+      recurse: yes
+      mode: '0755'
+      state: directory
+
+  - name: Move helm binaries
+    become: true
+    copy:
+      remote_src: true
+      src: "{{ tmp_directory.path }}/{{ helm.os }}-{{ helm.arch }}/helm"
+      dest: "{{ helm.bin_directory | default(default.bin_directory) }}/helm"
+      mode: '0755'
+
+  - name: Test helm installation
+    command: "{{ helm.bin_directory | default(default.bin_directory) }}/helm version"
+    changed_when: false
+    tags:
+      - molecule-idempotence-notest

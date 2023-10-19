@@ -1,0 +1,41 @@
+---
+- name: Create Kubernetes namespace
+  k8s:
+    name: "{{ application_namespace }}"
+    kind: Namespace
+    state: present
+    wait: true
+    wait_sleep: 2
+    wait_timeout: 60
+
+- name: "Pull openidl apps helm chart"
+  include_tasks: pull-chart.yaml
+
+- set_fact:
+    app_values_path: "{{git_config_path}}/apps/app-global-values.yml"
+
+- name:
+  stat:
+    path: "{{app_values_path}}"
+  register: reg_path
+
+- name:
+  include_tasks: template-app-values.yaml
+  when: not reg_path.stat.exists
+
+- name: Deploy openIDL app on Analytics node using helm
+  shell: |
+    helm upgrade --recreate-pods --install {{ env_id }}-{{ org_id }} {{app_chart_dest_folder}}/openidl-k8s \
+    -f {{app_values_path}} -n {{ application_namespace }}
+  when: application_node_type == "analytics"
+
+- name: Deploy openIDL app on Carrier node using helm
+  shell: |
+    helm upgrade --recreate-pods --install {{ env_id }}-{{ org_id }} {{app_chart_dest_folder}}/openidl-k8s \
+    -f {{app_values_path}} -n {{ application_namespace }}
+  when: application_node_type == "carrier"
+
+- name: Annotate ingress
+  shell: |
+    kubectl -n {{ application_namespace }} annotate ingress kubernetes.io/ingress.class={{nginx_controller_name}} --all
+  ignore_errors: yes 

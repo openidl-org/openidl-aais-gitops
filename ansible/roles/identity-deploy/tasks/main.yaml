@@ -1,0 +1,12 @@
+
+# 1. Featch the CA admin from vault
+# 2. register and enroll identity
+# 3. save it to vault
+
+- name: "Register the identity"
+  include_tasks: "register-identity.yaml"
+
+- name: "Enroll the identity"
+  include_tasks: "enroll-identity.yaml"
+  when: identity_registered.success == true
+

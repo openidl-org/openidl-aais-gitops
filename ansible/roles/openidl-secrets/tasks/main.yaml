@@ -1,0 +1,40 @@
+---
+
+- name: Delete folder for HELM chart
+  file:
+   path: "{{app_chart_dest_folder}}/helm"
+   state: absent
+
+- name: Download HELM chart
+  no_log: false
+  shell: |
+    git clone https://{{ apps_chart_gitrepo }} -b {{ apps_chart_gitrepo_branch }} {{app_chart_dest_folder}}/helm
+
+- name: Copy config files
+  copy:
+   remote_src: true
+   src: "{{config_folder}}/"
+   dest: "{{app_chart_dest_folder}}/helm/openidl-k8s/charts/openidl-secrets/{{ org_id }}-{{ env_id }}-config/"
+
+- name: Create Kubernetes namespace {{ application_namespace }}
+  k8s:
+    name: "{{ application_namespace  }}"
+    kind: Namespace
+    state: present
+    wait: true
+    wait_sleep: 2
+    wait_timeout: 60
+
+- name: Deploy secrets
+  shell: |
+    cd {{app_chart_dest_folder}}/helm/
+    helm upgrade --install \
+              {{ env_id }}-{{ org_id }}-secrets openidl-k8s \
+              -f openidl-k8s/global-values-secrets.yaml -n {{ application_namespace }} \
+            --set global.configpath={{ org_id }}-{{ env_id }}-config
+  register: deploy_secrets
+
+#- name: Dispose of temporary git repository content
+#  file:
+#   path: /tmp/openidl-code/
+#   state: absent

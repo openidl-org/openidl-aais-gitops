@@ -1,0 +1,88 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+# The type of K8S cluster this is using
+target: k8s
+arch: amd64
+
+# The image and crd URLs
+fabric_operator_image: ghcr.io/hyperledger-labs/fabric-operator
+crd_url: https://github.com/hyperledger-labs/fabric-operator.git/config/crd
+
+# tag version for crd and fabric operator
+tag_version: 1.0.4
+
+# name of the operator (it is used by delete function)
+webhook: fabric-operator
+
+# The Console URL will be constructed as follows:
+#       https://{{ namespace }}-{{ console_name }}-console.{{ console_domain }}:443
+#  e.g. https://fabricinfra-hlf-console-console.example.com:443
+
+# k8s namespace for the operator and console
+namespace: fabricinfra
+
+# Console name/domain
+console_name: hlf-console
+
+# Console domain
+console_domain: example.com
+
+#  default configuration for the console
+# password reset will be required on first login
+console_email: admin
+console_default_password: password
+
+# different k8s clusters will be shipped with differently named default storage providers
+# or none at all.  KIND for example has one called 'standard'
+console_storage_class: standard
+console_storage_size: 5Gi
+
+# Console image and tag version
+# Note: there is no tagging implemented for this service therefore we have to use label latest since it is the only available for now
+console_image: ghcr.io/hyperledger-labs/fabric-console
+console_image_label: latest
+
+# Deployer image and tag version
+deployer_image: ghcr.io/ibm-blockchain/fabric-deployer
+deployer_image_label: latest-amd64
+
+# Console init image
+init_image: registry.access.redhat.com/ubi8/ubi-minimal
+init_image_label: latest
+
+# Fabric versions
+fabric_version: 2.4.4
+fabric_ca_version: 1.5.4
+product_version: 2.5.0
+
+###############################
+# Nginx Ingress Controller vars
+###############################
+nginx:
+  nginx_chart_version: 4.4.2
+  cert_manager_chart_version: 1.10.0
+  cert_manager_email: openidl@openidl.org
+  controller_name: nginx-external
+
+###############################
+# Vault vars
+###############################
+vault:
+  name: vault
+  vault_namespace: vault
+  vault_chart_version: 0.23.0
+  vault_chart_repo: helm.releases.hashicorp.com
+  internal_domain: vault.d1.test.openidl.org
+  ingress_class: nginx-external
+  env: test
+  region: us-east-2
+  network:
+    org_name: d1
+    ordererorg: false
+    ordererorg_name: org_name
+  aws_account_number: XXXXXXXXXXXX
+  registry: ghcr.io/openidl-org/openidl-aais-gitops
+  registry_version: latest
+  aws_profile: git-actions-role

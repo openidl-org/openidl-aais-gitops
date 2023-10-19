@@ -1,0 +1,5 @@
+mongodb:
+  namespace: "mongodb-{{org_id}}"
+
+aws_region: "{{region}}"
+aws_iam_user_prefix: "{{env_id}}"

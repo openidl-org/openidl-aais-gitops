@@ -1,0 +1,18 @@
+---
+# template the file and store it on the remote host
+- set_fact:
+    app_values: "{{ lookup('template', 'templates/app-global-values.yaml.j2') | from_yaml }}"
+
+- name: Create destionaion folder
+  file:
+    path: "{{app_chart_values_path | dirname }}"
+    state: directory
+
+- name: Copy temaplte to remote/traget machine
+  ansible.builtin.copy:
+    content: "{{ app_values | to_nice_yaml }}"
+    dest: "{{app_chart_values_path}}"
+    force: true
+
+- set_fact:
+    app_values_path: "{{app_chart_values_path}}"

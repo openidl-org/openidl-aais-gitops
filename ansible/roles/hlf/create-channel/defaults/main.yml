@@ -1,0 +1,7 @@
+console_api_authtype: basic
+msp_id: ""
+msp_admin_id: "{{ msp_id }}-msp-admin"
+msp_admin_tls_id: "{{ msp_admin_id }}-tls"
+channel_name: ""
+ordering_service_name: "{{msp_id}}"
+channel_file_directory: "/tmp/hlf/channels/{{msp_id}}"

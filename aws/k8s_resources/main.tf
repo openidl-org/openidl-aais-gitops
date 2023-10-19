@@ -1,5 +1,9 @@
-#uses s3 as backend to manage terraform state files
 terraform {
-  backend "s3" {}
-}
+  cloud {
+    organization = "openIDL"
 
+    workspaces {
+      name = "testnet-openidl-k8s-resources"
+    }
+  }
+}

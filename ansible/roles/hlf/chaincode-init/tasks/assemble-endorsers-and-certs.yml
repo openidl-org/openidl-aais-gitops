@@ -1,0 +1,5 @@
+- set_fact:
+    tls_root_cert_string: "{{tls_root_cert_string}} {{endorserTlsPrefix}}{{ config_folder }}/{{endorsement_peer.MSPID}}/{{endorsement_peer.MSPID}}_tls_ca_root.pem"
+
+- set_fact:
+    endorsers_string: "{{endorsers_string}} {{endorserPrefix}}{{endorsement_peer.Endpoint}}"

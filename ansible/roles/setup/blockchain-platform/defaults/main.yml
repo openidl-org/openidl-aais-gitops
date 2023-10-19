@@ -1,0 +1,4 @@
+---
+blockchain_collection_install: false
+git_config_path: "/tmp/roles_configs"
+collection_file: "{{git_config_path}}/bin/ibm-blockchain_platform-2.0.0-beta.tar.gz"

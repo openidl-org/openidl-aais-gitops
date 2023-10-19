@@ -1,0 +1,3 @@
+- include: deploy_identity.yaml
+    app_identity="{{ item }}"
+  loop: "{{ application_identities }}"

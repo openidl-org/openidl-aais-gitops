@@ -1,0 +1,13 @@
+---
+- name: "Fail if 'do' not specified"
+  fail:
+    msg: "'do' not specified or is not one of 'import' or 'export'"
+  when: not do is defined or not do in ("import","export")
+
+- name: "Import"
+  include_tasks: import.yml
+  when: do == "import"
+
+- name: "Export"
+  include_tasks: export.yml
+  when: do == "export"

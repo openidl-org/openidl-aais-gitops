@@ -1,0 +1,8 @@
+---
+- name: "Pull configuration data from git config repository"
+  include_role: 
+    name: git-config
+
+- name: "Include configuration as variables"
+  include_role: 
+    name: include-config-vars

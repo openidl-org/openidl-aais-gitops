@@ -1,0 +1,24 @@
+- name: "Get the organization"
+  ibm.blockchain_platform.organization_info:
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    name: "{{ msp_peer.MSPID }}"
+  register: result
+
+
+- name: "Fail if organization not found {{msp_peer.MSPID}}"
+  fail:
+    msg: "Organization {{ msp_peer.MSPID }} not found in console"
+  when: not result
+
+- name: "Creates directory {{config_folder}}/{{msp_peer.MSPID}}"
+  file:
+    path: "{{config_folder}}/{{msp_peer.MSPID}}"
+    state: directory
+
+# Store the MSP CA TLS certs in a file
+- copy:
+    content: "{{ result.organization.tls_root_certs | b64decode }}"
+    dest: "{{config_folder}}/{{msp_peer.MSPID}}/{{msp_peer.MSPID}}_tls_ca_root.pem"

@@ -97,7 +97,9 @@ jobs:
         if: github.event.inputs.action == 'mongodb'
         run: |
           ansible-playbook mongodb-setup.yml -i ./inventory/ansible_provisioners \
-            -e "@./${{ github.event.inputs.org_name }}-config-${{ github.event.inputs.environment }}.yml"
+            -e "@./${{ github.event.inputs.org_name }}-config-${{ github.event.inputs.environment }}.yml" \
+            -e "aws_account_number=${{ env.account }}" \
+            -e "env=${{ github.event.inputs.environment }}"
   
       - name: Cleanup Mongodb cluster
         if: github.event.inputs.action == 'mongodb_cleanup'

@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fabric-operator
+spec:
+  selector:
+    release: "operator"
+    helm.sh/chart: "hlf"
+    app.kubernetes.io/name: "hlf"
+    app.kubernetes.io/instance: "hlf"
+    app.kubernetes.io/managed-by: "fabric-operator"
+  ports:
+    - name: service-port
+      protocol: TCP
+      port: 8383
+      targetPort: 8383

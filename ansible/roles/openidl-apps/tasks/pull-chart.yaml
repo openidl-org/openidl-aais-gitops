@@ -1,0 +1,11 @@
+---
+- name: Dispose temporary git repository content
+  file:
+    path: "{{app_chart_dest_folder}}/"
+    state: absent
+  become: yes
+
+- name: Download git repository content
+  shell: |
+    git clone https://{{ apps_chart_gitrepo }} -b {{ apps_chart_gitrepo_branch }} {{app_chart_dest_folder}}
+

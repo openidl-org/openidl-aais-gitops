@@ -1,0 +1,26 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+- name: Fail if architecture not specified
+  fail:
+    msg: arch not specified or is not one of "amd64"
+  when: not console_arch is defined or not console_arch in ("amd64")
+
+- name: Fail if console domain not specified
+  fail:
+    msg: console domain not specified or is empty
+  when: not console_domain is defined or not console_domain
+
+- name: Fail if console username not specified
+  fail:
+    msg: console username not specified or is empty
+  when: not console_username is defined or not console_username
+
+- name: Fail if console default password not specified
+  fail:
+    msg: console password not specified or is empty
+  when: not console_password is defined or not console_password
+
+- name: Create console
+  include_tasks: "{{ console_target }}/create.yml"

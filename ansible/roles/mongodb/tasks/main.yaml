@@ -1,0 +1,3 @@
+---
+- name: "Performing mongodb operation {{do}}"
+  include_tasks: "{{ do }}.yaml"

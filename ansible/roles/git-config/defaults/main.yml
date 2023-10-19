@@ -1,0 +1,10 @@
+---
+# either pass it as extra var if run local or create and attach to the template secret 'github_ssh_key' in AWX
+ssh_key: "base64 encoded string"
+git_config_path: "/tmp/roles_configs"
+git_configs_repo_url: ""
+git_configs_repo_branch: main
+delegate_to:
+  - localhost
+cicd_git_email: cicd@openidl.org
+cicd_git_name: CICD

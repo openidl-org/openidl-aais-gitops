@@ -1,0 +1,23 @@
+---
+- name: "Deploy all services"
+  hosts: all
+  gather_facts: no
+  vars:
+    state: present
+    wait_timeout: 3600
+    ### parameters bellow need to be passed as extra vars in the command line or as external vars file
+    ### uncomment here has lower priority and all will be overwritten by include of the vars file
+    #cluster: d1-test-blk-cluster
+    #type: external
+    #console_ingress_class: nginx-external
+    #console_storage_class: gp2
+    #console_domain: d1.test.openidl.org
+    #console_name: operator
+    #namespace: hlf
+  roles:
+    - role: setup/switch-cluster
+    - role: git-config
+    - role: nginx-ingress
+    - role: fabric-operator
+    - role: fabric-console
+    - role: vault

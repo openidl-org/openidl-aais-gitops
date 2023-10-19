@@ -1,0 +1,92 @@
+---
+- name: "Is hosted zone {{subdomain}} created?"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws route53 list-hosted-zones | jq -c '.[][] | select( .Name == "{{subdomain}}.")'
+  register: zone_exists
+
+- name: "Create hosted zones - {{subdomain}}"
+  shell: |
+    sleep 2;
+    export DATA=`date +%Y-%m-%d-%H:%M:%S`;
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws route53 create-hosted-zone \
+      --name {{subdomain}} \
+      --hosted-zone-config Comment=Ansible-Managed,PrivateZone=false \
+      --caller-reference $DATA
+  register: zone_info
+  when: not zone_exists.stdout
+
+- set_fact:
+    hosted_zone: "{{zone_exists.stdout | from_json }}"
+  when: zone_exists.stdout
+
+- set_fact:
+    hosted_zone_id: "{{ hosted_zone.Id }}"
+  when: zone_exists.stdout
+
+- set_fact:
+    hosted_zone: "{{zone_info.stdout | from_json}}"
+  when: not zone_exists.stdout
+
+- set_fact:
+    hosted_zone_id: "{{hosted_zone.HostedZone.Id}}"
+  when: not zone_exists.stdout
+
+- debug:
+    msg: "{{hosted_zone}}"
+
+- name: "Get app NS records - {{subdomain}}"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws route53 list-resource-record-sets --hosted-zone-id {{hosted_zone_id | replace("/hostedzone/", "", 1)}}
+  register: ns_records
+
+- set_fact:
+    ns_records: "{{ns_records.stdout | from_json }}"
+
+- set_fact:
+    ns_record:
+      - "{{ns_records.ResourceRecordSets[0].ResourceRecords[0].Value}}"
+      - "{{ns_records.ResourceRecordSets[0].ResourceRecords[1].Value}}"
+      - "{{ns_records.ResourceRecordSets[0].ResourceRecords[2].Value}}"
+      - "{{ns_records.ResourceRecordSets[0].ResourceRecords[3].Value}}"
+
+- name: "create recordset.json - {{subdomain}}"
+  template:
+    src: recordset.json.j2
+    dest: "recordset.json"
+
+- name: "create ns records in root zone - {{subdomain}}"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws route53 change-resource-record-sets \
+      --hosted-zone-id {{ dns_zone }} \
+      --change-batch file://recordset.json
+
+- name: Get ELB info
+  include_tasks: elb.yml
+
+- name: "create arecord.json for {{subdomain}}"
+  template:
+    src: arecord.json.j2
+    dest: "arecord.json"
+  when: elb_tags_info.stdout
+
+- name: "create A records in hosted zone {{subdomain}}"
+  shell: |
+    export AWS_PROFILE={{aws_conf_profile}}
+    aws route53 change-resource-record-sets \
+      --hosted-zone-id {{hosted_zone_id | replace("/hostedzone/", "", 1)}} \
+      --change-batch file://arecord.json
+  when: elb_tags_info.stdout
+
+- name:
+  file:
+    state: absent
+    name: "{{json_file}}"
+  loop:
+    - arecord.json
+    - recordset.json
+  loop_control:
+    loop_var: json_file

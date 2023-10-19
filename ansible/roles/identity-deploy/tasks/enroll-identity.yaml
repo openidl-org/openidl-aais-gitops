@@ -1,0 +1,44 @@
+
+- name: Delete the json enrolment file
+  file:
+    path: "enrl-{{ identity.id }}.json"
+    state: absent
+
+- name: Enroll the identity
+  no_log: "{{hide_sensitive_logs}}"
+  ibm.blockchain_platform.enrolled_identity:
+    state: "present"
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    api_timeout: "{{ api_timeout | default(omit) }}"
+    certificate_authority: "{{ cert_auth }}"
+    name: "{{ identity.id }}"
+    tls: "{{ enroll_to_tls_ca }}"
+    enrollment_id: "{{ identity.id }}"
+    path: "enrl-{{ identity.id }}.json"
+    enrollment_secret: "{{ identity.enrolment_secret }}"
+    force_reenroll: true
+  register: enrolled_identity
+
+- set_fact:
+    no_log: "{{hide_sensitive_logs}}"
+    identity_wallet:
+      data:
+        credentials:
+          certificate: "{{enrolled_identity.enrolled_identity.cert | b64decode | regex_replace('\n' , '\\n') }}"
+          privateKey: "{{ enrolled_identity.enrolled_identity.private_key | b64decode | regex_replace('\n' , '\\n') }}"
+        mspId: "{{msp_id}}"
+        type: "X.509"
+      ca_root_certs: "[\"{{enrolled_identity.enrolled_identity.ca}}\"]"
+      cas: "{{[]}}"
+      id: "{{identity.id}}"
+
+- name: "Put the enrolled identity to Wallet"
+  include_role: 
+    name: wallet
+  vars:
+    wallet_ops: "put"
+    wallet_path: "{{ identity_wallet.id }}"
+    wallet_identity: "{{ identity_wallet }}"

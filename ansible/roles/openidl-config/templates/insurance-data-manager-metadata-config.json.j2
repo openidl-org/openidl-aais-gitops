@@ -1,0 +1,131 @@
+{
+    "carrier": [
+        {
+            "Id": "carrier1",
+            "email": [
+                {
+                    "element": [
+                        {
+                            "emailsubject": "Blockchain API is Down",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "APIDOWN",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        },
+                        {
+                            "emailsubject": "Mongo Service is Down",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "DBDOWN",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        },
+                        {
+                            "emailsubject": "Mongo Database Error",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "DBEXECERROR",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        },
+                        {
+                            "emailsubject": "Blockchain Hash failed",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "BCERROR",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        },
+                        {
+                            "emailsubject": "AAIS Data Loading - ",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "DATALOADFAILURE",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        },
+                        {
+                            "emailsubject": "Input file format is incorrect",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "INPUTFILEFORMAT",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        },
+                        {
+                            "emailsubject": "AAIS Data Loading - ",
+                            "fromemailaddress": "openidl@openidl.org",
+                            "service": "DATALOADSUCCESS",
+                            "toemailaddress": [
+                                "openidl@openidl.org"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "indexes": [
+                {
+                    "collection": [
+                        "carrier1"
+                    ],
+                    "element": [
+                        {
+                            "name": "batchId"
+                        },
+                        {
+                            "name": "chunkId"
+                        },
+                        {
+                            "name": "carrierId"
+                        },
+                        {
+                            "name": "records.SequenceNum"
+                        }
+                    ]
+                },
+                {
+                    "collection": [
+                        {
+                            "name": "err"
+                        }
+                    ],
+                    "element": [
+                        {
+                            "name": "batchId"
+                        },
+                        {
+                            "name": "chunkId"
+                        },
+                        {
+                            "name": "carrierId"
+                        },
+                        {
+                            "name": "records.SequenceNum"
+                        }
+                    ]
+                },
+                {
+                    "collection": [
+                        "log"
+                    ],
+                    "element": [
+                        {
+                            "name": "batchId"
+                        },
+                        {
+                            "name": "records.chunkId"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "carrierIds": [
+        "carrier1"
+    ],
+    "collections": [
+        "err",
+        "log"
+    ]
+}

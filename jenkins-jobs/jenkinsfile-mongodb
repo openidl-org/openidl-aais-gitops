@@ -1,0 +1,64 @@
+def buildType
+pipeline {
+    agent {
+        node {
+            label 'openidl'
+        }
+    }
+    options {
+        // This is required if you want to clean before build
+        skipDefaultCheckout(true)
+    }
+    parameters {
+        string description: 'Organization name of the node', name: 'org_name', trim: true
+        choice choices: ['dev', 'test', 'prod'], description: 'Environment (dev | test | prod)', name: 'env'
+        string defaultValue: '', description: 'Custom Name to be added for Job Template Name (AWX)', name: 'jobPrefix', trim: true
+        choice choices: ['mongodb-deploy', 'mongodb-cleanup'], description: 'Choose setup/clean mongodb instance', name: 'deploy_action'
+    }
+    stages {
+        stage('Prepare') {
+            steps {
+                cleanWs()
+                checkout scm
+                script {
+                    currentBuild.displayName = "${params.org_name} - ${params.env} - ${params.deploy_action}"
+                    buildType = "${params.deploy_action}"
+                    length = params.org_name.length()
+                    mongoDB(buildType)
+                }
+            }
+        }
+    }
+    post {
+        success {
+             echo "The ${params.deploy_action} action is successful. Review logs"
+        }
+        failure {
+            echo "The ${params.deploy_action} action is failed, Please investigate"
+        }
+    }
+}
+def mongoDB(thestage){
+    stage(thestage) {
+        wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+            ansibleTower(
+                towerServer: 'AWX',
+                towerCredentialsId: 'AWX',
+                templateType: 'job',
+                jobTemplate: "${params.jobPrefix}${params.org_name}-${params.env}-openidl-mongodb",
+                jobType: "run",
+                towerLogLevel: 'full',
+                removeColor: false,
+                async: false,
+                importTowerLogs: true,
+                extraVars: """---
+                org_name: '${params.org_name}'
+                env: '${params.env}'
+                network:
+                    org_name: '${params.org_name}'
+                deploy_action: '${params.deploy_action}'
+                """
+            )
+        }
+    }
+}

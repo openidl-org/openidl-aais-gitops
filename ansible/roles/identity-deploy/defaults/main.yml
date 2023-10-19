@@ -1,0 +1,7 @@
+cloud_deployment: "aws"
+identity_force_registration: true
+ca_admin_id: "{{ msp_id }}-ca-admin"
+enroll_to_tls_ca: false
+cert_auth: "{{msp_id}}"
+console_api_authtype: "basic"
+hide_sensitive_logs: true

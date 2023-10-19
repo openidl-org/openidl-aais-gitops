@@ -1,7 +1,0 @@
-{
-    "logLevel": "debug",
-    "host": "localhost",
-    "port": "8080",
-    "maxBatchArraySize": 10000,
-    "targetDB": "insurance_trx_db"
-}

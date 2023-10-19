@@ -4,105 +4,116 @@
 #when nodetype is aais's dummy carrier set org_name="carrier" and for other carriers refer to next line.
 #when nodetype is other carrier set org_name="<carrier_org_name>" , example: org_name = "travelers" etc.,
 
-org_name = "trv" # For aais set to aais, for analytics set to analytics, for carriers set their org name, ex: travelers
+org_name = "trv"
 aws_env = "dev" #set to dev|test|prod
-#--------------------------------------------------------------------------------------------------------------------
-#Application cluster VPC specifications
-app_vpc_cidr           = "172.26.0.0/16"
-app_availability_zones = ["us-west-2a", "us-west-2b"]
-app_public_subnets     = ["172.26.1.0/24", "172.26.2.0/24"]
-app_private_subnets    = ["172.26.3.0/24", "172.26.4.0/24"]
-
-#-------------------------------------------------------------------------------------------------------------------
-#Blockchain cluster VPC specifications
-blk_vpc_cidr           = "172.27.0.0/16"
-blk_availability_zones = ["us-west-2a", "us-west-2b"]
-blk_public_subnets     = ["172.27.1.0/24", "172.27.2.0/24"]
-blk_private_subnets    = ["172.27.3.0/24", "172.27.4.0/24"]
 
 #--------------------------------------------------------------------------------------------------------------------
-#Bastion host specifications
-#bastion hosts are placed behind nlb. These NLBs can be configured to be private | public to serve SSH.
-#In any case whether the endpoint is private|public for an nlb, the source ip_address|cidr_block should be enabled
-#in bastion hosts security group for ssh traffic
+#Choose whether to create VPC or use existing VPC
+create_vpc = "true"
 
-bastion_host_nlb_external = "true"
+#Key in VPC ID when create_vpc is set to false
+vpc_id = ""
 
-#application cluster bastion host specifications
-app_bastion_sg_ingress =  [
-  {rule="ssh-tcp", cidr_blocks = "172.26.0.0/16"},
-  {rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
-app_bastion_sg_egress  =   [
-  {rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
-  {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
-  {rule="ssh-tcp", cidr_blocks = "172.26.0.0/16"}] #additional ip_address|cidr_block should be included for ssh
+#Key in for the below when create_vpc is set to true
+# 3 Availability Zones required
+vpc_cidr = "172.18.0.0/16"
+availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
+public_subnets = ["172.18.1.0/24", "172.18.2.0/24", "172.18.5.0/24"]
+private_subnets = ["172.18.3.0/24", "172.18.4.0/24", "172.18.6.0/24"]
+#--------------------------------------------------------------------------------------------------------------------
+#Bastion host specs. It is provisioned in autoscaling group and gets an Elastic IP assigned
+#Choose whether to provision bastion host
+create_bastion_host = "true"
 
-#blockchain cluster bastion host specifications
-#bastion host security specifications
-blk_bastion_sg_ingress =  [
-  {rule="ssh-tcp", cidr_blocks = "172.27.0.0/16"},
-  {rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
-blk_bastion_sg_egress  = [
-  {rule="https-443-tcp", cidr_blocks = "0.0.0.0/0"},
-  {rule="http-80-tcp", cidr_blocks = "0.0.0.0/0"},
-  {rule="ssh-tcp", cidr_blocks = "172.27.0.0/16"}] #additional ip_address|cidr_block should be included for ssh
+#when chosen to create bastion host, set the required IP address or CIDR block that is allowed SSH access to bastion host
+bastion_sg_ingress =  [{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
+bastion_sg_egress =   [{rule="ssh-tcp", cidr_blocks = "3.237.88.84/32"}]
 
 #--------------------------------------------------------------------------------------------------------------------
 #Route53 (PUBLIC) DNS domain related specifications
 domain_info = {
-  r53_public_hosted_zone_required = "yes",  #options: yes | no
-  domain_name = "travelersdemo.com", #primary domain registered
-  sub_domain_name = "trv", #subdomain name
-  comments = "travelers node dns name resolutions"
+  r53_public_hosted_zone_required = "yes", #Options: yes | no - This allows to chose whether to setup public hosted zone in Route53
+  domain_name = "demo.trv.com", #Primary domain registered
+  sub_domain_name = "carrier", #Sub domain if applicable. Otherwise it can be empty quotes
+  comments = "analytics-dev node domain"
 }
-#-------------------------------------------------------------------------------------------------------------------
-#Transit gateway  specifications
-tgw_amazon_side_asn = "64532" #default is 64532
 
 #--------------------------------------------------------------------------------------------------------------------
 #Cognito specifications
-userpool_name                = "openidl"
-client_app_name              = "openidl-client"
-client_callback_urls         = ["https://openidl.dev.trv.travelersdemo.com/callback", "https://openidl.dev.trv.travelersdemo.com/redirect"]
-client_default_redirect_url  = "https://openidl.dev.trv.travelersdemo.com/redirect"
-client_logout_urls           = ["https://openidl.dev.trv.travelersdemo.com/signout"]
-cognito_domain               = "travelersdemo" #unique domain name
-email_sending_account        = "COGNITO_DEFAULT" # Options: COGNITO_DEFAULT | DEVELOPER
-# COGNITO_DEFAULT - Uses cognito default and SES related inputs goes to empty in git secrets
-# DEVELOPER - Ensure inputs ses_email_identity and userpool_email_source_arn are setup in git secrets
-#--------------------------------------------------------------------------------------------------------------------
-#Any additional traffic in future required to open to worker nodes, the below section needs to be set
-app_eks_workers_app_sg_ingress = [] #{from_port, to_port, protocol, description, cidr_blocks}
-app_eks_workers_app_sg_egress = [{rule = "all-all"}]
+#Chose whether to provision Cognito user pool
+create_cognito_userpool = "true"
 
-#Any additional traffic in future required to open to worker nodes, the below section needs to be set
-blk_eks_workers_app_sg_ingress = [] #{from_port, to_port, protocol, description, cidr_blocks}
-blk_eks_workers_app_sg_egress = [{rule = "all-all"}]
+#When cognito is choosen to provision set the below
+userpool_name                = "openidl" #unique user_pool name
+
+# COGNITO_DEFAULT - Uses cognito default. When set to cognito default SES related inputs goes empty in git secrets
+# DEVELOPER - Ensure inputs ses_email_identity and userpool_email_source_arn are setup in git secrets
+email_sending_account        = "COGNITO_DEFAULT" # Options: COGNITO_DEFAULT | DEVELOPER
 
 #--------------------------------------------------------------------------------------------------------------------
 # application cluster EKS specifications
 app_cluster_name              = "app-cluster"
 app_cluster_version           = "1.20"
-app_worker_nodes_ami_id = "<ami_id_region_specific>"
-
+app_worker_nodes_ami_id       = "ami-09fd0b5dd68327412"
 #--------------------------------------------------------------------------------------------------------------------
 # blockchain cluster EKS specifications
-blk_cluster_name              = "blk-cluster"
-blk_cluster_version           = "1.20"
-blk_worker_nodes_ami_id = "<ami_id_region_specific>"
+blk_cluster_name = "blk-cluster"
+blk_cluster_version = "1.20"
+blk_worker_nodes_ami_id = "ami-09fd0b5dd68327412"
 
 #--------------------------------------------------------------------------------------------------------------------
 #cloudtrail related
-cw_logs_retention_period = 90
-s3_bucket_name_cloudtrail = "cloudtrail-logs"
+#Choose whether to enable cloudtrail
+create_cloudtrail = "true"
+
+#S3 bucket name to manage cloudtrail logs
+s3_bucket_name_cloudtrail = "openidl-cloudtrail"
 
 #--------------------------------------------------------------------------------------------------------------------
-#Name of the S3 bucket managing terraform state files
-terraform_state_s3_bucket_name = "trv-dev-tfstate-mgmt"
+#Terraform backend specification when S3 is used
+terraform_state_s3_bucket_name = "openidl-tf-state"
 
+#--------------------------------------------------------------------------------------------------------------------
+#Terraform backend specifications when Terraform Enterprise/Cloud is used
+#Name of the TFE/TFC organization
+tfc_org_name = "openidl-aais"
+#Name of the workspace that manages AWS resources
+tfc_workspace_name_aws_resources = "anal-dev-aws-resources"
+
+#--------------------------------------------------------------------------------------------------------------------
+#Applicable only to analytics and carrier nodes and not applicable to AAIS node. For AAIS it can be empty.
 #Name of the S3 bucket used to store the data extracted from HDS for analytics
-#Applicable for carrier and analytics node only
-s3_bucket_name_hds_analytics = "openidl-hds-analytics-data"
 
-#S3 public bucket to manage application related images (logos)
-s3_bucket_name_logos = "openidl-logos"
+s3_bucket_name_hds_analytics = "openidl-hdsdata"
+
+#--------------------------------------------------------------------------------------------------------------------
+#Name of the PUBLIC S3 bucket used to manage logos
+#Optional: Choose whether s3 public bucket is required to provision
+create_s3_bucket_public = "true"
+
+s3_bucket_name_logos = "openidl-public-logos"
+
+#--------------------------------------------------------------------------------------------------------------------
+#Name of the S3 bucket to store S3 bucket and its object access logs
+s3_bucket_name_access_logs = "openidl-access-logs"
+
+#--------------------------------------------------------------------------------------------------------------------
+#KMS Key arn to be used set create_kms_keys is set to false
+create_kms_keys = "true"
+s3_kms_key_arn = ""
+eks_kms_key_arn = ""
+cloudtrail_cw_logs_kms_key_arn = ""
+vpc_flow_logs_kms_key_arn = ""
+secrets_manager_kms_key_arn = ""
+
+#--------------------------------------------------------------------------------------------------------------------
+#Cloudwatch logs retention period (For VPC flow logs, EKS logs, Cloudtrail logs)
+cw_logs_retention_period = "90" #example 90 days
+
+#--------------------------------------------------------------------------------------------------------------------
+#Custom tags to include
+
+custom_tags = {
+  department = "openidl"
+  team = "demo-team"
+}

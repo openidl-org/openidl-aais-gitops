@@ -1,0 +1,17 @@
+---
+- name: "Create the channel"
+  hosts: all
+  tasks:
+    - name: "Import vars from git"
+      include_role:
+        name: import-config-vars
+
+    - name: "Blockchain collection"
+      include_role:
+        name: setup/blockchain-platform
+      vars:
+        blockchain_collection_install: true
+
+    - name: "Create channel"
+      include_role:
+        name: hlf/create-channel

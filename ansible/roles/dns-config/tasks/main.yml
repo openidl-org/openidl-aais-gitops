@@ -1,0 +1,21 @@
+---
+- name: "Fail if main_domain does not exist"
+  fail:
+    msg: "'main_domain' not set"
+  when: not main_domain
+
+
+- name: "Fail if resource domain tag not provided"
+  fail:
+    msg: "Resource_domain must be provided"
+  when: not resource_domain
+
+- name: "Set facts"
+  include_tasks: set_facts.yml
+
+- set_fact:
+    subdomain: "{{resource_domain}}"
+
+- name: "Create hosted zone"
+  include_tasks: create-zone.yml
+

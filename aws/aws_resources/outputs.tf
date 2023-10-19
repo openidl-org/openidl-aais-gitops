@@ -1,123 +1,153 @@
 #-----------------------------------------------------------------------------------------------------------------
-#aws cognito application client outputs
+#AWS cognito application client outputs
 output "cognito_user_pool_id" {
-  value     = aws_cognito_user_pool.user_pool.id
+  value     = var.create_cognito_userpool ? aws_cognito_user_pool.user_pool[0].id : "cognito userpool not opted"
   sensitive = true
 }
 output "cognito_app_client_id" {
-  value     = aws_cognito_user_pool_client.cognito_app_client.id
+  value     = var.create_cognito_userpool ? aws_cognito_user_pool_client.cognito_app_client[0].id : "cognito userpool not opted"
+  sensitive = true
+}
+output "cognito_app_client_secret" {
+  value     = var.create_cognito_userpool ? aws_cognito_user_pool_client.cognito_app_client[0].client_secret : "cognito userpool not opted"
   sensitive = true
 }
 #-----------------------------------------------------------------------------------------------------------------
-#git actions user and baf automation user outputs
+#Git actions user and baf automation user outputs
 output "git_actions_iam_user_arn" {
   value = aws_iam_user.git_actions_user.arn
-}
-output "baf_automation_user_arn" {
-  value = aws_iam_user.baf_user.arn
-}
-output "openidl_app_iam_user_arn"{
-  value = aws_iam_user.openidl_apps_user.arn
-}
-output "eks_admin_role_arn" {
-  value = aws_iam_role.eks_admin_role.arn
 }
 output "git_actions_admin_role_arn" {
   value = aws_iam_role.git_actions_admin_role.arn
 }
+output "baf_automation_user_arn" {
+  value = aws_iam_user.baf_user.arn
+}
+output "baf_automation_role_arn" {
+  value = aws_iam_role.baf_user_role.arn
+}
+output "openidl_app_iam_user_arn"{
+  value = aws_iam_user.openidl_apps_user.arn
+}
+output "openidl_app_iam_role_arn" {
+  value = aws_iam_role.openidl_apps_iam_role.arn
+}
+output "eks_admin_user_group_arn" {
+  value = aws_iam_group.eks_admin_group.arn
+}
+output "eks_admin_role_arn" {
+  value = aws_iam_role.eks_admin_role.arn
+}
 #-----------------------------------------------------------------------------------------------------------------
-#application cluster (EKS) outputs
+#Application cluster (EKS) outputs
 output "app_cluster_endpoint" {
   value = module.app_eks_cluster.cluster_endpoint
 }
 output "app_cluster_name" {
   value = module.app_eks_cluster.cluster_id
 }
-#output "app_cluster_certificate" {
-#  value = module.app_eks_cluster.cluster_certificate_authority_data
-#  sensitive = true
-#}
-#output "app_cluster_token" {
-#  value = module.app_eks_cluster.aws_eks_cluster_auth[0].token
-#  sensitive = true
-#}
 output "app_eks_nodegroup_role_arn" {
   value = aws_iam_role.eks_nodegroup_role["app-node-group"].arn
 }
 #-----------------------------------------------------------------------------------------------------------------
-#blockchain cluster (EKS) outputs
+#Blockchain cluster (EKS) outputs
 output "blk_cluster_endpoint" {
   value = module.blk_eks_cluster.cluster_endpoint
 }
 output "blk_cluster_name" {
   value = module.blk_eks_cluster.cluster_id
 }
-#output "blk_cluster_certificate" {
-#  value = module.blk_eks_cluster.cluster_certificate_authority_data
-#  sensitive = true
-#}
-#output "blk_cluster_token" {
-#  value = module.blk_eks_cluster.aws_eks_cluster_auth[0].token
-#  sensitive = true
-#}
 output "blk_eks_nodegroup_role_arn" {
   value = aws_iam_role.eks_nodegroup_role["blk-node-group"].arn
 }
 #-----------------------------------------------------------------------------------------------------------------
-#cloudtrail related
+#Cloudtrail related
 output "cloudtrail_s3_bucket_name" {
-  value = aws_s3_bucket.s3_bucket.bucket
+  value = var.create_cloudtrail ? aws_s3_bucket.ct_cw_s3_bucket[0].bucket : "cloudtrail not opted"
 }
 output "hds_data_s3_bucket_name" {
-  value = var.org_name == "aais" ? null : aws_s3_bucket.s3_bucket_hds[0].bucket
+  value = aws_s3_bucket.s3_bucket_hds.bucket
 }
 output "s3_public_bucket_logos_name" {
-  value = aws_s3_bucket.s3_bucket_logos_public.bucket
+  value = var.create_s3_bucket_public ? aws_s3_bucket.s3_bucket_logos_public[0].bucket : "s3 public bucket not opted"
 }
 #-----------------------------------------------------------------------------------------------------------------
 #Route53 entries
-output "private_app_bastion_nlb_private_fqdn" {
-  value = var.bastion_host_nlb_external ? null : aws_route53_record.private_record_app_nlb_bastion[0].fqdn
-}
-output "private_blk_bastion_nlb_private_fqdn" {
-  value = var.bastion_host_nlb_external ? null : aws_route53_record.private_record_blk_nlb_bastion[0].fqdn
-}
 output "aws_name_servers" {
-  value       = var.domain_info.r53_public_hosted_zone_required == "yes"  ? aws_route53_zone.zones[0].name_servers : null
+  value       = var.domain_info.r53_public_hosted_zone_required == "yes"  ? aws_route53_zone.public_zones[0].name_servers : ["Route53 public hosted zone not opted"]
   description = "The name servers to be updated in the domain registrar"
 }
-output "public_blk_bastion_fqdn" {
-  value = var.domain_info.r53_public_hosted_zone_required == "yes" && var.bastion_host_nlb_external ? aws_route53_record.blk_nlb_bastion_r53_record[0].fqdn : null
-}
-output "public_app_bastion_fqdn" {
-  value = var.domain_info.r53_public_hosted_zone_required == "yes" && var.bastion_host_nlb_external ? aws_route53_record.app_nlb_bastion_r53_record[0].fqdn : null
+output "public_bastion_fqdn" {
+  value = var.domain_info.r53_public_hosted_zone_required == "yes" && var.create_bastion_host ? aws_route53_record.nlb_bastion_r53_record[0].fqdn : null
 }
 output "bastion_dns_entries_required_to_update" {
-  value = var.domain_info.r53_public_hosted_zone_required == "no" && var.aws_env == "prod" && var.bastion_host_nlb_external ? local.dns_entries_list_prod : null
+  value = var.domain_info.r53_public_hosted_zone_required == "no" && var.aws_env == "prod" && var.create_bastion_host ? local.dns_entries_list_prod : null
 }
 output "bastion_dns_entries_required_to_add" {
-  value = var.domain_info.r53_public_hosted_zone_required == "no" && var.aws_env != "prod" && var.bastion_host_nlb_external ? local.dns_entries_list_non_prod : null
+  value = var.domain_info.r53_public_hosted_zone_required == "no" && var.aws_env != "prod" && var.create_bastion_host ? local.dns_entries_list_non_prod : null
 }
-output "public_app_bastion_dns_name" {
-  value = var.bastion_host_nlb_external ? module.app_bastion_nlb.lb_dns_name : null
-}
-output "public_blk_bastion_dns_name" {
-  value = var.bastion_host_nlb_external ? module.blk_bastion_nlb.lb_dns_name: null
+#output "public_bastion_dns_name" {
+#  value = var.create_bastion_host ? module.bastion_nlb[0].lb_dns_name : "bastion hosts opted out"
+#}
+output "public_ip_bastion_host" {
+  value = var.create_bastion_host ? aws_eip.bastion_host_eip[0].public_ip : "bastion hosts not opted"
 }
 output "r53_public_hosted_zone_id" {
-  value = var.domain_info.r53_public_hosted_zone_required == "yes" ? aws_route53_zone.zones[0].zone_id : null
+  value = var.domain_info.r53_public_hosted_zone_required == "yes" ? aws_route53_zone.public_zones[0].zone_id : "Route53 public zone opted out"
 }
 output "r53_private_hosted_zone_id"{
-  value = aws_route53_zone.aais_private_zones.zone_id
+  value = aws_route53_zone.private_zones.zone_id
 }
 output "r53_private_hosted_zone_internal_id" {
-  value = aws_route53_zone.aais_private_zones_internal.zone_id
+  value = aws_route53_zone.private_zones_internal.zone_id
 }
 #-----------------------------------------------------------------------------------------------------------------
-#KMS key related to vault unseal
-output "kms_key_arn_vault_unseal_arn" {
-  value = aws_kms_key.vault_kms_key.arn
+#KMS key used with hashicorp vault setup
+output "vault_kms_key_arn" {
+  value = var.create_kms_keys ? aws_kms_key.vault_kms_key[0].arn : "Provision KMS key named ${local.std_name}-vault-kmskey and set access to ${aws_iam_role.git_actions_admin_role.arn}, ${aws_iam_role.eks_nodegroup_role["app-node-group"].arn}, ${aws_iam_role.eks_nodegroup_role["blk-node-group"].arn}, ${var.aws_role_arn}"
+  sensitive = true
 }
-output "kms_key_id_vault_unseal_name" {
-  value = aws_kms_alias.vault_kms_key_alias.name
+output "vault_kms_key_alias_name" {
+  value = var.create_kms_keys ? aws_kms_alias.vault_kms_key_alias[0].name : ""
 }
+#-----------------------------------------------------------------------------------------------------------------
+#KMS key used for AWS secrets
+output "secrets_kms_key_arn" {
+  value = var.create_kms_keys ? aws_kms_key.sm_kms_key[0].arn : "Provision KMS key named ${local.std_name}-secrets-kms-key and set access to ${aws_iam_role.git_actions_admin_role.arn}, ${var.aws_role_arn}, ${aws_iam_role.openidl_apps_iam_role.arn}, ${aws_iam_role.baf_user_role.arn}"
+  sensitive = true
+}
+output "secrets_kms_key_alias_name" {
+  value = var.create_kms_keys ? aws_kms_alias.sm_kms_key_alias[0].name : ""
+}
+output "dynamodb_arn" {
+  value = aws_dynamodb_table.etl.arn
+}
+output "s3-bucket-idm-loader" {
+  value = aws_s3_bucket.etl["idm-loader"].arn
+}
+output "s3-bucket-intake" {
+  value = aws_s3_bucket.etl["intake"].arn
+}
+output "s3-bucket-failures" {
+  value = aws_s3_bucket.etl["failure"].arn
+}
+#include lambda functions
+output "lambda-idm-loader" {
+  value = aws_lambda_function.etl_success_processor.arn
+}
+output "lambda-intake-processor" {
+  value = aws_lambda_function.etl_intake_processor.arn
+}
+# output "upload_ui_s3_website_endpoint" {
+#   value = aws_s3_bucket.upload_ui.website_endpoint
+# }
+# output "s3_static_website_bucket" {
+#   value = aws_s3_bucket.upload_ui.arn
+# }
+# output "api_gateway_endpoint" {
+#   value = aws_api_gateway_deployment.upload_v1.invoke_url
+# }
+
+
+
+

@@ -1,0 +1,15 @@
+{
+    "targetChannels": [
+{% for channel in network.channels %}
+        {
+            "chaincodeName": "{{ channel.chaincode.name }}",
+            "channelName": "{{ channel.name }}"
+        }{% if loop.last %}{% else %},{% endif %}
+{% endfor %}
+    ],
+    "users": [{
+        "org": "{{ network.org_name }}",
+        "user": "{{application_fabric_tdel_user}}",
+        "mspId": "{{ network.msp_id }}"
+    }]
+}

@@ -1,0 +1,14 @@
+---
+- name: "Create components for an ordering organization"
+  hosts: all
+  tasks:
+    - include_role:
+        name: import-config-vars
+
+    - include_role:
+        name: setup/blockchain-platform
+      vars:
+        blockchain_collection_install: true
+
+    - include_role:
+        name: hlf/bootstrap-ordering-service

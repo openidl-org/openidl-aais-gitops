@@ -1,0 +1,52 @@
+---
+
+- name: List config folders
+  find:
+    paths: "{{ configs_directory }}"
+    recurse: no
+    file_type: directory
+  register: found_directories
+  delegate_to: localhost
+
+- name: Fail if config folder is empty
+  fail:
+    msg: "Cannot load config as config folder is empty {{ configs_directory }}"
+  when: found_directories.files | length == 0
+
+- set_fact:
+    conf_org_path: ""
+
+- name: Fail if multiple config exists and no org id provided
+  fail:
+    msg: "organization_id must be provided when multiple configs in folder {{ configs_directory }}"
+  when: found_directories.files | length > 1 and organization_id is not defined
+
+- set_fact:
+    conf_org_path: "{{ found_directories.files[0].path }}/config.yml"
+  when: found_directories.files | length == 1
+
+- name: Match the org config
+  set_fact:
+    conf_org_path: "{{ item.path }}/config.yml"
+  loop: "{{ found_directories.files }}"
+  when: ( conf_org_path == "" ) and ( item.isdir == true ) and ( organization_id == ( item.path | basename ) )
+
+- name: Fail if cannot determine config path
+  fail:
+    msg: "Cannot determine the org config under {{ configs_directory }}"
+  when: conf_org_path == ""
+
+- name: Fetach config file stats
+  stat:
+    path: "{{ conf_org_path }}"
+  register: conf_file_stat
+  delegate_to: localhost
+
+- name: Fail if config file is not available
+  fail:
+    msg: "Config file doesn't exists {{ conf_org_path }}"
+  when: not conf_file_stat.stat.exists
+
+- name: "Include vars from file {{ conf_org_path }}"
+  include_vars:
+    file: "{{ conf_org_path }}"

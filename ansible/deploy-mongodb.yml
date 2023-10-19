@@ -1,0 +1,41 @@
+- hosts: ansible_provisioners
+  gather_facts: yes
+  no_log: "{{ no_ansible_log | default(false) }}"
+
+  tasks:
+
+    - include_role:
+        name: "import-config-vars"
+    - set_fact:
+        switch_to_cluster: "{{openidl_apps_cluster}}"
+    - include_role:
+        name: "setup/switch-cluster"
+
+    - set_fact:
+        deploy_action: "deploy"
+
+    - no_log: false
+      set_fact:
+        user_token: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
+      when: deploy_action == "deploy"
+
+    - no_log: false
+      set_fact:
+        root_token: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=40') }}"
+      when: deploy_action == "deploy"
+
+    - no_log: false
+      set_fact:
+        user: "{{ lookup('password', '/dev/null chars=ascii_uppercase,ascii_lowercase,digits length=16') }}"
+      when: deploy_action == "deploy"
+
+    - include_role:
+        name: "mongodb"
+      vars:
+        mongodb_user_token: "{{ user_token }}"
+        mongodb_user: "{{ org_id }}-{{ env_id }}-{{ user }}"
+        mongodb_root_token: "{{ root_token }}"
+        mongodb_database: "openidl-offchain-db"
+        do: "{{ deploy_action }}"
+
+

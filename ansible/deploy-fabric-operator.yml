@@ -1,0 +1,19 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Usage:
+# Create: ansible-playbook role_fabric_console.yml --extra-vars "state=present"
+# Delete: ansible-playbook role_fabric_console.yml --extra-vars "state=absent"
+---
+- name: Deploy Fabric Operator and Operator Console
+  hosts: ansible_provisioners
+  
+  tasks:
+    - include_role:
+        name: "import-config-vars"
+    - set_fact:
+        switch_to_cluster: "{{fabric_operator_k8s_cluster}}"
+    - include_role:
+        name: "setup/switch-cluster"
+    - include_role:
+        name: "fabric-operator"

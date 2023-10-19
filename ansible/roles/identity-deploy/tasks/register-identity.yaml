@@ -1,0 +1,53 @@
+
+- name: "Fetch the CA admin user from Wallet"
+  include_role: 
+    name: wallet
+  vars:
+    wallet_ops: "get"
+    wallet_path: "{{ ca_admin_id }}"
+
+- name: Register the idenity
+  no_log: "{{hide_sensitive_logs}}"
+  ibm.blockchain_platform.registered_identity:
+    state: "present"
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    api_timeout: "{{ api_timeout | default(omit) }}"
+    certificate_authority: "{{ cert_auth }}"
+    registrar: "{{ wallet_operator_identity_dict }}"
+    enrollment_id: "{{ identity.id }}"
+    enrollment_secret: "{{ identity.enrolment_secret }}"
+    max_enrollments: -1
+    type: "{{ identity.type }}"
+    attributes: "{{ identity.cert_attrs }}"
+  register: registered_identity
+  when: identity.cert_attrs is defined
+
+- name: Register the identity
+  no_log: "{{hide_sensitive_logs}}"
+  ibm.blockchain_platform.registered_identity:
+    state: "present"
+    api_endpoint: "{{ console_api_endpoint }}"
+    api_authtype: "{{ console_api_authtype }}"
+    api_key: "{{ console_username }}"
+    api_secret: "{{ console_password }}"
+    api_timeout: "{{ api_timeout | default(omit) }}"
+    certificate_authority: "{{ cert_auth }}"
+    registrar: "{{ wallet_operator_identity_dict }}"
+    enrollment_id: "{{ identity.id }}"
+    enrollment_secret: "{{ identity.enrolment_secret }}"
+    max_enrollments: -1
+    type: "{{ identity.type }}"
+  register: registered_identity
+  when: identity.cert_attrs is not defined
+
+- name: "Enroll the identity"
+  include_tasks: "re-register.yaml"
+  when: identity_force_registration == true and registered_identity.changed == false
+
+- set_fact:
+    identity_registered:
+      success: "{{registered_identity.changed}}"
+      identity: "{{registered_identity.registered_identity}}"

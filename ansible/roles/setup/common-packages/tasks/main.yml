@@ -1,0 +1,31 @@
+---
+- include_tasks: set-facts.yml
+
+- name: "Install package dependencies - apt"
+  become: true
+  apt:
+    pkg: "{{ item }}"
+    state: present
+    install_recommends: No
+  with_items: "{{common_packages}}"
+  retries: 5
+  when: is_apt
+  until: result is success
+  register: result
+  tags:
+    - packages
+
+- name: "Install package dependencies - yum"
+  become: true
+  yum:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  retries: 5
+  loop: "{{common_packages}}"
+  when:
+    - is_yum
+  until: result is success
+  register: result
+  tags:
+    - packages

@@ -1,0 +1,29 @@
+---
+- name: "Setup"
+  include_tasks: setup.yml
+  when: git_setup | default(true)
+
+- name: "Pull"
+  include_tasks: pull.yml
+  when: git_pull | default(true)
+
+- name: "Push"
+  include_tasks: push.yml
+  when: git_push | default(false)
+
+- name: "Pull configs"
+  delegate_to: "{{ item }}"
+  git:
+    repo: "git@github_roles_configs:{{ git_configs_repo_url }}"
+    dest: "{{git_config_path}}"
+    version: "{{ git_configs_repo_branch }}"
+    clone: yes
+    force: true
+    update: yes
+    accept_hostkey: true
+  register: pull_result
+  with_items: "{{delegate_to}}"
+
+- name: "Cleanup"
+  include_tasks: cleanup.yml
+  when: git_cleanup | default(false)

@@ -1,0 +1,7 @@
+---
+- name: "Include config vars"
+  hosts: all
+  gather_facts: no
+  roles:
+    - role: git-config
+    - role: include-config-vars

@@ -1,0 +1,19 @@
+- set_fact:
+    wallet_resource_path: "{{vault_config.orgName}}/data/{{vault_config.vaultPath}}/{{wallet_path}}"
+
+- name: Put to Vault with path {{ wallet_resource_path }}
+  community.hashi_vault.vault_write:
+    url: "{{ vault_config.url }}"
+    path: "{{ wallet_resource_path }}"
+    data:
+      data: 
+        data: "{{ wallet_identity.data | to_json | string }}"
+        id: "{{ wallet_identity.id }}"
+        ca_root_certs: "{{ wallet_identity.ca_root_certs | to_json }}"
+        cas: "{{ wallet_identity.cas | to_json }}"
+    auth_method: userpass
+    mount_point: "{{ vault_config.orgName }}"
+    username: "{{ vault_config.username }}"
+    password: "{{ vault_config.password }}"
+    validate_certs: true
+  register: vault_put_out
