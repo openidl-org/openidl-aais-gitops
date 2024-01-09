@@ -2,7 +2,7 @@
     "mongo": {
         "mongodb": "openidl-offchain-db",
         "persistentStore": "mongo",
-        "simpleURI": "mongodb://{{ mongo_user }}:{{ mongo_user_token }}@{{ network.org_name }}-mongodb-0.{{ network.org_name }}-mongodb-headless.{{mongodb.namespace}}.svc.cluster.local:27017,{{ network.org_name }}-mongodb-1.{{ network.org_name }}-mongodb-headless.{{mongodb.namespace}}.svc.cluster.local:27017,{{ network.org_name }}-mongodb-2.{{ network.org_name }}-mongodb-headless.{{mongodb.namespace}}.svc.cluster.local:27017/openidl-offchain-db?authSource=openidl-offchain-db"
+        "simpleURI": "mongodb://{{ mongo_user }}:{{ mongo_user_token }}@{{ network.org_name }}-mongodb-0.{{ network.org_name }}-mongodb-headless.{{mongodb_namespace}}.svc.cluster.local:27017,{{ network.org_name }}-mongodb-1.{{ network.org_name }}-mongodb-headless.{{mongodb_namespace}}.svc.cluster.local:27017,{{ network.org_name }}-mongodb-2.{{ network.org_name }}-mongodb-headless.{{mongodb_namespace}}.svc.cluster.local:27017/openidl-offchain-db?authSource=openidl-offchain-db"
     },
     "postgres": {
         "host": "{{ hds_host }}",
@@ -11,5 +11,12 @@
         "password": "{{ hds_password }}",
         "database": "{{ hds_dbname }}"
     },
-    "defaultDbType": "mongo"
+    "defaultDbType": "mongo",
+    "admin": {
+        "userId": "{{ app_admin_user_id }}",
+        "stateName": "New York",
+        "stateCode": "NY",
+        "role": "admin",
+        "organizationId": "{{ org_id }}"
+  }
 }

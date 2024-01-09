@@ -1,0 +1,5 @@
+- hosts: ansible_provisioners
+  gather_facts: false
+  tasks:
+    - include_role:
+        name: "openidl-config"

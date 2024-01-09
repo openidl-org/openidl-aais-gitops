@@ -118,6 +118,9 @@ secrets:
     - name: cognito-config
       file: config/local-cognito-config.json
       namespace: default
+    - name: auth-config
+      file: config/local-auth-config.json
+      namespace: default
     - name: kvs-config
       file: config/local-kvs-config.json
       namespace: default

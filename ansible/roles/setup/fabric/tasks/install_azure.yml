@@ -1,0 +1,14 @@
+---
+- name: Install required Python packages
+
+  pip:
+    name: "{{ item.pkg_name }}"
+    executable: "{{ item.exec }}"
+    extra_args: "{{ item.args }}"
+  loop:
+    - { pkg_name: "pysha3", exec: "pip3", args: "" }
+    - { pkg_name: "python-pkcs11", exec: "pip3", args: "" }
+    - { pkg_name: "semantic_version", exec: "pip3", args: "" }
+    - { pkg_name: "fabric-sdk-py", exec: "pip3", args: "" }
+    - { pkg_name: "hvac", exec: "pip3", args: "" }
+

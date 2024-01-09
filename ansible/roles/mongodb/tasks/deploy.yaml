@@ -12,22 +12,14 @@
       api_version: v1
       kind: Namespace
       metadata:
-        name: "{{ mongodb.namespace }}"
-
-- name: mongodb Helm chart repo
-  kubernetes.core.helm_repository:
-    name: bitnami
-    repo_url: https://charts.bitnami.com/bitnami
-  tags:
-    - mongodb
-    - mongodb-helm-repo
+        name: "{{ mongodb_namespace}}"
 
 - name: Install mongodb helm chart
   kubernetes.core.helm:
-    chart_ref: bitnami/mongodb
+    chart_ref: oci://registry-1.docker.io/bitnamicharts/mongodb
     release_name: "{{ org_id }}"
     release_state: present
-    release_namespace: "{{ mongodb.namespace }}"
+    release_namespace: "{{ mongodb_namespace }}"
     force: True
     wait: True
     wait_timeout: "300s"
@@ -35,7 +27,6 @@
     disable_hook: True
     release_values:
       architecture: replicaset
-      useStatefulSet: true
       auth:
         enabled: true
         rootPassword: "{{ mongodb_root_token }}"
@@ -43,9 +34,6 @@
         password: "{{ mongodb_user_token }}"
         database: "{{ mongodb_database }}"
       persistence:
-        enabled: true
-        size: 20Gi
-        mountPath: "/bitnami/mongodb"
         storageClass: "openidl-sc"
       serviceAccount:
         create: true
@@ -55,7 +43,6 @@
         service:
           type: ClusterIP
       replicaSetHostnames: true
-      replicaCount: 3
       tls:
         enabled: false
       readinessProbe:
@@ -64,71 +51,10 @@
         livenessProbe:
           enabled: false
       global:
-        namespaceOverride: "{{ mongodb.namespace }}"
+        namespaceOverride: "{{ mongodb_namespace }}"
   tags:
     - mongodb
     - mongodb-helm
 
-- name: Check mongodb-user secret exists
-  shell : |
-    aws secretsmanager list-secrets --filter Key="name",Values="{{ org_id }}-{{ env_id}}-mongodb-user" | jq .SecretList[0].Name
-  register: mongodb_user_secret
-
-- name: Create mongodb user in AWS secrets manager
-  no_log: false
-  shell: |
-    aws secretsmanager create-secret --name {{ org_id }}-{{ env_id}}-mongodb-user --description "Mongodb User Name" --secret-string {{ mongodb_user }}
-  when: mongodb_user_secret.stdout == "null"
-
-- name: Update mongodb user in AWS secrets manager
-  no_log: false
-  shell: |
-    aws secretsmanager update-secret --secret-id {{ org_id }}-{{ env_id}}-mongodb-user --secret-string {{ mongodb_user }}
-  when: mongodb_user_secret.stdout != "null"
-
-- name: Check mongodb-user-token secret exists
-  shell : |
-    aws secretsmanager list-secrets --filter Key="name",Values="{{ org_id }}-{{ env_id}}-mongodb-user-token" | jq .SecretList[0].Name
-  register: mongodb_user_token_secret
-
-- name: Create mongodb user token in AWS secrets manager
-  no_log: false
-  shell: |
-    aws secretsmanager create-secret --name {{ org_id }}-{{ env_id}}-mongodb-user-token --description "Mongodb User Token" --secret-string {{ mongodb_user_token }}
-  when: mongodb_user_token_secret.stdout == "null"
-
-- name: Update mongodb user token in AWS secrets manager
-  no_log: false
-  shell: |
-    aws secretsmanager update-secret --secret-id {{ org_id }}-{{ env_id}}-mongodb-user-token --secret-string {{ mongodb_user_token }}
-  when: mongodb_user_token_secret.stdout != "null"
-
-- name: Check mongodb-root-token secret exists
-  shell : |
-    aws secretsmanager list-secrets --filter Key="name",Values="{{ org_id }}-{{ env_id}}-mongodb-root-token" | jq .SecretList[0].Name
-  register: mongodb_root_token_secret
-
-- name: Create mongodb root token in AWS secrets manager
-  no_log: false
-  shell: |
-    aws secretsmanager create-secret --name {{ org_id }}-{{ env_id}}-mongodb-root-token --description "Mongodb root token" --secret-string {{ mongodb_root_token }}
-  when: mongodb_root_token_secret.stdout == "null"
-
-- name: Update mongodb root token in AWS secrets manager
-  no_log: false
-  shell: |
-    aws secretsmanager update-secret --secret-id {{ org_id }}-{{ env_id}}-mongodb-root-token --secret-string {{ mongodb_root_token }}
-  when: mongodb_root_token_secret.stdout != "null"
-
-- name: Add resource policy to the secret created {{ item }}
-  shell: |
-    aws secretsmanager put-resource-policy --secret-id {{ item }} --resource-policy file://aws_resource_policy.json --region {{ aws_region }} --block-public-policy
-  with_items:
-  - "{{ org_id }}-{{ env_id}}-mongodb-user-token"
-  - "{{ org_id }}-{{ env_id}}-mongodb-root-token"
-  - "{{ org_id }}-{{ env_id}}-mongodb-user"
-
-- name: Delete aws resource policy file
-  file:
-    state: absent
-    path: ./aws_resources_policy.json
+- name: "Store access credentials "
+  include_tasks: "store-access-{{ mongodb_access_store_type }}.yaml"

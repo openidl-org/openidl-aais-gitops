@@ -1,0 +1,103 @@
+---
+- name: Get Mongodb User
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ org_id }}-{{ env_id }}-mongodb-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: mongodb_user_out
+
+- name: Set mongodb user name
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    mongodb_user: "{{mongodb_user_out.stdout }}"
+
+- name: Get Mongodb User Token
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ org_id }}-{{ env_id }}-mongodb-user-token --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: mongodb_user_token_out
+
+- name: Set mongodb user token
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    mongodb_user_token: "{{mongodb_user_token_out.stdout }}"
+
+- name: Get Apps User
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .access_id
+  register: apps_user_access_id_out
+- name: "Fail if AWS apps user not found in AWS secrets manager"
+  fail:
+    msg: "AWS apps user access id should be available in AWS secrets manager {{ env_id }}-apps-user"
+  when: not apps_user_access_id_out.stdout
+
+- name: Set apps user access id
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    apps_user_access_id: "{{apps_user_access_id_out.stdout }}"
+
+- name: Get Apps User token
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .secret_key
+  register: apps_user_secret_key_out
+- name: "Fail if AWS apps user not found in AWS secrets manager"
+  fail:
+    msg: "AWS apps user secret key should be available in AWS secrets manager {{ env_id }}-apps-user"
+  when: not apps_user_secret_key_out.stdout
+
+- name: Set apps user secret key
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    apps_user_secret_key: "{{apps_user_secret_key_out.stdout }}"
+
+- name: Get Cognito User-Pool ID
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws cognito-idp list-user-pools --region {{ aws_region }} --max-results 20 | jq -r ".UserPools[] | select(.Name | contains(\"{{ application_cognito_user_pool }}\")) | .Id"
+  register: cognito_user_pool_id_out
+
+- name: Set cognito user pool id config
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    cognito_user_pool_id: "{{cognito_user_pool_id_out.stdout }}"
+
+- name: Get Cognito App Client ID
+  no_log: false
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ application_cognito_appl_client }}\")) | .ClientId"
+  register: cognito_app_client_id_out
+
+- name: Set cognito app client config
+  set_fact:
+    cognito_app_client_id: "{{cognito_app_client_id_out.stdout }}"
+
+- name: Get Organizations and IDs
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-organization-ids --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .organizations
+  register: organizations_out
+
+- name: Set organizations config
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    organizations: "{{organizations_out.stdout }}"
+
+- name: Get Vault config
+  no_log: "{{hide_sensitive_logs}}"
+  shell: |
+    export AWS_PROFILE={{ default_aws_profile }}
+    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-kvs-vault --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
+  register: vault_config_secret
+
+- name: Set vault config
+  no_log: "{{hide_sensitive_logs}}"
+  set_fact:
+    vault_config: "{{vault_config_secret.stdout | string }}"

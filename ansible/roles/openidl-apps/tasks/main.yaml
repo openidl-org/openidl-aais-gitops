@@ -12,7 +12,7 @@
   include_tasks: pull-chart.yaml
 
 - set_fact:
-    app_values_path: "{{git_config_path}}/apps/app-global-values.yml"
+    app_values_path: "{{git_config_path}}/apps/app-{{apps_deployment_template}}-values.yml"
 
 - name:
   stat:
@@ -21,21 +21,14 @@
 
 - name:
   include_tasks: template-app-values.yaml
-  when: not reg_path.stat.exists
 
-- name: Deploy openIDL app on Analytics node using helm
+- name: Deploy openIDL app on {{application_node_type}} node using helm
   shell: |
-    helm upgrade --recreate-pods --install {{ env_id }}-{{ org_id }} {{app_chart_dest_folder}}/openidl-k8s \
+    helm upgrade --recreate-pods --install {{ apps_helm_chart_deploy_name }} {{app_chart_dest_folder}}/openidl-k8s \
     -f {{app_values_path}} -n {{ application_namespace }}
-  when: application_node_type == "analytics"
-
-- name: Deploy openIDL app on Carrier node using helm
-  shell: |
-    helm upgrade --recreate-pods --install {{ env_id }}-{{ org_id }} {{app_chart_dest_folder}}/openidl-k8s \
-    -f {{app_values_path}} -n {{ application_namespace }}
-  when: application_node_type == "carrier"
 
 - name: Annotate ingress
   shell: |
     kubectl -n {{ application_namespace }} annotate ingress kubernetes.io/ingress.class={{nginx_controller_name}} --all
-  ignore_errors: yes 
+  ignore_errors: yes
+  when: apps_annotate_ingress == true

@@ -97,6 +97,8 @@ secrets:
       file: admin-config.json
     - name: cognito-config
       file: local-cognito-config.json
+    - name: auth-config
+      file: local-auth-config.json
     - name: cognito-admin-config
       file: local-cognito-admin-config.json
     - name: kvs-config

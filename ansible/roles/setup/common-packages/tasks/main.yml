@@ -1,6 +1,12 @@
 ---
 - include_tasks: set-facts.yml
 
+- name: Update apt packages
+  become: true
+  apt:
+    update_cache: yes
+  when: is_apt
+
 - name: "Install package dependencies - apt"
   become: true
   apt:
