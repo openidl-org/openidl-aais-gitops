@@ -11,7 +11,7 @@
   when: not aws_conf_profile or not aws_conf_user
 
 - name: Set AWS profile {{ aws_conf_profile }} for user {{aws_conf_user}} with external ID {{aws_external_id}}
-  no_log: true
+  no_log: "{{hide_sensitive_logs}}"
   shell: |
     aws configure set aws_access_key_id {{ aws_access_key }} --profile {{aws_conf_user}}
     aws configure set aws_secret_access_key {{ aws_secret_key }} --profile {{aws_conf_user}}
