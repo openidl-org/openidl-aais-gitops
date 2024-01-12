@@ -72,34 +72,8 @@ output "s3_public_bucket_logos_name" {
   value = var.create_s3_bucket_public ? aws_s3_bucket.s3_bucket_logos_public[0].bucket : "s3 public bucket not opted"
 }
 #-----------------------------------------------------------------------------------------------------------------
-#Route53 entries
-output "aws_name_servers" {
-  value       = var.domain_info.r53_public_hosted_zone_required == "yes"  ? aws_route53_zone.public_zones[0].name_servers : ["Route53 public hosted zone not opted"]
-  description = "The name servers to be updated in the domain registrar"
-}
-output "public_bastion_fqdn" {
-  value = var.domain_info.r53_public_hosted_zone_required == "yes" && var.create_bastion_host ? aws_route53_record.nlb_bastion_r53_record[0].fqdn : null
-}
-output "bastion_dns_entries_required_to_update" {
-  value = var.domain_info.r53_public_hosted_zone_required == "no" && var.aws_env == "prod" && var.create_bastion_host ? local.dns_entries_list_prod : null
-}
-output "bastion_dns_entries_required_to_add" {
-  value = var.domain_info.r53_public_hosted_zone_required == "no" && var.aws_env != "prod" && var.create_bastion_host ? local.dns_entries_list_non_prod : null
-}
-#output "public_bastion_dns_name" {
-#  value = var.create_bastion_host ? module.bastion_nlb[0].lb_dns_name : "bastion hosts opted out"
-#}
 output "public_ip_bastion_host" {
   value = var.create_bastion_host ? aws_eip.bastion_host_eip[0].public_ip : "bastion hosts not opted"
-}
-output "r53_public_hosted_zone_id" {
-  value = var.domain_info.r53_public_hosted_zone_required == "yes" ? aws_route53_zone.public_zones[0].zone_id : "Route53 public zone opted out"
-}
-output "r53_private_hosted_zone_id"{
-  value = aws_route53_zone.private_zones.zone_id
-}
-output "r53_private_hosted_zone_internal_id" {
-  value = aws_route53_zone.private_zones_internal.zone_id
 }
 #-----------------------------------------------------------------------------------------------------------------
 #KMS key used with hashicorp vault setup
