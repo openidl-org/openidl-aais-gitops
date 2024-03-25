@@ -128,3 +128,5 @@ app_config_files_analytics_list:
     dest: "data-call-mood-listener-metadata-config.json"
   - source: "data-call-mood-listener-target-channel-config.json"
     dest: "data-call-mood-listener-target-channel-config.json"
+
+idp_config_file: "local-auth-config.json"
