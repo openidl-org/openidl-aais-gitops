@@ -10,62 +10,9 @@
     state: directory
     mode: 0755
 
-- name: Get Mongodb User
-  no_log: "{{hide_sensitive_logs}}"
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ org_id }}-{{ env_id }}-mongodb-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
-  register: mongodb_user
-
-- name: Get Mongodb User Token
-  no_log: "{{hide_sensitive_logs}}"
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ org_id }}-{{ env_id }}-mongodb-user-token --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString
-  register: mongodb_user_token
-
-- name: Get Apps User
-  no_log: "{{hide_sensitive_logs}}"
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .access_id
-  register: apps_user_access_id
-- name: "Fail if AWS apps user not found in AWS secrets manager"
-  fail:
-    msg: "AWS apps user access id should be available in AWS secrets manager {{ env_id }}-apps-user"
-  when: not apps_user_access_id.stdout
-
-- name: Get Apps User token
-  no_log: "{{hide_sensitive_logs}}"
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-apps-user --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .secret_key
-  register: apps_user_secret_key
-- name: "Fail if AWS apps user not found in AWS secrets manager"
-  fail:
-    msg: "AWS apps user secret key should be available in AWS secrets manager {{ env_id }}-apps-user"
-  when: not apps_user_secret_key.stdout
-
-- name: Get Cognito User-Pool ID
-  no_log: "{{hide_sensitive_logs}}"
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws cognito-idp list-user-pools --region {{ aws_region }} --max-results 20 | jq -r ".UserPools[] | select(.Name | contains(\"{{ application_cognito_user_pool }}\")) | .Id"
-  register: cognito_user_pool_id
-
-- name: Get Cognito App Client ID
-  no_log: false
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws cognito-idp list-user-pool-clients --region {{ aws_region }} --user-pool-id {{ cognito_user_pool_id.stdout }} | jq -r ".UserPoolClients[] | select(.ClientName | contains(\"{{ application_cognito_appl_client }}\")) | .ClientId"
-  register: cognito_app_client_id
-
-- name: Get Organizations and IDs
-  no_log: "{{hide_sensitive_logs}}"
-  shell: |
-    export AWS_PROFILE={{ default_aws_profile }}
-    /usr/local/bin/aws secretsmanager get-secret-value --secret-id {{ env_id }}-organization-ids --version-stage AWSCURRENT --region {{ aws_region }} | jq -r .SecretString | jq -r .organizations
-  register: organizations
+- name: "Pull openidl apps configs"
+  include_tasks: "read-config-{{ apps_config_reader_name }}.yaml"
+  when: apps_config_reader_name != ""
 
 - name: Create a connection profile
   no_log: "{{hide_sensitive_logs}}"
@@ -83,85 +30,50 @@
 
 - name: Generate configuration files
   template:
-    src: templates/{{ item }}.j2
-    dest: '{{config_folder}}/{{ item }}'
+    src: templates/{{ item.source }}.j2
+    dest: '{{config_folder}}/{{ item.dest }}'
     mode: 0755
   vars:
-    organization_ids: "{{ organizations.stdout }}"
-    aws_access_id: "{{ apps_user_access_id.stdout }}"
-    aws_access_secret_key: "{{ apps_user_secret_key.stdout }}"
-    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
-    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
-    mongo_user: "{{ mongodb_user.stdout }}"
-    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    organization_ids: "{{ organizations }}"
+    aws_access_id: "{{ apps_user_access_id }}"
+    aws_access_secret_key: "{{ apps_user_secret_key }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id }}"
+    mongo_user: "{{ mongodb_user }}"
+    mongo_user_token: "{{ mongodb_user_token }}"
     s3_hds_bucket: "{{aws_s3_hds_bucket}}"
-  with_items:
-    - channel-config.json
-    - data-call-app-default-config.json
-    - data-call-app-mappings-config.json
-    - default-config.json
-    - email-config.json
-    - insurance-data-manager-channel-config.json
-    - insurance-data-manager-default-config.json
-    - insurance-data-manager-mappings-config.json
-    - insurance-data-manager-metadata-config.json
-    - local-cognito-admin-config.json
-    - local-cognito-config.json
-    - local-db-config.json
-    - local-kvs-config.json
-    - local-vault-config.json
-    - s3-bucket-config.json
-    - ui-mappings-config.json
-    - unique-identifiers-config.json
-    - utilities-admin-config.json
-    - utilities-fabric-config.json
-    - utilities-mappings-config.json
+  with_items: "{{app_config_files_list}}"
 
 - name: Generate configuration files
   template:
-    src: templates/{{ item }}.j2
-    dest: '{{config_folder}}/{{ item }}'
+    src: templates/{{ item.source }}.j2
+    dest: '{{config_folder}}/{{ item.dest }}'
     mode: 0755
   vars:
-    organization_ids: "{{ organizations.stdout }}"
-    aws_access_id: "{{ apps_user_access_id.stdout }}"
-    aws_secret_key: "{{ apps_user_secret_key.stdout }}"
-    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
-    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
-    mongo_user: "{{ mongodb_user.stdout }}"
-    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    organization_ids: "{{ organizations }}"
+    aws_access_id: "{{ apps_user_access_id }}"
+    aws_secret_key: "{{ apps_user_secret_key }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id }}"
+    mongo_user: "{{ mongodb_user }}"
+    mongo_user_token: "{{ mongodb_user_token }}"
     s3_hds_bucket: "{{aws_s3_hds_bucket}}"
-  with_items:
-    - transactional-data-event-listener-channel-config.json
-    - transactional-data-event-listener-default-config.json
-    - transactional-data-event-listener-mappings-config.json
-    - transactional-data-event-listener-metadata-config.json
-    - transactional-data-event-listener-target-channel-config.json
-    - data-call-mood-listener-channel-config.json
-    - data-call-mood-listener-default-config.json
-    - data-call-mood-listener-mappings-config.json
-    - data-call-mood-listener-metadata-config.json
-    - data-call-mood-listener-target-channel-config.json
+  with_items: "{{app_config_files_analytics_list}}"
   when: application_node_type == "analytics"
 
 - name: Generate configuration files
   template:
-    src: templates/{{ item }}.j2
-    dest: '{{config_folder}}/{{ item }}'
+    src: templates/{{ item.source }}.j2
+    dest: '{{config_folder}}/{{ item.dest }}'
     mode: 0755
   vars:
-    organization_ids: "{{ organizations.stdout }}"
-    aws_access_id: "{{ apps_user_access_id.stdout }}"
-    aws_access_secret_key: "{{ apps_user_secret_key.stdout }}"
-    aws_cognito_application_id: "{{ cognito_app_client_id.stdout }}"
-    aws_cognito_pool_id: "{{ cognito_user_pool_id.stdout }}"
-    mongo_user: "{{ mongodb_user.stdout }}"
-    mongo_user_token: "{{ mongodb_user_token.stdout }}"
+    organization_ids: "{{ organizations }}"
+    aws_access_id: "{{ apps_user_access_id }}"
+    aws_access_secret_key: "{{ apps_user_secret_key }}"
+    aws_cognito_application_id: "{{ cognito_app_client_id }}"
+    aws_cognito_pool_id: "{{ cognito_user_pool_id }}"
+    mongo_user: "{{ mongodb_user }}"
+    mongo_user_token: "{{ mongodb_user_token }}"
     s3_hds_bucket: "{{aws_s3_hds_bucket}}"
-  with_items:
-    - data-call-processor-default-config.json
-    - data-call-processor-mappings-config.json
-    - data-call-processor-metadata-config.json
-    - listener-channel-config.json
-    - target-channel-config.json
+  with_items: "{{app_config_files_carrier_list}}"
   when: application_node_type != "analytics"

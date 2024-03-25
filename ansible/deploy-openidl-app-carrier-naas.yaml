@@ -1,0 +1,13 @@
+- hosts: ansible_provisioners
+  gather_facts: false
+  tasks:
+    - include_role:
+        name: "import-config-vars"
+    - set_fact:
+        switch_to_cluster: "{{openidl_apps_cluster}}"
+    - include_role:
+        name: "setup/switch-cluster"
+    - set_fact:
+        apps_deployment_template: "carrier-naas"
+    - include_role:
+        name: "openidl-apps"

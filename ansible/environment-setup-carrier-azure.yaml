@@ -1,0 +1,48 @@
+---
+#######################################
+# Playbook to setup the environment for running the Blockchain Automation Framework configurations
+#######################################
+  - hosts: ansible_provisioners
+    gather_facts: yes
+    no_log: "{{ no_ansible_log | default(false) }}"
+    tasks:
+    - include_role:
+        name: "import-config-vars"
+    - include_role:
+        name: setup/hlf-fabric-tools
+    - include_role:
+        name: setup/common-packages
+      vars:
+        common_packages:
+          - git
+          - jq
+          - gcc
+          - python3-dev
+          - python3-pip
+    - include_role:
+        name:  setup/kubectl
+      vars:
+        kubectl:
+          os: "{{ install_os }}"
+          arch: "{{ install_arch }}"
+          bin_directory: "{{ bin_install_dir }}"
+    - include_role:
+        name:  setup/helm
+      vars:
+        helm:
+          os: "{{ install_os }}"
+          arch: "{{ install_arch }}"
+          bin_directory: "{{ bin_install_dir }}"
+
+    - include_role:
+        name:  setup/azure-cli
+
+    - include_role:
+        name: setup/fabric
+
+    vars: #These variables can be overriden from the command line
+      privilege_escalate: false           #Default to NOT escalate to root privledges
+      install_os: "linux"                 #Default to linux OS
+      install_arch:  "amd64"              #Default to amd64 architecture
+      bin_install_dir:  "/usr/local/bin"           #Default to ~/bin install directory for binaries
+

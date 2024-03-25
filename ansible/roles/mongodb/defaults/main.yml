@@ -1,5 +1,5 @@
-mongodb:
-  namespace: "mongodb-{{org_id}}"
+mongodb_namespace: "mongodb-{{org_id}}"
 
 aws_region: "{{region}}"
 aws_iam_user_prefix: "{{env_id}}"
+mongodb_access_store_type: "aws-sm"

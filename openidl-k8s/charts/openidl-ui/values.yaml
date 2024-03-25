@@ -93,5 +93,9 @@ affinity: {}
 secrets:
     - name: cognito-config
       file: local-cognito-config.json
+    - name: auth-config
+      file: local-auth-config.json
     - name: ui-mappings-config
       file: mappings.json
+    - name: db-config
+      file: local-db-config.json

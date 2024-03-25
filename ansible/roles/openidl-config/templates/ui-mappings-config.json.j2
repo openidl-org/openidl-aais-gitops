@@ -5,7 +5,7 @@
     },
     "idp-credentials": {
         "env": "IDP_CONFIG",
-        "file": "local-cognito-config.json"
+        "file": "{{idp_config_file}}"
     },
     "log-level": {
         "env": "LOG_LEVEL",
@@ -18,5 +18,9 @@
     "icon-bucket-url": {
 		"value": "https://{{ s3_icon_bucket_url }}/",
 		"env": "ICON_BUCKET_URL"
-	}
+	},
+    "off-chain-db-credentials": {
+        "env": "OFF_CHAIN_DB_CONFIG",
+        "file": "local-db-config.json"
+    }
 }

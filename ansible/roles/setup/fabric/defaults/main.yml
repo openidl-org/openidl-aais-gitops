@@ -1,2 +1,4 @@
 ---
 default_aws_profile: cicd-role
+
+cloud_deployment: "aws"

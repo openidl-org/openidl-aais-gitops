@@ -93,6 +93,8 @@ affinity: {}
 secrets:
     - name: cognito-config
       file: local-cognito-config.json
+    - name: auth-config
+      file: local-auth-config.json
     - name: kvs-config
       file: local-kvs-config.json
     - name: vault-config

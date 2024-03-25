@@ -1,4 +1,9 @@
 ---
+- name: Fail if switch_to_cluster not defined
+  fail:
+    msg: switch_to_cluster == ""
+  when: switch_to_cluster == ""
+
 - name: Configuring aws eks cluster
   shell: |
     aws eks update-kubeconfig --name {{ switch_to_cluster }}
